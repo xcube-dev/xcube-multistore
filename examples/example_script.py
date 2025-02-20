@@ -1,9 +1,8 @@
 import logging
-from pathlib import Path
 import os
+from pathlib import Path
 
 from ms_datastore.ms_datastore import MultiSourceDataStore
-
 
 logging.basicConfig(
     level=logging.INFO,

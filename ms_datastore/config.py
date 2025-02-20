@@ -21,18 +21,12 @@
 # SOFTWARE.
 
 import yaml
-
-from xcube.util.jsonschema import JsonObjectSchema
 from xcube.util.jsonschema import (
     JsonArraySchema,
-    JsonBooleanSchema,
-    JsonDateSchema,
-    JsonIntegerSchema,
     JsonNumberSchema,
     JsonObjectSchema,
     JsonStringSchema,
 )
-
 
 SCEMA_IDENTIFIER = JsonStringSchema(title="Identifier for the object", min_length=1)
 

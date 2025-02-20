@@ -1,5 +1,5 @@
-import xarray as xr
 import numpy as np
+import xarray as xr
 
 
 def biomass_xu_merge_years(ds: xr.Dataset) -> xr.Dataset:

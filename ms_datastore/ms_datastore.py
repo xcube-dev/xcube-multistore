@@ -20,24 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import importlib
 import functools
+import importlib
 
 import pyproj
 import xarray as xr
-from xcube.util.jsonschema import JsonObjectSchema
-from xcube.core.gridmapping import GridMapping
 from xcube.core.geom import clip_dataset_by_geometry
+from xcube.core.gridmapping import GridMapping
 from xcube.core.resampling.spatial import resample_in_space
+from xcube.util.jsonschema import JsonObjectSchema
 
 from .config import MultiSourceConfig
-from .stores import DataStores
+from .constants import LOG, MAP_FORMAT_ID_FILE_EXT
 from .grid_mappings import GridMappings
-from .constants import LOG
-from .constants import MAP_FORMAT_ID_FILE_EXT
-from .visualisation import GeneratorDisplay
-from .visualisation import GeneratorState
-from .visualisation import GeneratorStatus
+from .stores import DataStores
+from .visualisation import GeneratorDisplay, GeneratorState, GeneratorStatus
 
 
 class MultiSourceDataStore:

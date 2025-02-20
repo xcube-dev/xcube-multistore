@@ -23,8 +23,8 @@
 from abc import ABC
 from enum import Enum
 
-from xcube.util.assertions import assert_given, assert_instance
 import tabulate
+from xcube.util.assertions import assert_given, assert_instance
 
 
 class GeneratorStatus(Enum):
