@@ -38,4 +38,4 @@ grid_mappings:
     crs: EPSG:4326
 
 general:
-  visualize: False
+  visualize: True
