@@ -1,4 +1,4 @@
-name: ms-datastore
+name: xcube-multistore
 channels:
   - conda-forge
 dependencies:
@@ -10,5 +10,13 @@ dependencies:
   - xcube-cci >=0.11.2
   - xcube-cds >=0.9.3
   - xcube-clms >=0.2.2
-  #- xcube-stac
+  - xcube-stac >=0.1.0
   - xcube-zenodo >=0.1.1
+  # for testing
+  - black
+  - flake8
+  - isort
+  - pytest
+  - pytest-cov
+  - pytest-recording
+  - ruff

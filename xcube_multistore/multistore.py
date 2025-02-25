@@ -22,6 +22,7 @@
 
 import functools
 import importlib
+from typing import Any
 
 import pyproj
 import xarray as xr
@@ -31,29 +32,29 @@ from xcube.core.resampling.spatial import resample_in_space
 from xcube.util.jsonschema import JsonObjectSchema
 
 from .config import MultiSourceConfig
-from .constants import LOG, MAP_FORMAT_ID_FILE_EXT
-from .grid_mappings import GridMappings
+from .constants import LOG, MAP_FORMAT_ID_FILE_EXT, NAME_WRITE_STORE
+from .gridmappings import GridMappings
 from .stores import DataStores
-from .visualisation import GeneratorDisplay, GeneratorState, GeneratorStatus
+from .visualization import GeneratorDisplay, GeneratorState, GeneratorStatus
 
 
 class MultiSourceDataStore:
 
-    def __init__(self, config: MultiSourceConfig, visualize: bool = True):
+    def __init__(self, config: str | dict[str, Any]):
+        config = MultiSourceConfig(config)
         self.config = config
-        self.visualize = visualize
         self.stores = DataStores.setup_data_stores(config)
-        if hasattr(config, "grid_mappings"):
-            self.grid_mapping = GridMappings.setup_grid_mappings(config)
+        if config.grid_mappings:
+            self._grid_mapping = GridMappings.setup_grid_mappings(config)
         else:
-            self.grid_mapping = None
+            self._grid_mapping = None
         self._states = {
             config_ds["identifier"]: GeneratorState(
                 identifier=config_ds["identifier"], status=GeneratorStatus.waiting
             )
             for config_ds in config.datasets
         }
-        if self.visualize:
+        if self.config.general["visualize"]:
             self._display = GeneratorDisplay.create(list(self._states.values()))
             self._display.show()
         self.generate_cubes()
@@ -62,27 +63,25 @@ class MultiSourceDataStore:
     def get_config_schema(cls) -> JsonObjectSchema:
         return MultiSourceConfig.get_schema()
 
-    @classmethod
-    def from_file(
-        cls, config_path: str, visualize: bool = True
-    ) -> "MultiSourceDataStore":
-        config = MultiSourceConfig.from_file(config_path)
-        return MultiSourceDataStore(config, visualize=visualize)
-
     def notify(self, event: GeneratorState):
         state = self._states[event.identifier]
-        if (
-            event.status is not None
-            and event.status != state.status
-            and state.status in (GeneratorStatus.stopped, GeneratorStatus.failed)
-        ):
-            # Status cannot be changed
-            return
         state.update(event)
-        if self.visualize:
+        if self.config.general["visualize"]:
             self._display.update()
         else:
-            LOG.info(event.message)
+            if event.status == GeneratorStatus.failed:
+                LOG.error(event.exception)
+            else:
+                LOG.info(event.message)
+
+    def notify_error(self, identifier: str, exception: Any):
+        self.notify(
+            GeneratorState(
+                identifier,
+                status=GeneratorStatus.failed,
+                exception=exception,
+            )
+        )
 
     def generate_cubes(self):
         for config_ds in self.config.datasets:
@@ -102,14 +101,9 @@ class MultiSourceDataStore:
                     )
                 )
             else:
-                self.notify(
-                    GeneratorState(
-                        config_ds["identifier"],
-                        status=GeneratorStatus.failed,
-                        exception=ds,
-                    )
-                )
-            ds = process_dataset(ds, self.grid_mapping, config_ds)
+                self.notify_error(config_ds["identifier"], ds)
+                continue
+            ds = process_dataset(ds, self._grid_mapping, config_ds)
             if isinstance(ds, xr.Dataset):
                 self.notify(
                     GeneratorState(
@@ -118,13 +112,8 @@ class MultiSourceDataStore:
                     )
                 )
             else:
-                self.notify(
-                    GeneratorState(
-                        config_ds["identifier"],
-                        status=GeneratorStatus.failed,
-                        exception=ds,
-                    )
-                )
+                self.notify_error(config_ds["identifier"], ds)
+                continue
             ds = write_dataset(ds, self.stores, config_ds)
             if isinstance(ds, xr.Dataset):
                 self.notify(
@@ -135,13 +124,7 @@ class MultiSourceDataStore:
                     )
                 )
             else:
-                self.notify(
-                    GeneratorState(
-                        config_ds["identifier"],
-                        status=GeneratorStatus.failed,
-                        exception=ds,
-                    )
-                )
+                self.notify_error(config_ds["identifier"], ds)
 
 
 def safe_execute():
@@ -192,7 +175,7 @@ def process_dataset(
 def write_dataset(
     ds: xr.Dataset, stores: DataStores, config: dict
 ) -> xr.Dataset | Exception:
-    store = getattr(stores, "storage")
+    store = getattr(stores, NAME_WRITE_STORE)
     format_id = config.get("format_id", "zarr")
     if format_id == "netcdf":
         ds = prepare_dataset_for_netcdf(ds)

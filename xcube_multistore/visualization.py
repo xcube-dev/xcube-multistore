@@ -135,10 +135,6 @@ class GeneratorDisplay(ABC):
         """Update the display."""
         print(self.to_text())
 
-    def log(self, message: str):
-        """Log a message to the output widget."""
-        print(message)
-
 
 class IPyGeneratorDisplay(GeneratorDisplay):
     def __init__(self, states: list[GeneratorState]):
@@ -156,10 +152,6 @@ class IPyGeneratorDisplay(GeneratorDisplay):
         self._ipy_display.clear_output(wait=True)
         self._ipy_display.display(self.to_html())
 
-    def log(self, message: str):
-        """Log a message to the output widget."""
-        self._ipy_display.display(message)
-
 
 class IPyWidgetsGeneratorDisplay(IPyGeneratorDisplay):
     def __init__(self, states: list[GeneratorState]):
@@ -173,11 +165,6 @@ class IPyWidgetsGeneratorDisplay(IPyGeneratorDisplay):
     def show(self):
         """Display the widget container."""
         self._ipy_display.display(self._container)
-
-    def log(self, message: str):
-        """Log a message to the output widget."""
-        with self._output:
-            print(message)
 
     def update(self):
         """Update the display."""

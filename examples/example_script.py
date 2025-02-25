@@ -1,8 +1,7 @@
 import logging
-import os
 from pathlib import Path
 
-from ms_datastore.ms_datastore import MultiSourceDataStore
+from xcube_multistore.multistore import MultiSourceDataStore
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,4 +13,4 @@ logging.basicConfig(
 
 
 DIR = Path(__file__).parent.resolve()
-msds = MultiSourceDataStore.from_file(os.path.join(DIR, "config.yml"), visualize=False)
+msds = MultiSourceDataStore(DIR / "config.yml")

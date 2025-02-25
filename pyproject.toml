@@ -3,7 +3,7 @@ requires = ["setuptools >= 61.2.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ms_datastore"
+name = "xcube_multistore"
 dynamic = ["version"]
 authors = [
   {name = "Konstantin Ntokas", email = "konstantin.ntokas@brockmann-consult.de"}
@@ -23,11 +23,12 @@ dependencies = [
     "xcube-cci>=0.11.2",
     "xcube-cds>=0.9.3",
     "xcube-clms>=0.2.2",
+    "xcube-stac>=0.1.0",
     "xcube-zenodo>=0.1.1",
 ]
 
 [tool.setuptools.dynamic]
-version = {attr = "ms_datastore.__version__"}
+version = {attr = "xcube_multistore.__version__"}
 
 [tool.setuptools.packages.find]
 exclude = [
@@ -45,6 +46,6 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/xcube-dev/multi-source-datastore"
-Issues = "https://github.com/xcube-dev/multi-source-datastore/issues"
-Changelog = "https://github.com/xcube-dev/multi-source-datastore/blob/main/CHANGES.md"
+Repository = "https://github.com/xcube-dev/xcube-multistore"
+Issues = "https://github.com/xcube-dev/xcube-multistore/issues"
+Changelog = "https://github.com/xcube-dev/xcube-multistore/blob/main/CHANGES.md"

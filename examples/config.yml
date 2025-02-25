@@ -36,3 +36,6 @@ grid_mappings:
     bbox: [-180, -90, 180, 90]
     spatial_res: 0.1
     crs: EPSG:4326
+
+general:
+  visualize: False

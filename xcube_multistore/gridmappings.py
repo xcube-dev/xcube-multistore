@@ -30,7 +30,6 @@ class GridMappings:
     @classmethod
     def setup_grid_mappings(cls, config: MultiSourceConfig):
         for config_gm in config.grid_mappings:
-
             setattr(
                 cls,
                 config_gm["identifier"],

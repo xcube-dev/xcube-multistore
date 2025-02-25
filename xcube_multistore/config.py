@@ -20,30 +20,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from typing import Any
+
+import fsspec
 import yaml
 from xcube.util.jsonschema import (
     JsonArraySchema,
     JsonNumberSchema,
     JsonObjectSchema,
     JsonStringSchema,
+    JsonBooleanSchema,
 )
 
-SCEMA_IDENTIFIER = JsonStringSchema(title="Identifier for the object", min_length=1)
+from .constants import NAME_WRITE_STORE
+
+
+SCHEMA_IDENTIFIER = JsonStringSchema(title="Identifier for the object", min_length=1)
 
 # define schema for dataset
-SCEMA_STORE_IDENTIFIER = JsonStringSchema(
+SCHEMA_STORE_IDENTIFIER = JsonStringSchema(
     title="Store used to open the dataset", min_length=1
 )
-SCEMA_GRIDMAPPING_ID = JsonStringSchema(
+SCHEMA_GRIDMAPPING_ID = JsonStringSchema(
     title="Final grid mapping for the dataset", min_length=1
 )
-SCEMA_DATA_ID = JsonStringSchema(
+SCHEMA_DATA_ID = JsonStringSchema(
     title="Data ID of the dataset in the assigned data store", min_length=1
 )
-SCEMA_OPEN_PARAMS = JsonObjectSchema(
+SCHEMA_OPEN_PARAMS = JsonObjectSchema(
     title="Open data parameters", additional_properties=True
 )
-SCEMA_FORTMAT_ID = JsonStringSchema(
+SCHEMA_FORTMAT_ID = JsonStringSchema(
     title="Desired format of the saved datacube.",
     description="netcdf and zarr are available.",
     default="zarr",
@@ -59,12 +66,12 @@ SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
 )
 SCHEMA_DATASET = JsonObjectSchema(
     properties=dict(
-        identifier=SCEMA_IDENTIFIER,
-        store=SCEMA_STORE_IDENTIFIER,
-        grid_mapping=SCEMA_GRIDMAPPING_ID,
-        data_id=SCEMA_DATA_ID,
-        open_params=SCEMA_OPEN_PARAMS,
-        format_id=SCEMA_FORTMAT_ID,
+        identifier=SCHEMA_IDENTIFIER,
+        store=SCHEMA_STORE_IDENTIFIER,
+        grid_mapping=SCHEMA_GRIDMAPPING_ID,
+        data_id=SCHEMA_DATA_ID,
+        open_params=SCHEMA_OPEN_PARAMS,
+        format_id=SCHEMA_FORTMAT_ID,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
     ),
     required=["identifier", "store", "data_id"],
@@ -72,15 +79,15 @@ SCHEMA_DATASET = JsonObjectSchema(
 )
 
 # define schema for data store
-SCEMA_STORE_ID = JsonStringSchema(title="Store identifier", default="EPSG:4326")
-SCEMA_STORE_PARAMS = JsonObjectSchema(
+SCHEMA_STORE_ID = JsonStringSchema(title="Store identifier", default="EPSG:4326")
+SCHEMA_STORE_PARAMS = JsonObjectSchema(
     title="STORE parameters", additional_properties=True
 )
 SCHEMA_STORE = JsonObjectSchema(
     properties=dict(
-        identifier=SCEMA_IDENTIFIER,
-        store_id=SCEMA_STORE_ID,
-        store_params=SCEMA_STORE_PARAMS,
+        identifier=SCHEMA_IDENTIFIER,
+        store_id=SCHEMA_STORE_ID,
+        store_params=SCHEMA_STORE_PARAMS,
     ),
     required=["identifier", "store_id"],
     additional_properties=False,
@@ -100,7 +107,7 @@ SCHEMA_BBOX = JsonArraySchema(
 )
 SCHEMA_GRID_MAPPING = JsonObjectSchema(
     properties=dict(
-        identifier=SCEMA_IDENTIFIER,
+        identifier=SCHEMA_IDENTIFIER,
         bbox=SCHEMA_BBOX,
         crs=SCHEMA_CRS,
         spatial_res=SCHEMA_SPATIAL_RES,
@@ -109,12 +116,31 @@ SCHEMA_GRID_MAPPING = JsonObjectSchema(
     additional_properties=False,
 )
 
-# define general copnfig schema
+# define schema for general
+SCHEMA_VISUALIZE = JsonBooleanSchema(
+    title="Switch between visualization in table, if True, and logging, if False.",
+    default=True,
+)
+SCHEMA_GENERAL = JsonObjectSchema(
+    properties=dict(visualize=SCHEMA_VISUALIZE),
+    required=[],
+    additional_properties=False,
+)
+
+# define general config schema
 CONFIG_SCHEMA = JsonObjectSchema(
     properties=dict(
         datasets=JsonArraySchema(items=SCHEMA_DATASET),
-        data_stores=JsonArraySchema(items=SCHEMA_STORE),
+        data_stores=JsonArraySchema(
+            items=SCHEMA_STORE,
+            title="Used xcube's data stores.",
+            description=(
+                f"A single data store with identifier {NAME_WRITE_STORE!r} is "
+                f"required for writing the final data cubes."
+            ),
+        ),
         grid_mappings=JsonArraySchema(items=SCHEMA_GRID_MAPPING),
+        general=SCHEMA_GENERAL,
     ),
     required=["datasets", "data_stores"],
     additional_properties=False,
@@ -123,19 +149,25 @@ CONFIG_SCHEMA = JsonObjectSchema(
 
 class MultiSourceConfig:
 
-    def __init__(self, config: dict):
+    def __init__(self, config: str | dict[str, Any]):
+        if not isinstance(config, dict):
+            config = read_yaml(config)
+        schema = self.get_schema()
+        schema.validate_instance(config)
         self.datasets = config["datasets"]
-        self.grid_mappings = config["grid_mappings"]
         self.data_stores = config["data_stores"]
+        self.grid_mappings = config.get("grid_mappings", None)
+        self.general = config.get("general", dict(visualize=True))
+        assert NAME_WRITE_STORE in [
+            store["identifier"] for store in self.data_stores
+        ], f"store with identifier {NAME_WRITE_STORE!r} needs to ge given."
 
     @classmethod
     def get_schema(cls) -> JsonObjectSchema:
         return CONFIG_SCHEMA
 
-    @classmethod
-    def from_file(cls, config_path: str):
-        with open(config_path) as fp:
-            config = yaml.safe_load(fp)
-        schema = cls.get_schema()
-        schema.validate_instance(config)
-        return MultiSourceConfig(config)
+
+def read_yaml(config_path: str) -> dict[str, Any]:
+    with fsspec.open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+    return config
