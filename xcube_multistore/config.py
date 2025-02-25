@@ -157,7 +157,10 @@ class MultiSourceConfig:
         self.datasets = config["datasets"]
         self.data_stores = config["data_stores"]
         self.grid_mappings = config.get("grid_mappings", None)
-        self.general = config.get("general", dict(visualize=True))
+        self.general = config.get(
+            "general",
+            dict(visualize=True) if is_jupyter_notebook() else dict(visualize=False),
+        )
         assert NAME_WRITE_STORE in [
             store["identifier"] for store in self.data_stores
         ], f"store with identifier {NAME_WRITE_STORE!r} needs to ge given."
@@ -171,3 +174,12 @@ def read_yaml(config_path: str) -> dict[str, Any]:
     with fsspec.open(config_path, "r") as file:
         config = yaml.safe_load(file)
     return config
+
+
+def is_jupyter_notebook():
+    try:
+        from IPython import get_ipython
+
+        return get_ipython() is not None
+    except NameError:
+        return False
