@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools >= 61.2.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xcube_multistore"
+dynamic = ["version"]
+authors = [
+  {name = "Konstantin Ntokas", email = "konstantin.ntokas@brockmann-consult.de"}
+]
+description = """\
+  xcube multi source data store for combining all datastores
+  availabe in the xcube ecosystem.\
+  """
+keywords = [
+  "analysis ready data", "data science", "datacube", "xarray", "zarr", "xcube"
+]
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "xcube>=1.8.1",
+    "xcube-cci>=0.11.2",
+    "xcube-cds>=0.9.3",
+    "xcube-clms>=0.2.2",
+    "xcube-stac>=0.1.0",
+    "xcube-zenodo>=0.1.1",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "xcube_multistore.__version__"}
+
+[tool.setuptools.packages.find]
+exclude = [
+  "examples*",
+  "test*",
+  "doc*"
+]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "flake8",
+  "pytest",
+  "pytest-cov",
+]
+
+[project.urls]
+Repository = "https://github.com/xcube-dev/xcube-multistore"
+Issues = "https://github.com/xcube-dev/xcube-multistore/issues"
+Changelog = "https://github.com/xcube-dev/xcube-multistore/blob/main/CHANGES.md"
