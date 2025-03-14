@@ -24,3 +24,5 @@ import logging
 LOG = logging.getLogger("xcube.multistore")
 MAP_FORMAT_ID_FILE_EXT = {"netcdf": "nc", "zarr": "zarr"}
 NAME_WRITE_STORE = "storage"
+COMPRESSED_FORMATS = ["zip", "tar", "tar.gz"]
+CRS_WGS84 = "epsg:4326"

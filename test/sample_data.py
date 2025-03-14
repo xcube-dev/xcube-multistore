@@ -34,7 +34,7 @@ def get_config_dict0():
                 "grid_mapping": "grid1",
                 "data_id": "dataset1.zarr",
                 "format_id": "netcdf",
-            }
+            },
         ],
         "data_stores": [
             {
@@ -56,7 +56,10 @@ def get_config_dict0():
                 "crs": "EPSG:4326",
             }
         ],
-        "general": {"visualize": False},
+        "general": {
+            "dask_scheduler": "single-threaded",
+            "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+        },
     }
 
 
@@ -139,6 +142,67 @@ def get_config_dict3():
             },
         ],
         "general": {"visualize": False},
+    }
+
+
+def get_config_dict4():
+    return {
+        "preload_datasets": [
+            {
+                "store": "datasource",
+                "data_ids": ["dataset0.zip"],
+            }
+        ],
+        "datasets": [
+            {
+                "identifier": "dataset1",
+                "store": "datasource",
+                "grid_mapping": "grid1",
+                "data_id": "dataset1.zarr",
+                "format_id": "netcdf",
+            },
+            {
+                "identifier": "dataset2",
+                "grid_mapping": "grid1",
+                "variables": [
+                    {
+                        "identifier": "data_var1",
+                        "store": "datasource",
+                        "data_id": "dataset0/data_var0.zarr",
+                    },
+                    {
+                        "identifier": "data_var2",
+                        "store": "datasource",
+                        "data_id": "dataset0/data_var1.zarr",
+                    },
+                ],
+            },
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "memory",
+                "store_params": {"root": "data"},
+            },
+            {
+                "identifier": "datasource",
+                "store_id": "memory",
+                "store_params": {"root": "datasource"},
+            },
+        ],
+        "grid_mappings": [
+            {
+                "identifier": "grid1",
+                "bbox": [0, 30, 30, 60],
+                "spatial_res": 10,
+                "crs": "EPSG:4326",
+                "tile_size": 512,
+            }
+        ],
+        "general": {
+            "dask_scheduler": "single-threaded",
+            "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+        },
     }
 
 

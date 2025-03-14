@@ -34,14 +34,17 @@ class GridMappings:
                 cls,
                 config_gm["identifier"],
                 get_regular_gridmapping(
-                    config_gm["bbox"], config_gm["spatial_res"], config_gm["crs"]
+                    **{k: v for k, v in config_gm.items() if k != "identifier"}
                 ),
             )
         return cls
 
 
 def get_regular_gridmapping(
-    bbox: list[float] | list[int], spatial_res: int | float, crs: str
+    bbox: list[float] | list[int],
+    spatial_res: int | float,
+    crs: str,
+    tile_size: int | tuple[int, int] = 1024,
 ):
     x_size = int((bbox[2] - bbox[0]) / spatial_res)
     y_size = int(abs(bbox[3] - bbox[1]) / spatial_res)
@@ -50,4 +53,5 @@ def get_regular_gridmapping(
         xy_min=(bbox[0], bbox[1]),
         xy_res=spatial_res,
         crs=crs,
+        tile_size=tile_size,
     )

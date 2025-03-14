@@ -60,7 +60,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
             msds = MultiSourceDataStore(config_dict)
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(4, len(cm.output))
-        msg = "INFO:xcube.multistore:Finished dataset dataset1."
+        msg = "INFO:xcube.multistore:Dataset dataset1 finished."
         self.assertEqual(msg, str(cm.output[-1]))
         ds = msds.stores.storage.open_data("dataset1.nc")
         self.assertIsInstance(ds, xr.Dataset)
@@ -108,7 +108,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(2, len(cm.output))
         msg = (
-            "ERROR:xcube.multistore:Failed to open dataset "
+            "ERROR:xcube.multistore:An error occurred: Failed to open dataset "
             "'datasource/dataset2.zarr': group not found at path ''"
         )
         self.assertEqual(msg, str(cm.output[-1]))
