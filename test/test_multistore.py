@@ -22,13 +22,14 @@
 import shutil
 import unittest
 
-import pytest
-from xcube.util.jsonschema import JsonObjectSchema
-from xcube.core.store import new_data_store
-import xarray as xr
 import numpy as np
+import pytest
+import xarray as xr
+from xcube.core.store import new_data_store
+from xcube.util.jsonschema import JsonObjectSchema
 
 from xcube_multistore.multistore import MultiSourceDataStore
+
 from .sample_data import (
     get_config_dict0,
     get_config_dict1,

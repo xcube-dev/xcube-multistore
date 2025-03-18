@@ -29,16 +29,15 @@ import fsspec
 import yaml
 from xcube.util.jsonschema import (
     JsonArraySchema,
+    JsonBooleanSchema,
+    JsonComplexSchema,
     JsonNumberSchema,
     JsonObjectSchema,
     JsonStringSchema,
-    JsonBooleanSchema,
-    JsonComplexSchema,
 )
 
 from .constants import NAME_WRITE_STORE
 from .utils import remove_compressed_extension
-
 
 SCHEMA_IDENTIFIER = JsonStringSchema(title="Identifier for the object", min_length=1)
 

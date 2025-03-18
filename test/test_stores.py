@@ -21,10 +21,10 @@
 # SOFTWARE.
 
 import unittest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import MagicMock, mock_open, patch
 
-from xcube_multistore.stores import DataStores
 from xcube_multistore.config import MultiSourceConfig
+from xcube_multistore.stores import DataStores
 
 
 class DataStoresTest(unittest.TestCase):

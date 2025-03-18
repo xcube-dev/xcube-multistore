@@ -20,16 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import sys
 import unittest
 from unittest.mock import patch
-import sys
 
 import fsspec
 import yaml
-from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema, JsonComplexSchema
+from xcube.util.jsonschema import JsonArraySchema, JsonComplexSchema, JsonObjectSchema
 
-from xcube_multistore.config import MultiSourceConfig
-from xcube_multistore.config import is_jupyter_notebook
+from xcube_multistore.config import MultiSourceConfig, is_jupyter_notebook
+
 from .sample_data import get_config_dict4
 
 

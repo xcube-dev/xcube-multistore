@@ -22,14 +22,14 @@
 
 import unittest
 
-import xarray as xr
 import numpy as np
+import xarray as xr
 
 from xcube_multistore.utils import (
-    safe_execute,
-    get_utm_zone,
     get_bbox,
+    get_utm_zone,
     normalize_grid_mapping,
+    safe_execute,
 )
 
 

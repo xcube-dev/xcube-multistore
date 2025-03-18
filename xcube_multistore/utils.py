@@ -20,14 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import pyproj
 import functools
 
 import numpy as np
+import pyproj
 import xarray as xr
 from xcube.core.gridmapping import GridMapping
 
-from .constants import CRS_WGS84, COMPRESSED_FORMATS
+from .constants import COMPRESSED_FORMATS, CRS_WGS84
 
 
 def safe_execute():

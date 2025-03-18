@@ -27,9 +27,9 @@ from typing import Any
 import numpy as np
 import pyproj
 import xarray as xr
+from xcube.core.chunk import chunk_dataset
 from xcube.core.geom import clip_dataset_by_geometry
 from xcube.core.gridmapping import GridMapping
-from xcube.core.chunk import chunk_dataset
 from xcube.core.resampling.spatial import resample_in_space
 from xcube.util.jsonschema import JsonObjectSchema
 
@@ -37,8 +37,8 @@ from .config import MultiSourceConfig
 from .constants import LOG, MAP_FORMAT_ID_FILE_EXT, NAME_WRITE_STORE
 from .gridmappings import GridMappings
 from .stores import DataStores
+from .utils import clean_dataset, get_data_id, prepare_dataset_for_netcdf, safe_execute
 from .visualization import GeneratorDisplay, GeneratorState, GeneratorStatus
-from .utils import safe_execute, prepare_dataset_for_netcdf, get_data_id, clean_dataset
 
 
 class MultiSourceDataStore:
