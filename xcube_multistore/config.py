@@ -64,7 +64,7 @@ SCHEMA_XR_MERGE_PARAMS = JsonObjectSchema(
         compat="no_conflicts",
         join="exact",
         fill_value="<NA>",
-        combine_attrs="no_conflicts",
+        combine_attrs="drop_conflicts",
     ),
     additional_properties=True,
 )
@@ -291,7 +291,7 @@ class MultiSourceConfig:
         if "dask_scheduler" not in self.general:
             self.general["dask_scheduler"] = "threads"
         _GDAL_HTTP_MAX_RETRY_DEFAULT = 10
-        _GDAL_HTTP_RETRY_DELAY_DEFAULT = 10
+        _GDAL_HTTP_RETRY_DELAY_DEFAULT = 5
         if "gdal_http_params" not in self.general:
             self.general["gdal_http_params"] = dict(
                 gdal_http_max_retry=_GDAL_HTTP_MAX_RETRY_DEFAULT,
@@ -348,5 +348,5 @@ def is_jupyter_notebook():
         from IPython import get_ipython
 
         return get_ipython() is not None
-    except NameError:
+    except ModuleNotFoundError:
         return False

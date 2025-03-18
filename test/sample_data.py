@@ -56,10 +56,7 @@ def get_config_dict0():
                 "crs": "EPSG:4326",
             }
         ],
-        "general": {
-            "dask_scheduler": "single-threaded",
-            "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
-        },
+        "general": {"visualize": False},
     }
 
 
@@ -150,7 +147,7 @@ def get_config_dict4():
         "preload_datasets": [
             {
                 "store": "datasource",
-                "data_ids": ["dataset0.zip"],
+                "data_ids": ["dataset0.zip", "dataset1.zarr.zip"],
             }
         ],
         "datasets": [
@@ -206,7 +203,138 @@ def get_config_dict4():
     }
 
 
-def get_sample_data():
+def get_config_dict5():
+    return {
+        "preload_datasets": [
+            {
+                "store": "zenodo_senf",
+                "data_ids": ["andorra.zip"],
+            }
+        ],
+        "datasets": [
+            {
+                "identifier": "senf_andorra",
+                "variables": [
+                    {
+                        "identifier": "annual_disturbances_1985_2023",
+                        "store": "zenodo_senf",
+                        "data_id": "andorra/annual_disturbances_1985_2023_andorra.zarr",
+                    },
+                    {
+                        "identifier": "forest_mask",
+                        "store": "zenodo_senf",
+                        "data_id": "andorra/forest_mask_andorra.zarr",
+                    },
+                ],
+            },
+            {
+                "identifier": "biomass_xu",
+                "store": "zenodo_xu",
+                "grid_mapping": "senf_andorra",
+                "data_id": "test10a_cd_ab_pred_corr_2000_2019_v2.tif",
+                "custom_processing": {
+                    "module_path": "test.sample_data",
+                    "function_name": "biomass_xu_merge_years",
+                },
+            },
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "memory",
+                "store_params": {"root": "data"},
+            },
+            {
+                "identifier": "zenodo_senf",
+                "store_id": "zenodo",
+                "store_params": {"root": "13333034"},
+            },
+            {
+                "identifier": "zenodo_xu",
+                "store_id": "zenodo",
+                "store_params": {"root": "4161694"},
+            },
+        ],
+    }
+
+
+def get_config_dict6():
+    return {
+        "datasets": [
+            {
+                "identifier": "dataset3",
+                "store": "datasource",
+                "data_id": "dataset3.zarr",
+                "open_params": {"point": [40, 0]},
+            },
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "memory",
+                "store_params": {"root": "data"},
+            },
+            {
+                "identifier": "datasource",
+                "store_id": "memory",
+                "store_params": {"root": "datasource"},
+            },
+        ],
+    }
+
+
+def get_config_dict7():
+    return {
+        "datasets": [
+            {
+                "identifier": "dataset1",
+                "store": "datasource",
+                "grid_mapping": "grid1",
+                "data_id": "dataset1.zarr",
+            }
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "memory",
+                "store_params": {"root": "data"},
+            },
+            {
+                "identifier": "datasource",
+                "store_id": "memory",
+                "store_params": {"root": "datasource"},
+            },
+        ],
+        "general": {"visualize": False},
+    }
+
+
+def get_config_dict8():
+    return {
+        "datasets": [
+            {
+                "identifier": "dataset1",
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+            }
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "zenodo",
+                "store_params": {"root": "13333034"},
+            },
+            {
+                "identifier": "datasource",
+                "store_id": "memory",
+                "store_params": {"root": "datasource"},
+            },
+        ],
+        "general": {"visualize": False},
+    }
+
+
+def get_sample_data_2d():
     lon = np.arange(-5.0, 36.0, 5.0)
     lat = np.arange(65.0, 24.0, -5.0)
     spatial_ref = np.array(0)
@@ -224,6 +352,37 @@ def get_sample_data():
     return ds
 
 
+def get_sample_data_3d():
+    lon = np.arange(-5.0, 6.0, 5.0)
+    lat = np.arange(45.0, 34.0, -5.0)
+    time = np.arange(10)
+    spatial_ref = np.array(0)
+    band_1 = np.arange(90).reshape((10, 3, 3))
+    ds = xr.Dataset(
+        dict(
+            band_1=xr.DataArray(
+                band_1,
+                dims=("time", "lat", "lon"),
+                attrs=dict(grid_mapping="spatial_ref"),
+            )
+        ),
+        coords=dict(time=time, lat=lat, lon=lon, spatial_ref=spatial_ref),
+    )
+    ds.spatial_ref.attrs = pyproj.CRS.from_epsg("4326").to_cf()
+    ds.attrs = dict(history=["test", "list sterilization", "if saved to netcdf"])
+    return ds
+
+
 def modify_dataset(ds: xr.Dataset) -> xr.Dataset:
     ds["band_1"] *= 2
+    return ds
+
+
+def biomass_xu_merge_years(ds: xr.Dataset) -> xr.Dataset:
+    ds = ds.rename(name_dict={"x": "lon", "y": "lat"})
+    ds_arr = ds.to_dataarray(dim="time")
+    time = [np.datetime64(f"{year}-01-01T00:00:00") for year in range(2000, 2019 + 1)]
+    ds["carbon_density"] = ds_arr.assign_coords(coords=dict(time=time))
+    var_del = [f"da_{i}" for i in range(1, 21)]
+    ds = ds.drop_vars(var_del)
     return ds

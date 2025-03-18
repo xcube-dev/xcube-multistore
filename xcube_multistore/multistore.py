@@ -137,9 +137,10 @@ class MultiSourceDataStore:
                     LOG.info(f"Data ID {data_id!r} already preloaded.")
 
             if data_ids:
-                _ = store.preload_data(
-                    *data_ids, **config_preload.get("preload_params", {})
-                )
+                preload_params = config_preload.get("preload_params", {})
+                if "silent" not in preload_params:
+                    preload_params["silent"] = self.config.general["visualize"]
+                _ = store.preload_data(*data_ids, **preload_params)
 
     def generate_cubes(self):
         for identifier, config_ds in self.config.datasets.items():
@@ -149,7 +150,7 @@ class MultiSourceDataStore:
                     GeneratorState(
                         identifier,
                         status=GeneratorStatus.stopped,
-                        message=f"Dataset {identifier} already generated.",
+                        message=f"Dataset {identifier!r} already generated.",
                     )
                 )
                 continue
@@ -157,7 +158,7 @@ class MultiSourceDataStore:
                 GeneratorState(
                     identifier,
                     status=GeneratorStatus.started,
-                    message=f"Open dataset {identifier}.",
+                    message=f"Open dataset {identifier!r}.",
                 )
             )
             ds = self.open_dataset(config_ds)
@@ -165,7 +166,7 @@ class MultiSourceDataStore:
                 self.notify(
                     GeneratorState(
                         identifier,
-                        message=f"Processing dataset {identifier}.",
+                        message=f"Processing dataset {identifier!r}.",
                     )
                 )
             else:
@@ -176,7 +177,7 @@ class MultiSourceDataStore:
                 self.notify(
                     GeneratorState(
                         identifier,
-                        message=f"Write dataset {identifier}.",
+                        message=f"Write dataset {identifier!r}.",
                     )
                 )
             else:
@@ -188,7 +189,7 @@ class MultiSourceDataStore:
                     GeneratorState(
                         identifier,
                         status=GeneratorStatus.stopped,
-                        message=f"Dataset {identifier} finished.",
+                        message=f"Dataset {identifier!r} finished.",
                     )
                 )
             else:
@@ -197,7 +198,7 @@ class MultiSourceDataStore:
                 data_id = (
                     f"{config_ds['identifier']}.{MAP_FORMAT_ID_FILE_EXT[format_id]}"
                 )
-                store.delete_data(data_id)
+                store.has_data(data_id) and store.delete_data(data_id)
                 self.notify_error(identifier, ds)
 
     @safe_execute()
@@ -222,16 +223,23 @@ class MultiSourceDataStore:
             merge_params = config.get("merge_params", {})
             if "join" not in merge_params:
                 merge_params["join"] = "exact"
-            if "join" not in merge_params:
-                merge_params["combine_attrs"] = "no_conflicts"
+            if "combine_attrs" not in merge_params:
+                merge_params["combine_attrs"] = "drop_conflicts"
             ds = xr.merge(dss, **merge_params)
         return clean_dataset(ds)
 
     def open_single_dataset(self, config: dict) -> xr.Dataset | Exception:
         store = getattr(self.stores, config["store"])
-        open_params = config.get("open_params", {})
-        if "point" in open_params:
-            open_params = copy.deepcopy(open_params)
+        open_params = copy.deepcopy(config.get("open_params", {}))
+        lat, lon = open_params.pop("point", [np.nan, np.nan])
+        schema = store.get_open_data_params_schema(data_id=config["data_id"])
+        if (
+            ~np.isnan(lat)
+            and ~np.isnan(lon)
+            and "bbox" in schema.properties
+            and ["spatial_res"] in open_params
+            and "spatial_res" in schema.properties
+        ):
             lat, lon = open_params.pop("point")
             open_params["bbox"] = [
                 lon - 2 * open_params["spatial_res"],

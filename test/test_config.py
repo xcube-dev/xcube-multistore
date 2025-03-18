@@ -21,12 +21,15 @@
 # SOFTWARE.
 
 import unittest
+from unittest.mock import patch
+import sys
 
 import fsspec
 import yaml
 from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema, JsonComplexSchema
 
 from xcube_multistore.config import MultiSourceConfig
+from xcube_multistore.config import is_jupyter_notebook
 from .sample_data import get_config_dict4
 
 
@@ -68,7 +71,7 @@ class MultiSourceConfigTest(unittest.TestCase):
         self.assertIn("gdal_http_params", schema.properties["general"].properties)
 
     def test_init(self):
-        def subtest_config(config: MultiSourceConfig):
+        def subtest_config(config: MultiSourceConfig, gdal_http_params: dict):
             self.assertIsInstance(config, MultiSourceConfig)
             self.assertEqual(len(config.preload_datasets), 1)
             self.assertEqual(len(config.datasets), 2)
@@ -83,21 +86,30 @@ class MultiSourceConfigTest(unittest.TestCase):
                     "dataset0.zip": [
                         "dataset0/data_var0.zarr",
                         "dataset0/data_var1.zarr",
-                    ]
+                    ],
+                    "dataset1.zarr.zip": ["dataset1.zarr"],
                 },
             )
             self.assertEqual(config.general["visualize"], False)
             self.assertEqual(config.general["force_preload"], False)
             self.assertEqual(config.general["dask_scheduler"], "single-threaded")
-            self.assertDictEqual(
-                config.general["gdal_http_params"],
-                dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
-            )
+            self.assertDictEqual(gdal_http_params, config.general["gdal_http_params"])
 
         # test config given as dict
         config_dict = get_config_dict4()
         config = MultiSourceConfig(config_dict)
-        subtest_config(config)
+        gdal_http_params = dict(gdal_http_max_retry=20, gdal_http_retry_delay=2)
+        subtest_config(config, gdal_http_params)
+        config_dict = get_config_dict4()
+        del config_dict["general"]["gdal_http_params"]["gdal_http_max_retry"]
+        config = MultiSourceConfig(config_dict)
+        gdal_http_params = dict(gdal_http_max_retry=10, gdal_http_retry_delay=2)
+        subtest_config(config, gdal_http_params)
+        config_dict = get_config_dict4()
+        del config_dict["general"]["gdal_http_params"]["gdal_http_retry_delay"]
+        config = MultiSourceConfig(config_dict)
+        gdal_http_params = dict(gdal_http_max_retry=20, gdal_http_retry_delay=5)
+        subtest_config(config, gdal_http_params)
 
         # test config given as filepath
         config_path = "memory://config.yml"
@@ -105,4 +117,9 @@ class MultiSourceConfigTest(unittest.TestCase):
         with fsspec.open(config_path, "w") as file:
             yaml.dump(config_dict, file)
         config = MultiSourceConfig(config_path)
-        subtest_config(config)
+        gdal_http_params = dict(gdal_http_max_retry=20, gdal_http_retry_delay=2)
+        subtest_config(config, gdal_http_params)
+
+    def test_is_jupyter_notebook(self):
+        with patch.dict(sys.modules, {"IPython": None}):
+            self.assertFalse(is_jupyter_notebook())

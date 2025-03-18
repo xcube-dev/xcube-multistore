@@ -115,9 +115,9 @@ def normalize_grid_mapping(ds: xr.Dataset) -> xr.Dataset:
     gm_name = get_grid_mapping_name(ds)
     if gm_name is None:
         return ds
-    gm = GridMapping.from_dataset(ds)
+    crs = pyproj.crs.CRS.from_cf(ds[gm_name].attrs)
     ds = ds.drop_vars(gm_name)
-    ds = ds.assign_coords(spatial_ref=xr.DataArray(0, attrs=gm.crs.to_cf()))
+    ds = ds.assign_coords(spatial_ref=xr.DataArray(0, attrs=crs.to_cf()))
     for var in ds.data_vars:
         ds[var].attrs["grid_mapping"] = "spatial_ref"
     return ds

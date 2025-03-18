@@ -4,7 +4,7 @@ datasets:
   - identifier: biomass_xu
     store: zenodo
     grid_mapping: gm_scs4
-    data_id: "4161694/test10a_cd_ab_pred_corr_2000_2019_v2.tif"
+    data_id: "test10a_cd_ab_pred_corr_2000_2019_v2.tif"
     open_params:
       tile_size: [1800, 1800]
     format_id: netcdf
@@ -30,6 +30,8 @@ data_stores:
   # zenodo data store for canopy height and biomass map by Xu et al.
   - identifier: zenodo
     store_id: zenodo
+    store_params:
+      root: "4161694"
 
 grid_mappings:
   - identifier: gm_scs4
