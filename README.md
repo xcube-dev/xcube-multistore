@@ -1,15 +1,54 @@
-# Multi-Source Data Store 
+[![Build Status](https://github.com/xcube-dev/xcube-multistore/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/xcube-dev/xcube-multistore/actions)
+[![codecov](https://codecov.io/gh/xcube-dev/xcube-multistore/branch/main/graph/badge.svg)](https://codecov.io/gh/xcube-dev/xcube-multistore)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-This repository aims to delevop a Multi-Source Data Store to formalize the fusion 
-of data from various sources into a harmonized data model. This approach will not 
-only streamline the integration process but also ensure its **transparency** and 
-**reproducibility** through well-defined configurations.
+# xcube-multistore
 
-It contains the following steps:
+xcube Multi-Source Data Store: Seamlessly Integrating and Harmonizing Data from 
+Multiple Sources.
 
-1. Data access through xcube data stores
-2. Data harmonization
-3. Data fusion if required 
 
-This can result in either one unified data cube with all datasets on a consistent grid
-or a catalog of separate datasets. 
+## Development
+
+### Setting up a development environment
+
+The recommended Python distribution for development is 
+[miniforge](https://conda-forge.org/download/) which includes 
+conda, mamba, and their dependencies.
+
+```shell
+git clone https://github.com/xcube-dev/xcube-multistore.git
+cd xcube-multistore
+mamba env create
+mamba activate xcube-multistore
+pip install -ve .
+```
+
+### Install the library locally and test
+
+```shell
+mamba activate xcube-multistore
+pip install -ve .
+pytest
+```
+
+### Documentation
+
+### Setting up a documentation environment
+
+```shell
+mamba activate xcube-multistore
+pip install .[doc]
+```
+
+### Testing documentation changes
+
+```shell
+mkdocs serve
+```
+
+### Deploying documentation changes
+
+```shell
+mkdocs gh-deploy
+```

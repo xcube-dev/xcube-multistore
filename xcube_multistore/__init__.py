@@ -21,5 +21,6 @@
 # SOFTWARE.
 
 from .version import version
+from .multistore import MultiSourceDataStore
 
 __version__ = version
