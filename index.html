@@ -367,6 +367,48 @@
   
   
     <li class="md-nav__item">
+      <a href="config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="about/" class="md-nav__link">
         
   
@@ -477,18 +519,17 @@ to user-defined specifications.</p>
 <p>This process results in either a single, unified data cube with all datasets aligned
 to a consistent grid or a catalog of separate datasets.</p>
 <h2 id="overview">Overview</h2>
-<p>The Multi-Source Data Store is configure via a yml file. One example can be seen <a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml">heer</a>.
-More documentation on the creating a config file is given in (add section). The 
-Multi-Source Data Store can then be started by a single line of code, presented below.</p>
-<p>The Multi-Source Data Store is configured via a YAML file. An example configuration 
-can be found <a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml">here</a>.
-More detailed documentation on creating a config file is available in the (add section).</p>
-<p>Once the configuration is set up, the Multi-Source Data Store can be started with a 
-single line of code, as shown below.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xcube_multistore</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiSourceDataStore</span>
+<p>The Multi-Source Data Store is configured via a YAML file. You can find an example 
+configuration in <a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml">examples/config.yml</a>.</p>
+<p>For more detailed guidance on creating a configuration file, please refer to the 
+<a href="https://xcube-dev.github.io/xcube-multistore/config/">Configuration Guide</a>.</p>
+<p>Once the configuration file is ready, the Multi-Source Data Store can be started 
+with a single line of code, as shown below:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">xcube_multistore.multistore</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiSourceDataStore</span>
 
 <span class="n">msds</span> <span class="o">=</span> <span class="n">MultiSourceDataStore</span><span class="p">(</span><span class="s2">&quot;config.yml&quot;</span><span class="p">)</span>
 </code></pre></div>
+<p>For further examples please view the <a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples">examples folder</a>.</p>
 <h2 id="features">Features</h2>
 <blockquote>
 <p><strong>IMPORTANT:</strong><br />
