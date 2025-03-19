@@ -33,19 +33,33 @@ class GridMappings:
             setattr(
                 cls,
                 config_gm["identifier"],
-                get_regular_gridmapping(
+                _get_regular_gridmapping(
                     **{k: v for k, v in config_gm.items() if k != "identifier"}
                 ),
             )
         return cls
 
 
-def get_regular_gridmapping(
+def _get_regular_gridmapping(
     bbox: list[float] | list[int],
     spatial_res: int | float,
     crs: str,
     tile_size: int | tuple[int, int] = 1024,
-):
+) -> GridMapping:
+    """Creates a regular grid mapping for a given coordinate reference system based on
+    the given bounding box and spatial resolution.
+
+    Args:
+        bbox: Bounding box coordinates in the format [west, south, east, north].
+            The values must be in the given CRS.
+        spatial_res: Spatial resolution of the grid.
+        crs: Coordinate reference system in a string format (e.g., "EPSG:4326").
+        tile_size: Chunk size for the grid; if a single int is given,
+            square chunk size is assumed. Defaults to 1024.
+
+    Returns:
+        A regular grid mapping object.
+    """
     x_size = int((bbox[2] - bbox[0]) / spatial_res)
     y_size = int(abs(bbox[3] - bbox[1]) / spatial_res)
     return GridMapping.regular(

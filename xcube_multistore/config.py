@@ -37,7 +37,7 @@ from xcube.util.jsonschema import (
 )
 
 from .constants import NAME_WRITE_STORE
-from .utils import remove_compressed_extension
+from .utils import _remove_compressed_extension
 
 SCHEMA_IDENTIFIER = JsonStringSchema(title="Identifier for the object", min_length=1)
 
@@ -263,7 +263,7 @@ class MultiSourceConfig:
 
     def __init__(self, config: str | dict[str, Any]):
         if not isinstance(config, dict):
-            config = read_yaml(config)
+            config = _read_yaml(config)
         schema = self.get_schema()
         schema.validate_instance(config)
         self.preload_datasets = config.get("preload_datasets", None)
@@ -286,7 +286,7 @@ class MultiSourceConfig:
 
     def _general_setup(self):
         if "visualize" not in self.general:
-            self.general["visualize"] = True if is_jupyter_notebook() else False
+            self.general["visualize"] = True if _is_jupyter_notebook() else False
         if "force_preload" not in self.general:
             self.general["force_preload"] = False
         if "dask_scheduler" not in self.general:
@@ -322,7 +322,7 @@ class MultiSourceConfig:
         preload_map = defaultdict(list)
         for config_preload in self.preload_datasets:
             for data_id in config_preload["data_ids"]:
-                data_id_mod = remove_compressed_extension(data_id)
+                data_id_mod = _remove_compressed_extension(data_id)
                 for identifier_ds, config_ds in self.datasets.items():
                     if "variables" in config_ds:
                         for config_da in config_ds["variables"]:
@@ -338,13 +338,13 @@ class MultiSourceConfig:
         return CONFIG_SCHEMA
 
 
-def read_yaml(config_path: str) -> dict[str, Any]:
+def _read_yaml(config_path: str) -> dict[str, Any]:
     with fsspec.open(config_path, "r") as file:
         config = yaml.safe_load(file)
     return config
 
 
-def is_jupyter_notebook():
+def _is_jupyter_notebook():
     try:
         from IPython import get_ipython
 

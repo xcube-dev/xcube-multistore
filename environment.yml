@@ -5,12 +5,19 @@ dependencies:
   # Python
   - python >=3.10
   # Required
+  - dask
+  - fsspec
+  - numpy
+  - pyproj
+  - tabulate
+  - xarray
   - xcube >=1.8.1
   - xcube-cci >=0.11.2
   - xcube-cds >=0.9.3
   - xcube-clms >=0.2.2
   - xcube-stac >=0.1.0
   - xcube-zenodo >=0.1.1
+  - yaml
   # Development Dependencies - Tools
   - black
   - isort
