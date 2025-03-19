@@ -59,7 +59,7 @@ class MultiSourceDataStore:
 
     Notes:
         Detailed instructions on setting up the configuration can be found in the
-        `Configuration Guide <https://xcube-dev.github.io/xcube-multistore/config/>`_.
+        [Configuration Guide](https://xcube-dev.github.io/xcube-multistore/config/).
     """
 
     def __init__(self, config: str | dict[str, Any]):

@@ -1,7 +1,5 @@
 # Configuration Guide
 
-# Configuration Guide
-
 The Multi-Source Data Store is configured using a YAML file. This configuration 
 defines key elements such as datasets, data stores, grid mappings, and general 
 parameters, which are essential for setting up a workflow to generate data cubes. 
