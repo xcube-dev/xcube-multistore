@@ -292,6 +292,9 @@ class MultiSourceDataStore:
 
             ds = clip_dataset_by_geometry(ds, geometry=bbox)
             ds = resample_in_space(ds, target_gm=target_gm, encode_cf=True)
+            # this is needed since resample in space returns one chunk along the time
+            # axis; this part can be removed once https://github.com/xcube-dev/xcube/issues/1124
+            # is resolved.
             if "time" in ds.coords:
                 ds = chunk_dataset(
                     ds, dict(time=1), format_name=config.get("format_id", "zarr")

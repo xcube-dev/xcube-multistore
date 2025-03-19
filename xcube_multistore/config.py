@@ -215,9 +215,10 @@ SCHEMA_GDAL_HTTP_PARAMS = JsonObjectSchema(
             default=10,
         ),
         gdal_http_retry_delay=JsonNumberSchema(
-            title="Delay in sec between  retry of a http request in GDAL.",
+            title="Delay in seconds between retries of a http request in GDAL.",
             description=(
-                "This is used when opening a tif file with `rioxarray.open_rasterio`."
+                "This is used when opening a tif file with `rioxarray.open_rasterio` "
+                "from a remote source."
             ),
             default=5,
         ),
@@ -280,7 +281,7 @@ class MultiSourceConfig:
 
         assert (
             NAME_WRITE_STORE in self.data_stores.keys()
-        ), f"store with identifier {NAME_WRITE_STORE!r} needs to ge given."
+        ), f"store with identifier {NAME_WRITE_STORE!r} needs to be given."
 
     def _general_setup(self):
         if "visualize" not in self.general:
