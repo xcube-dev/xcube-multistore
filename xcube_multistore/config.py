@@ -43,10 +43,10 @@ SCHEMA_IDENTIFIER = JsonStringSchema(title="Identifier for the object", min_leng
 
 # define schema for dataset
 SCHEMA_STORE_IDENTIFIER = JsonStringSchema(
-    title="Store used to open the dataset", min_length=1
+    title="Store identifier used to open the dataset", min_length=1
 )
 SCHEMA_GRIDMAPPING_ID = JsonStringSchema(
-    title="Final grid mapping for the dataset", min_length=1
+    title="Grid mapping identifier for the dataset", min_length=1
 )
 SCHEMA_DATA_ID = JsonStringSchema(
     title="Data ID of the dataset in the assigned data store", min_length=1
@@ -74,8 +74,17 @@ SCHEMA_FORMAT_ID = JsonStringSchema(
 )
 SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
     properties=dict(
-        module_path=JsonStringSchema(min_length=1),
-        function_name=JsonStringSchema(min_length=1),
+        module_path=JsonStringSchema(
+            title="Path to python module relative to config file.", min_length=1
+        ),
+        function_name=JsonStringSchema(
+            title="Name of function in the python module.",
+            description=(
+                "Any function is allowed with takes a `xarray.Dataset` as an "
+                "input and returns a modified xarray.Dataset"
+            ),
+            min_length=1,
+        ),
     ),
     required=["module_path", "function_name"],
     additional_properties=False,
@@ -122,9 +131,36 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
 SCHEMA_DATASET = JsonComplexSchema(one_of=[SCHEMA_SINGLE_DATASET, SCHEMA_MULTI_DATASET])
 
 # define schema for data store
-SCHEMA_STORE_ID = JsonStringSchema(title="Store identifier", default="EPSG:4326")
+SCHEMA_STORE_ID = JsonStringSchema(
+    title="Store identifier",
+    enum=[
+        "cds",
+        "clms",
+        "cmems",
+        "esa-cci",
+        "esa-cci-kc",
+        "esa-cci-zarr",
+        "file",
+        "https",
+        "memory",
+        "s3",
+        "sentinelhub",
+        "sentinelhub-cdse",
+        "smos",
+        "stac",
+        "stac-cdse",
+        "stac-xcube",
+        "zenodo",
+    ],
+)
 SCHEMA_STORE_PARAMS = JsonObjectSchema(
-    title="STORE parameters", additional_properties=True
+    title="Store parameters",
+    description=(
+        "Store parameters can be obtained by `get_data_store_params_schema(store_id)`. "
+        "Further documentation can be found at "
+        "https://xcube.readthedocs.io/en/latest/dataaccess.html#data-store-framework."
+    ),
+    additional_properties=True,
 )
 SCHEMA_STORE = JsonObjectSchema(
     properties=dict(
@@ -149,17 +185,17 @@ SCHEMA_BBOX = JsonArraySchema(
     title="Bounding box [west, south, east, north]",
 )
 SCHEMA_TILE_SIZE = JsonComplexSchema(
-    title="Spatial size of chunk in grid mapping",
+    title="Spatial chunk size in grid mapping.",
     one_of=[
         JsonArraySchema(
             items=(
-                JsonNumberSchema(minimum=256, default=1024),
-                JsonNumberSchema(minimum=256, default=1024),
+                JsonNumberSchema(title="Chunk size in lat/x direction."),
+                JsonNumberSchema(title="Chunk size in lon/y direction."),
             ),
-            default=[1024, 1024],
         ),
-        JsonNumberSchema(minimum=256, default=1024),
+        JsonNumberSchema(title="Squared chunk size"),
     ],
+    default=1024,
 )
 
 SCHEMA_GRID_MAPPING = JsonObjectSchema(
