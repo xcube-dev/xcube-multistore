@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import json
+
 from xcube.core.store import new_data_store
 
 from .config import MultiSourceConfig
@@ -29,11 +31,14 @@ class DataStores:
 
     @classmethod
     def setup_data_stores(cls, config: MultiSourceConfig):
-        for config_store in config.data_stores:
+        for identifier, config_store in config.data_stores.items():
             store_params = config_store.get("store_params", {})
+            if config_store["store_id"] == "clms":
+                with open(store_params["credentials"]) as f:
+                    store_params["credentials"] = json.load(f)
             setattr(
                 cls,
-                config_store["identifier"],
+                identifier,
                 new_data_store(config_store["store_id"], **store_params),
             )
         return cls

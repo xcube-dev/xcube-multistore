@@ -17,7 +17,24 @@ jobs:
         with:
           environment-file: environment.yml
 
-      - name: Run unit tests
+      # quick and dirty xcube installation, will be removed once 1.8.4 released
+      - name: Install xcube from GitHub
         shell: bash -l {0}
         run: |
-          pytest --cov=xcube_multistore --cov-report=xml
+          pip install git+https://github.com/xcube-dev/xcube.git
+
+      # quick and dirty xcube-zenodo installation, will be removed once 1.0.0 released
+      - name: Install xcube-zenodo from GitHub
+        shell: bash -l {0}
+        run: |
+          pip install git+https://github.com/xcube-dev/xcube-zenodo.git
+
+      - name: Run unit tests
+        shell: bash -l {0}
+        run: pytest --cov=xcube_multistore --cov-report=xml
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}

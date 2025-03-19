@@ -135,6 +135,10 @@ class GeneratorDisplay(ABC):
         """Update the display."""
         print(self.to_text())
 
+    def display_title(self, title: str):
+        """Display a title"""
+        print(title)
+
 
 class IPyGeneratorDisplay(GeneratorDisplay):
     def __init__(self, states: list[GeneratorState]):
@@ -151,6 +155,12 @@ class IPyGeneratorDisplay(GeneratorDisplay):
         """Update the display."""
         self._ipy_display.clear_output(wait=True)
         self._ipy_display.display(self.to_html())
+
+    def display_title(self, title: str):
+        """Display a title"""
+        self._ipy_display.display(
+            self._ipy_display.HTML(f"<b style='font-size: 20px;'>{title}</b>")
+        )
 
 
 class IPyWidgetsGeneratorDisplay(IPyGeneratorDisplay):

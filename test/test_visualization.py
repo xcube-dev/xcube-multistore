@@ -1,12 +1,12 @@
-import unittest
-from unittest.mock import patch, MagicMock
 import sys
+import unittest
 from io import StringIO
+from unittest.mock import MagicMock, patch
 
 from xcube_multistore.visualization import (
+    GeneratorDisplay,
     GeneratorState,
     GeneratorStatus,
-    GeneratorDisplay,
     IPyGeneratorDisplay,
     IPyWidgetsGeneratorDisplay,
 )

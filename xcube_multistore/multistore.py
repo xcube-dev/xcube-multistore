@@ -20,12 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import functools
+import copy
 import importlib
 from typing import Any
 
+import numpy as np
 import pyproj
 import xarray as xr
+from xcube.core.chunk import chunk_dataset
 from xcube.core.geom import clip_dataset_by_geometry
 from xcube.core.gridmapping import GridMapping
 from xcube.core.resampling.spatial import resample_in_space
@@ -35,6 +37,7 @@ from .config import MultiSourceConfig
 from .constants import LOG, MAP_FORMAT_ID_FILE_EXT, NAME_WRITE_STORE
 from .gridmappings import GridMappings
 from .stores import DataStores
+from .utils import clean_dataset, get_data_id, prepare_dataset_for_netcdf, safe_execute
 from .visualization import GeneratorDisplay, GeneratorState, GeneratorStatus
 
 
@@ -45,17 +48,24 @@ class MultiSourceDataStore:
         self.config = config
         self.stores = DataStores.setup_data_stores(config)
         if config.grid_mappings:
-            self._grid_mapping = GridMappings.setup_grid_mappings(config)
+            self._grid_mappings = GridMappings.setup_grid_mappings(config)
         else:
-            self._grid_mapping = None
+            self._grid_mappings = None
         self._states = {
-            config_ds["identifier"]: GeneratorState(
-                identifier=config_ds["identifier"], status=GeneratorStatus.waiting
+            identifier: GeneratorState(
+                identifier=identifier, status=GeneratorStatus.waiting
             )
-            for config_ds in config.datasets
+            for identifier, config_ds in config.datasets.items()
         }
+
+        # preload data, which is not preloaded as default
+        if config.preload_datasets is not None:
+            self.preload_datasets()
+
+        # generate data cubes
         if self.config.general["visualize"]:
             self._display = GeneratorDisplay.create(list(self._states.values()))
+            self._display.display_title("Cube Generation")
             self._display.show()
         self.generate_cubes()
 
@@ -70,7 +80,7 @@ class MultiSourceDataStore:
             self._display.update()
         else:
             if event.status == GeneratorStatus.failed:
-                LOG.error(event.exception)
+                LOG.error("An error occurred: %s", event.exception)
             else:
                 LOG.info(event.message)
 
@@ -83,115 +93,231 @@ class MultiSourceDataStore:
             )
         )
 
+    def preload_datasets(self):
+        for config_preload in self.config.preload_datasets:
+            store = getattr(self.stores, config_preload["store"])
+
+            if self.config.general["force_preload"]:
+                # preload all datasets again
+                data_ids_preloaded = []
+                data_ids = config_preload["data_ids"]
+            else:
+                # filter preloaded data IDs
+                data_ids = []
+                data_ids_preloaded = []
+                for data_id_preload in config_preload["data_ids"]:
+                    if all(
+                        store.cache_store.has_data(data_id)
+                        for data_id in self.config.preload_map[data_id_preload]
+                    ):
+                        data_ids_preloaded.append(data_id_preload)
+                    else:
+                        data_ids.append(data_id_preload)
+
+            # setup visualization
+            if self.config.general["visualize"]:
+                display_preloaded = GeneratorDisplay.create(
+                    [
+                        GeneratorState(
+                            identifier=data_id,
+                            status=GeneratorStatus.stopped,
+                            message="Already preloaded.",
+                        )
+                        for data_id in data_ids_preloaded
+                    ]
+                )
+                display_preloaded.display_title(
+                    f"Preload Datasets from store {config_preload['store']!r}"
+                )
+                if data_ids_preloaded:
+                    display_preloaded.show()
+            else:
+                LOG.info(f"Preload Datasets from store {config_preload['store']!r}")
+                for data_id in data_ids_preloaded:
+                    LOG.info(f"Data ID {data_id!r} already preloaded.")
+
+            if data_ids:
+                preload_params = config_preload.get("preload_params", {})
+                if "silent" not in preload_params:
+                    preload_params["silent"] = self.config.general["visualize"]
+                _ = store.preload_data(*data_ids, **preload_params)
+
     def generate_cubes(self):
-        for config_ds in self.config.datasets:
+        for identifier, config_ds in self.config.datasets.items():
+            data_id = get_data_id(config_ds)
+            if getattr(self.stores, "storage").has_data(data_id):
+                self.notify(
+                    GeneratorState(
+                        identifier,
+                        status=GeneratorStatus.stopped,
+                        message=f"Dataset {identifier!r} already generated.",
+                    )
+                )
+                continue
             self.notify(
                 GeneratorState(
-                    config_ds["identifier"],
+                    identifier,
                     status=GeneratorStatus.started,
-                    message=f"Open dataset {config_ds['identifier']}.",
+                    message=f"Open dataset {identifier!r}.",
                 )
             )
-            ds = open_dataset(self.stores, config_ds)
+            ds = self.open_dataset(config_ds)
             if isinstance(ds, xr.Dataset):
                 self.notify(
                     GeneratorState(
-                        config_ds["identifier"],
-                        message=f"Processing dataset {config_ds['identifier']}.",
+                        identifier,
+                        message=f"Processing dataset {identifier!r}.",
                     )
                 )
             else:
-                self.notify_error(config_ds["identifier"], ds)
+                self.notify_error(identifier, ds)
                 continue
-            ds = process_dataset(ds, self._grid_mapping, config_ds)
+            ds = self.process_dataset(ds, config_ds)
             if isinstance(ds, xr.Dataset):
                 self.notify(
                     GeneratorState(
-                        config_ds["identifier"],
-                        message=f"Write dataset {config_ds['identifier']}.",
+                        identifier,
+                        message=f"Write dataset {identifier!r}.",
                     )
                 )
             else:
-                self.notify_error(config_ds["identifier"], ds)
+                self.notify_error(identifier, ds)
                 continue
-            ds = write_dataset(ds, self.stores, config_ds)
+            ds = self.write_dataset(ds, config_ds)
             if isinstance(ds, xr.Dataset):
                 self.notify(
                     GeneratorState(
-                        config_ds["identifier"],
+                        identifier,
                         status=GeneratorStatus.stopped,
-                        message=f"Finished dataset {config_ds['identifier']}.",
+                        message=f"Dataset {identifier!r} finished.",
                     )
                 )
             else:
-                self.notify_error(config_ds["identifier"], ds)
+                store = getattr(self.stores, NAME_WRITE_STORE)
+                format_id = config_ds.get("format_id", "zarr")
+                data_id = (
+                    f"{config_ds['identifier']}.{MAP_FORMAT_ID_FILE_EXT[format_id]}"
+                )
+                store.has_data(data_id) and store.delete_data(data_id)
+                self.notify_error(identifier, ds)
 
+    @safe_execute()
+    def open_dataset(self, config: dict) -> xr.Dataset | Exception:
+        if "data_id" in config:
+            return self.open_single_dataset(config)
+        else:
+            dss = []
+            for config_var in config["variables"]:
+                ds = self.open_single_dataset(config_var)
+                if len(ds.data_vars) > 1:
+                    name_dict = {
+                        var: f"{config_var["identifier"]}_{var}"
+                        for var in ds.data_vars.keys()
+                    }
+                else:
+                    name_dict = {
+                        var: f"{config_var["identifier"]}"
+                        for var in ds.data_vars.keys()
+                    }
+                dss.append(ds.rename_vars(name_dict=name_dict))
+            merge_params = config.get("merge_params", {})
+            if "join" not in merge_params:
+                merge_params["join"] = "exact"
+            if "combine_attrs" not in merge_params:
+                merge_params["combine_attrs"] = "drop_conflicts"
+            ds = xr.merge(dss, **merge_params)
+        return clean_dataset(ds)
 
-def safe_execute():
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                return e
-
-        return wrapper
-
-    return decorator
-
-
-@safe_execute()
-def open_dataset(stores: DataStores, config: dict) -> xr.Dataset | Exception:
-    store = getattr(stores, config["store"])
-    open_params = config.get("open_params", {})
-    return store.open_data(config["data_id"], **open_params)
-
-
-@safe_execute()
-def process_dataset(
-    ds: xr.Dataset, grid_mappings: GridMappings | None, config: dict
-) -> xr.Dataset | Exception:
-    # custom processing
-    if "custom_processing" in config:
-        module = importlib.import_module(config["custom_processing"]["module_path"])
-        function = getattr(module, config["custom_processing"]["function_name"])
-        ds = function(ds)
-
-    # if grid mapping is given, resample the dataset
-    if "grid_mapping" in config:
-        target_gm = getattr(grid_mappings, config["grid_mapping"])
-        source_gm = GridMapping.from_dataset(ds)
-        transformer = pyproj.Transformer.from_crs(
-            target_gm.crs, source_gm.crs, always_xy=True
-        )
-        bbox = transformer.transform_bounds(*target_gm.xy_bbox, densify_pts=21)
-        ds = clip_dataset_by_geometry(ds, geometry=bbox)
-        ds = resample_in_space(ds, target_gm=target_gm, encode_cf=True)
-    return ds
-
-
-@safe_execute()
-def write_dataset(
-    ds: xr.Dataset, stores: DataStores, config: dict
-) -> xr.Dataset | Exception:
-    store = getattr(stores, NAME_WRITE_STORE)
-    format_id = config.get("format_id", "zarr")
-    if format_id == "netcdf":
-        ds = prepare_dataset_for_netcdf(ds)
-    data_id = f"{config['identifier']}.{MAP_FORMAT_ID_FILE_EXT[format_id]}"
-    store.write_data(ds, data_id, replace=True)
-    return ds
-
-
-def prepare_dataset_for_netcdf(ds: xr.Dataset) -> xr.Dataset:
-    attrs = ds.attrs
-    for key in attrs:
+    def open_single_dataset(self, config: dict) -> xr.Dataset | Exception:
+        store = getattr(self.stores, config["store"])
+        open_params = copy.deepcopy(config.get("open_params", {}))
+        lat, lon = open_params.pop("point", [np.nan, np.nan])
+        schema = store.get_open_data_params_schema(data_id=config["data_id"])
         if (
-            isinstance(attrs[key], list)
-            or isinstance(attrs[key], tuple)
-            or isinstance(attrs[key], dict)
+            ~np.isnan(lat)
+            and ~np.isnan(lon)
+            and "bbox" in schema.properties
+            and ["spatial_res"] in open_params
+            and "spatial_res" in schema.properties
         ):
-            attrs[key] = str(attrs[key])
-    ds = ds.assign_attrs(attrs)
-    return ds
+            lat, lon = open_params.pop("point")
+            open_params["bbox"] = [
+                lon - 2 * open_params["spatial_res"],
+                lat - 2 * open_params["spatial_res"],
+                lon + 2 * open_params["spatial_res"],
+                lat + 2 * open_params["spatial_res"],
+            ]
+
+        if hasattr(store, "cache_store"):
+            try:
+                ds = store.cache_store.open_data(config["data_id"], **open_params)
+            except Exception:
+                ds = store.open_data(config["data_id"], **open_params)
+        else:
+            ds = store.open_data(config["data_id"], **open_params)
+
+        # custom processing
+        if "custom_processing" in config:
+            module = importlib.import_module(config["custom_processing"]["module_path"])
+            function = getattr(module, config["custom_processing"]["function_name"])
+            ds = function(ds)
+
+        return clean_dataset(ds)
+
+    @safe_execute()
+    def process_dataset(self, ds: xr.Dataset, config: dict) -> xr.Dataset | Exception:
+        # if grid mapping is given, resample the dataset
+        if "grid_mapping" in config:
+            if hasattr(self._grid_mappings, config["grid_mapping"]):
+                target_gm = getattr(self._grid_mappings, config["grid_mapping"])
+            else:
+                config_ref = self.config.datasets[config["grid_mapping"]]
+                data_id = get_data_id(config_ref)
+                ds_ref = getattr(self.stores, "storage").open_data(data_id)
+                target_gm = GridMapping.from_dataset(ds_ref)
+                for var_name, data_array in ds.items():
+                    if np.issubdtype(data_array.dtype, np.number):
+                        ds[var_name] = data_array.astype(target_gm.x_coords.dtype)
+            source_gm = GridMapping.from_dataset(ds)
+            transformer = pyproj.Transformer.from_crs(
+                target_gm.crs, source_gm.crs, always_xy=True
+            )
+            bbox = transformer.transform_bounds(*target_gm.xy_bbox, densify_pts=21)
+            bbox = [
+                bbox[0] - 2 * source_gm.x_res,
+                bbox[1] - 2 * source_gm.y_res,
+                bbox[2] + 2 * source_gm.x_res,
+                bbox[3] + 2 * source_gm.y_res,
+            ]
+
+            ds = clip_dataset_by_geometry(ds, geometry=bbox)
+            ds = resample_in_space(ds, target_gm=target_gm, encode_cf=True)
+            # this is needed since resample in space returns one chunk along the time
+            # axis; this part can be removed once https://github.com/xcube-dev/xcube/issues/1124
+            # is resolved.
+            if "time" in ds.coords:
+                ds = chunk_dataset(
+                    ds, dict(time=1), format_name=config.get("format_id", "zarr")
+                )
+
+        # if "point" in open_params, timeseries is requested
+        open_params = config.get("open_params", {})
+        if "point" in open_params:
+            ds = ds.interp(
+                lat=open_params["point"][0],
+                lon=open_params["point"][1],
+                method="linear",
+            )
+
+        return ds
+
+    @safe_execute()
+    def write_dataset(self, ds: xr.Dataset, config: dict) -> xr.Dataset | Exception:
+        store = getattr(self.stores, NAME_WRITE_STORE)
+        format_id = config.get("format_id", "zarr")
+        if format_id == "netcdf":
+            ds = prepare_dataset_for_netcdf(ds)
+        data_id = f"{config['identifier']}.{MAP_FORMAT_ID_FILE_EXT[format_id]}"
+        ds = clean_dataset(ds)
+        store.write_data(ds, data_id, replace=True)
+        return ds
