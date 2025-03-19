@@ -7,6 +7,8 @@ copyright: Copyright &copy; 2025 Brockmann Consult
 nav:
   - Overview: index.md
   - Getting Started: start.md
+  - Configuration Guide: config.md
+  - API Reference: api.md
   - About: about.md
 
 theme:

@@ -55,7 +55,7 @@ SCHEMA_OPEN_PARAMS = JsonObjectSchema(
     title="Open data parameters", additional_properties=True
 )
 SCHEMA_XR_MERGE_PARAMS = JsonObjectSchema(
-    title="`xr.merge parameters`",
+    title="`xarry.merge parameters`",
     description=(
         "See documentation https://docs.xarray.dev/en/stable/generated/xarray.merge.html"
     ),
@@ -67,7 +67,7 @@ SCHEMA_XR_MERGE_PARAMS = JsonObjectSchema(
     ),
     additional_properties=True,
 )
-SCHEMA_FORTMAT_ID = JsonStringSchema(
+SCHEMA_FORMAT_ID = JsonStringSchema(
     title="Desired format of the saved datacube.",
     default="zarr",
     enum=["netcdf", "zarr"],
@@ -100,7 +100,7 @@ SCHEMA_MULTI_DATASET = JsonObjectSchema(
             items=SCHEMA_DATA_VARIABLE,
         ),
         grid_mapping=SCHEMA_GRIDMAPPING_ID,
-        format_id=SCHEMA_FORTMAT_ID,
+        format_id=SCHEMA_FORMAT_ID,
         xr_merge_params=SCHEMA_XR_MERGE_PARAMS,
     ),
     required=["identifier", "variables"],
@@ -113,8 +113,7 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
         grid_mapping=SCHEMA_GRIDMAPPING_ID,
         data_id=SCHEMA_DATA_ID,
         open_params=SCHEMA_OPEN_PARAMS,
-        format_id=SCHEMA_FORTMAT_ID,
-        xr_merge_params=SCHEMA_XR_MERGE_PARAMS,
+        format_id=SCHEMA_FORMAT_ID,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
     ),
     required=["identifier", "store", "data_id"],

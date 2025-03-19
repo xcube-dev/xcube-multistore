@@ -21,23 +21,23 @@ to a consistent grid or a catalog of separate datasets.
 
 ## Overview
 
-The Multi-Source Data Store is configure via a yml file. One example can be seen [heer](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml).
-More documentation on the creating a config file is given in (add section). The 
-Multi-Source Data Store can then be started by a single line of code, presented below.
+The Multi-Source Data Store is configured via a YAML file. You can find an example 
+configuration in [examples/config.yml](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml).
 
-The Multi-Source Data Store is configured via a YAML file. An example configuration 
-can be found [here](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml).
-More detailed documentation on creating a config file is available in the (add section).
+For more detailed guidance on creating a configuration file, please refer to the 
+[Configuration Guide](https://xcube-dev.github.io/xcube-multistore/config/).
 
-Once the configuration is set up, the Multi-Source Data Store can be started with a 
-single line of code, as shown below.
+Once the configuration file is ready, the Multi-Source Data Store can be started 
+with a single line of code, as shown below:
 
 
 ```python
-from xcube_multistore import MultiSourceDataStore
+from xcube_multistore.multistore import MultiSourceDataStore
 
 msds = MultiSourceDataStore("config.yml")
 ```
+
+For further examples please view the [examples folder](https://github.com/xcube-dev/xcube-multistore/blob/main/examples).
 
 ## Features 
 

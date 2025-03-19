@@ -4,7 +4,7 @@ The following described objects can be imported through the `xcube_multistore` p
 
 ## Class `MultiSourceDataStore`
 
-::: xcube_multistore.MultiSourceDataStore
+::: xcube_multistore.multistore.MultiSourceDataStore
 
 The following described objects can be imported through the `xcube_multistore.utils` 
 module.

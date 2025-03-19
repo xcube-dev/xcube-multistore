@@ -244,7 +244,7 @@ class MultiSourceDataStore:
                         for var in ds.data_vars.keys()
                     }
                 dss.append(ds.rename_vars(name_dict=name_dict))
-            merge_params = config.get("merge_params", {})
+            merge_params = config.get("xr_merge_params", {})
             if "join" not in merge_params:
                 merge_params["join"] = "exact"
             if "combine_attrs" not in merge_params:
