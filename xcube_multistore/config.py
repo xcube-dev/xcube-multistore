@@ -208,7 +208,7 @@ SCHEMA_DASK_SCHEDULER = JsonStringSchema(
 SCHEMA_GDAL_HTTP_PARAMS = JsonObjectSchema(
     properties=dict(
         gdal_http_max_retry=JsonNumberSchema(
-            title="Maximal retry of a http request in GDAL.",
+            title="Maximal number of retries of a http request in GDAL.",
             description=(
                 "This is used when opening a tif file with `rioxarray.open_rasterio` "
                 "from a remote source."
