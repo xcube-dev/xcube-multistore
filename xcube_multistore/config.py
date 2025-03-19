@@ -210,7 +210,8 @@ SCHEMA_GDAL_HTTP_PARAMS = JsonObjectSchema(
         gdal_http_max_retry=JsonNumberSchema(
             title="Maximal retry of a http request in GDAL.",
             description=(
-                "This is used when opening a tif file with `rioxarray.open_rasterio`."
+                "This is used when opening a tif file with `rioxarray.open_rasterio` "
+                "from a remote source."
             ),
             default=10,
         ),
