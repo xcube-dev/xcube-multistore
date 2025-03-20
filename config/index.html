@@ -347,21 +347,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Entire configuration schema">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties:
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -717,21 +702,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Entire configuration schema">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties:
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1038,16 +1008,14 @@ file and show you how to create a valid configuration.</p>
 <a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples">examples folder</a>.</p>
 <h2 id="entire-configuration-schema">Entire configuration schema</h2>
 <p>The entire configuration schema consists of the following sections: </p>
-<h3 id="properties">Properties:</h3>
-<ul>
-<li><strong>datasets</strong> (Required): list of <a href="#dataset-object">dataset objects</a> objects.</li>
-<li><strong>preload_datasets</strong> (Optional): list of <a href="#preload-dataset-object">preload dataset objects</a>.</li>
-<li><strong>data_stores</strong> (Required): list of <a href="#store-object">store objects</a>.<br />
+<p><strong>Properties:</strong>
+- <strong>datasets</strong> (Required): list of <a href="#dataset-object">dataset objects</a> objects.
+- <strong>preload_datasets</strong> (Optional): list of <a href="#preload-dataset-object">preload dataset objects</a>.
+- <strong>data_stores</strong> (Required): list of <a href="#store-object">store objects</a>.<br />
   A single data store with identifier <code>storage</code> is required for 
-  writing the final data cubes.</li>
-<li><strong>grid_mappings</strong> (Optional): list of <a href="#grid-mapping-object">grid mapping objects</a>.</li>
-<li><strong>general</strong> (Optional): following the <a href="#general-object">general object</a> mapping.</li>
-</ul>
+  writing the final data cubes.
+- <strong>grid_mappings</strong> (Optional): list of <a href="#grid-mapping-object">grid mapping objects</a>.
+- <strong>general</strong> (Optional): following the <a href="#general-object">general object</a> mapping.</p>
 <h2 id="object-parameters">Object parameters</h2>
 <p>An object in this configuration schema can refer to a dataset, data store, or grid 
 mapping. </p>
@@ -1196,11 +1164,9 @@ only non-preloaded datasets will be preloaded.  </p>
 <h3 id="gdal_http_params">gdal_http_params</h3>
 <p>GDAL http environment variables which are used when opening a tif file with 
 <code>rioxarray.open_rasterio</code>, which uses GDAL driver under the hood, from a remote source.  </p>
-<p><strong>Properties</strong>:
-- <strong>gdal_http_max_retry</strong>: Maximal number of retries of an HTTP request in GDAL. 
-  <strong>Default:</strong> <code>10</code> 
-- <strong>gdal_http_retry_delay</strong> :Delay in seconds between retries of an HTTP request in GDAL. 
-  <strong>Default:</strong> <code>5</code> </p>
+<p><strong>Properties</strong>:<br />
+- <strong>gdal_http_max_retry</strong>: Maximal number of retries of an HTTP request in GDAL. Defaults set to <code>10</code>.<br />
+- <strong>gdal_http_retry_delay</strong>: Delay in seconds between retries of an HTTP request in GDAL. Defaults set to <code>5</code>.   </p>
 
 
 
