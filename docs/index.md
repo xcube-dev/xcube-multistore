@@ -21,8 +21,8 @@ to user-defined specifications.
 The workflow includes the following steps:
 
 1. Data access through xcube data stores
-2. Data harmonization
-3. Data fusion (if required)
+2. Data harmonization (e.g. subset, resample, reproject a dataset)
+3. Optional data fusion (e.g. combining multiple data sources into one data cube)
 
 This process results in either a single, unified data cube with all datasets aligned
 to a consistent grid or a catalog of separate datasets.

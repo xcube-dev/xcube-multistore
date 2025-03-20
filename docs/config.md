@@ -23,7 +23,7 @@ Additionally, you can explore example configurations in the
 
 The entire configuration schema consists of the following sections: 
 
-### Properties:
+**Properties:**
 - **datasets** (Required): list of [dataset objects](#dataset-object) objects.
 - **preload_datasets** (Optional): list of [preload dataset objects](#preload-dataset-object).
 - **data_stores** (Required): list of [store objects](#store-object).  
@@ -230,11 +230,9 @@ Scheduler mode put into `dask.config.set(scheduler=<scheduler_mode>)`
 GDAL http environment variables which are used when opening a tif file with 
 `rioxarray.open_rasterio`, which uses GDAL driver under the hood, from a remote source.  
 
-**Properties**:
-- **gdal_http_max_retry**: Maximal number of retries of an HTTP request in GDAL. 
-  **Default:** `10` 
-- **gdal_http_retry_delay** :Delay in seconds between retries of an HTTP request in GDAL. 
-  **Default:** `5` 
+**Properties**:  
+- **gdal_http_max_retry**: Maximal number of retries of an HTTP request in GDAL. Defaults set to `10`.  
+- **gdal_http_retry_delay**: Delay in seconds between retries of an HTTP request in GDAL. Defaults set to `5`.   
 
 
 
