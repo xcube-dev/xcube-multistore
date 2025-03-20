@@ -81,7 +81,7 @@ SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
             title="Name of function in the python module.",
             description=(
                 "Any function is allowed with takes a `xarray.Dataset` as an "
-                "input and returns a modified xarray.Dataset"
+                "input and returns a modified xarray.Dataset."
             ),
             min_length=1,
         ),

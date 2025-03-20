@@ -57,7 +57,7 @@ For further examples please view the [examples folder](https://github.com/xcube-
 
 > The following features will be implemented in the future:
 
-* some auxiliary functionalities which shall help to setup a config yml file. 
+* some auxiliary functionalities which shall help to setup a config YAML file. 
 * interpolate along the time axis 
 
 ### License
