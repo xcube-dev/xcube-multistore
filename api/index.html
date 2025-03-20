@@ -920,7 +920,10 @@ reference to a YAML configuration file.</p>
 <span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages access to multiple data sources and their configurations for generating</span>
 <span class="sd">    data cubes.</span>
 
@@ -1190,6 +1193,9 @@ reference to a YAML configuration file.</p>
 
             <span class="n">ds</span> <span class="o">=</span> <span class="n">clip_dataset_by_geometry</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">bbox</span><span class="p">)</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">resample_in_space</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">target_gm</span><span class="o">=</span><span class="n">target_gm</span><span class="p">,</span> <span class="n">encode_cf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># this is needed since resample in space returns one chunk along the time</span>
+            <span class="c1"># axis; this part can be removed once https://github.com/xcube-dev/xcube/issues/1124</span>
+            <span class="c1"># is resolved.</span>
             <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">chunk_dataset</span><span class="p">(</span>
                     <span class="n">ds</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">format_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;format_id&quot;</span><span class="p">,</span> <span class="s2">&quot;zarr&quot;</span><span class="p">)</span>
