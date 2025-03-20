@@ -37,11 +37,30 @@ from .config import MultiSourceConfig
 from .constants import LOG, MAP_FORMAT_ID_FILE_EXT, NAME_WRITE_STORE
 from .gridmappings import GridMappings
 from .stores import DataStores
-from .utils import clean_dataset, get_data_id, prepare_dataset_for_netcdf, safe_execute
+from .utils import (
+    _get_data_id,
+    _safe_execute,
+    clean_dataset,
+    prepare_dataset_for_netcdf,
+)
 from .visualization import GeneratorDisplay, GeneratorState, GeneratorStatus
 
 
 class MultiSourceDataStore:
+    """Manages access to multiple data sources and their configurations for generating
+    data cubes.
+
+    This class utilizes xcube data store plugins for data access, supports data
+    harmonization, and enables visualization of data cube generation.
+
+    Args:
+        config: Configuration settings, provided as a dictionary or a string
+            reference to a YAML configuration file.
+
+    Notes:
+        Detailed instructions on setting up the configuration can be found in the
+        [Configuration Guide](https://xcube-dev.github.io/xcube-multistore/config/).
+    """
 
     def __init__(self, config: str | dict[str, Any]):
         config = MultiSourceConfig(config)
@@ -60,20 +79,25 @@ class MultiSourceDataStore:
 
         # preload data, which is not preloaded as default
         if config.preload_datasets is not None:
-            self.preload_datasets()
+            self._preload_datasets()
 
         # generate data cubes
         if self.config.general["visualize"]:
             self._display = GeneratorDisplay.create(list(self._states.values()))
             self._display.display_title("Cube Generation")
             self._display.show()
-        self.generate_cubes()
+        self._generate_cubes()
 
     @classmethod
     def get_config_schema(cls) -> JsonObjectSchema:
+        """Retrieves the configuration schema for the multi-source data store.
+
+        Returns:
+            A schema object defining the expected structure of the configuration.
+        """
         return MultiSourceConfig.get_schema()
 
-    def notify(self, event: GeneratorState):
+    def _notify(self, event: GeneratorState):
         state = self._states[event.identifier]
         state.update(event)
         if self.config.general["visualize"]:
@@ -84,8 +108,8 @@ class MultiSourceDataStore:
             else:
                 LOG.info(event.message)
 
-    def notify_error(self, identifier: str, exception: Any):
-        self.notify(
+    def _notify_error(self, identifier: str, exception: Any):
+        self._notify(
             GeneratorState(
                 identifier,
                 status=GeneratorStatus.failed,
@@ -93,7 +117,7 @@ class MultiSourceDataStore:
             )
         )
 
-    def preload_datasets(self):
+    def _preload_datasets(self):
         for config_preload in self.config.preload_datasets:
             store = getattr(self.stores, config_preload["store"])
 
@@ -142,11 +166,11 @@ class MultiSourceDataStore:
                     preload_params["silent"] = self.config.general["visualize"]
                 _ = store.preload_data(*data_ids, **preload_params)
 
-    def generate_cubes(self):
+    def _generate_cubes(self):
         for identifier, config_ds in self.config.datasets.items():
-            data_id = get_data_id(config_ds)
+            data_id = _get_data_id(config_ds)
             if getattr(self.stores, "storage").has_data(data_id):
-                self.notify(
+                self._notify(
                     GeneratorState(
                         identifier,
                         status=GeneratorStatus.stopped,
@@ -154,38 +178,38 @@ class MultiSourceDataStore:
                     )
                 )
                 continue
-            self.notify(
+            self._notify(
                 GeneratorState(
                     identifier,
                     status=GeneratorStatus.started,
                     message=f"Open dataset {identifier!r}.",
                 )
             )
-            ds = self.open_dataset(config_ds)
+            ds = self._open_dataset(config_ds)
             if isinstance(ds, xr.Dataset):
-                self.notify(
+                self._notify(
                     GeneratorState(
                         identifier,
                         message=f"Processing dataset {identifier!r}.",
                     )
                 )
             else:
-                self.notify_error(identifier, ds)
+                self._notify_error(identifier, ds)
                 continue
-            ds = self.process_dataset(ds, config_ds)
+            ds = self._process_dataset(ds, config_ds)
             if isinstance(ds, xr.Dataset):
-                self.notify(
+                self._notify(
                     GeneratorState(
                         identifier,
                         message=f"Write dataset {identifier!r}.",
                     )
                 )
             else:
-                self.notify_error(identifier, ds)
+                self._notify_error(identifier, ds)
                 continue
-            ds = self.write_dataset(ds, config_ds)
+            ds = self._write_dataset(ds, config_ds)
             if isinstance(ds, xr.Dataset):
-                self.notify(
+                self._notify(
                     GeneratorState(
                         identifier,
                         status=GeneratorStatus.stopped,
@@ -199,16 +223,16 @@ class MultiSourceDataStore:
                     f"{config_ds['identifier']}.{MAP_FORMAT_ID_FILE_EXT[format_id]}"
                 )
                 store.has_data(data_id) and store.delete_data(data_id)
-                self.notify_error(identifier, ds)
+                self._notify_error(identifier, ds)
 
-    @safe_execute()
-    def open_dataset(self, config: dict) -> xr.Dataset | Exception:
+    @_safe_execute()
+    def _open_dataset(self, config: dict) -> xr.Dataset | Exception:
         if "data_id" in config:
-            return self.open_single_dataset(config)
+            return self._open_single_dataset(config)
         else:
             dss = []
             for config_var in config["variables"]:
-                ds = self.open_single_dataset(config_var)
+                ds = self._open_single_dataset(config_var)
                 if len(ds.data_vars) > 1:
                     name_dict = {
                         var: f"{config_var["identifier"]}_{var}"
@@ -220,7 +244,7 @@ class MultiSourceDataStore:
                         for var in ds.data_vars.keys()
                     }
                 dss.append(ds.rename_vars(name_dict=name_dict))
-            merge_params = config.get("merge_params", {})
+            merge_params = config.get("xr_merge_params", {})
             if "join" not in merge_params:
                 merge_params["join"] = "exact"
             if "combine_attrs" not in merge_params:
@@ -228,7 +252,7 @@ class MultiSourceDataStore:
             ds = xr.merge(dss, **merge_params)
         return clean_dataset(ds)
 
-    def open_single_dataset(self, config: dict) -> xr.Dataset | Exception:
+    def _open_single_dataset(self, config: dict) -> xr.Dataset | Exception:
         store = getattr(self.stores, config["store"])
         open_params = copy.deepcopy(config.get("open_params", {}))
         lat, lon = open_params.pop("point", [np.nan, np.nan])
@@ -264,15 +288,15 @@ class MultiSourceDataStore:
 
         return clean_dataset(ds)
 
-    @safe_execute()
-    def process_dataset(self, ds: xr.Dataset, config: dict) -> xr.Dataset | Exception:
+    @_safe_execute()
+    def _process_dataset(self, ds: xr.Dataset, config: dict) -> xr.Dataset | Exception:
         # if grid mapping is given, resample the dataset
         if "grid_mapping" in config:
             if hasattr(self._grid_mappings, config["grid_mapping"]):
                 target_gm = getattr(self._grid_mappings, config["grid_mapping"])
             else:
                 config_ref = self.config.datasets[config["grid_mapping"]]
-                data_id = get_data_id(config_ref)
+                data_id = _get_data_id(config_ref)
                 ds_ref = getattr(self.stores, "storage").open_data(data_id)
                 target_gm = GridMapping.from_dataset(ds_ref)
                 for var_name, data_array in ds.items():
@@ -311,8 +335,8 @@ class MultiSourceDataStore:
 
         return ds
 
-    @safe_execute()
-    def write_dataset(self, ds: xr.Dataset, config: dict) -> xr.Dataset | Exception:
+    @_safe_execute()
+    def _write_dataset(self, ds: xr.Dataset, config: dict) -> xr.Dataset | Exception:
         store = getattr(self.stores, NAME_WRITE_STORE)
         format_id = config.get("format_id", "zarr")
         if format_id == "netcdf":

@@ -4,31 +4,62 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xcube_multistore"
-dynamic = ["version"]
+dynamic = ["version", "readme"]
 authors = [
   {name = "Konstantin Ntokas", email = "konstantin.ntokas@brockmann-consult.de"}
 ]
 description = """\
-  xcube multi source data store for combining all datastores
-  availabe in the xcube ecosystem.\
+  xcube Multi-Source Data Store: Seamlessly Integrating and Harmonizing
+  Data from Multiple Sources \
   """
 keywords = [
-  "analysis ready data", "data science", "datacube", "xarray", "zarr", "xcube"
+    "analysis ready data",
+    "data science",
+    "datacube",
+    "xarray",
+    "zarr",
+    "xcube"
 ]
-readme = {file = "README.md", content-type = "text/markdown"}
+
 license = {text = "MIT"}
 requires-python = ">=3.10"
 dependencies = [
+    "dask",
+    "fsspec",
+    "numpy",
+    "pyproj",
+    "tabulate",
+    "xarray",
     "xcube>=1.8.1",
     "xcube-cci>=0.11.2",
     "xcube-cds>=0.9.3",
     "xcube-clms>=0.2.2",
     "xcube-stac>=0.1.0",
     "xcube-zenodo>=0.1.1",
+    "yaml",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development",
+  "Topic :: Scientific/Engineering",
+  "Typing :: Typed",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX",
+  "Operating System :: Unix",
+  "Operating System :: MacOS",
 ]
 
 [tool.setuptools.dynamic]
 version = {attr = "xcube_multistore.__version__"}
+readme = {file = "README.md", content-type = "text/markdown"}
 
 [tool.setuptools.packages.find]
 exclude = [
@@ -37,15 +68,43 @@ exclude = [
   "doc*"
 ]
 
+[tool.flake8]
+max-line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+# There is a problem with ruff when linting imports
+exclude = ["**/*.ipynb"]
+
 [project.optional-dependencies]
 dev = [
+  # Build tools
+  "build",
+  "hatch",
+  "twine",
+  # Code Style / QA
   "black",
-  "flake8",
+  "isort",
+  "ruff",
+  # Testing
   "pytest",
   "pytest-cov",
+  # Notebooks / Visualisation
+  "jupyterlab",
+  "matplotlib",
+]
+doc = [
+  "mkdocs",
+  "mkdocs-autorefs",
+  "mkdocs-material",
+  "mkdocstrings",
+  "mkdocstrings-python"
 ]
 
 [project.urls]
+Documentation = "https://xcube-dev.github.io/xcube-multistore"
 Repository = "https://github.com/xcube-dev/xcube-multistore"
 Issues = "https://github.com/xcube-dev/xcube-multistore/issues"
 Changelog = "https://github.com/xcube-dev/xcube-multistore/blob/main/CHANGES.md"

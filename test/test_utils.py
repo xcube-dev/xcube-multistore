@@ -28,8 +28,8 @@ import xarray as xr
 from xcube_multistore.utils import (
     get_bbox,
     get_utm_zone,
-    normalize_grid_mapping,
-    safe_execute,
+    _normalize_grid_mapping,
+    _safe_execute,
 )
 
 
@@ -37,7 +37,7 @@ class TestSafeExecute(unittest.TestCase):
 
     def test_safe_execute_keyboard_interrupt(self):
 
-        @safe_execute()
+        @_safe_execute()
         def test_function():
             raise KeyboardInterrupt
 
@@ -107,5 +107,5 @@ class TestNormalizeGridMapping(unittest.TestCase):
             },
             coords={"x": np.arange(4), "y": np.arange(4)},
         )
-        normalized_ds = normalize_grid_mapping(ds)
+        normalized_ds = _normalize_grid_mapping(ds)
         xr.testing.assert_identical(ds, normalized_ds)

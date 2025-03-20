@@ -28,7 +28,7 @@ import fsspec
 import yaml
 from xcube.util.jsonschema import JsonArraySchema, JsonComplexSchema, JsonObjectSchema
 
-from xcube_multistore.config import MultiSourceConfig, is_jupyter_notebook
+from xcube_multistore.config import MultiSourceConfig, _is_jupyter_notebook
 
 from .sample_data import get_config_dict4
 
@@ -122,4 +122,4 @@ class MultiSourceConfigTest(unittest.TestCase):
 
     def test_is_jupyter_notebook(self):
         with patch.dict(sys.modules, {"IPython": None}):
-            self.assertFalse(is_jupyter_notebook())
+            self.assertFalse(_is_jupyter_notebook())

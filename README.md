@@ -1,15 +1,19 @@
-# Multi-Source Data Store 
 
-This repository aims to delevop a Multi-Source Data Store to formalize the fusion 
-of data from various sources into a harmonized data model. This approach will not 
-only streamline the integration process but also ensure its **transparency** and 
-**reproducibility** through well-defined configurations.
+<p align="right">
+  <img src="docs/assets/eo-lincs.png" alt="Logo" height="100">
+  <br>
+  <span style="font-weight: bold; font-size: 10px;">EO-LINCS</span>
+</p>
 
-It contains the following steps:
+[![Build Status](https://github.com/xcube-dev/xcube-multistore/actions/workflows/unittest-workflow.yml/badge.svg?branch=main)](https://github.com/xcube-dev/xcube-multistore/actions)
+[![codecov](https://codecov.io/gh/xcube-dev/xcube-multistore/branch/main/graph/badge.svg)](https://codecov.io/gh/xcube-dev/xcube-multistore)
+[![Documentation Status](https://img.shields.io/badge/docs-latest-blue.svg)](https://xcube-dev.github.io/xcube-multistore/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-1. Data access through xcube data stores
-2. Data harmonization
-3. Data fusion if required 
 
-This can result in either one unified data cube with all datasets on a consistent grid
-or a catalog of separate datasets. 
+# xcube-multistore
+
+xcube Multi-Source Data Store: Seamlessly Integrating and Harmonizing Data from 
+Multiple Sources.
+
+Find out more in the [xcube Multi-Source Data Store Documentation](https://xcube-dev.github.io/xcube-multistore/).

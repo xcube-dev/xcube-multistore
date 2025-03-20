@@ -37,16 +37,16 @@ from xcube.util.jsonschema import (
 )
 
 from .constants import NAME_WRITE_STORE
-from .utils import remove_compressed_extension
+from .utils import _remove_compressed_extension
 
 SCHEMA_IDENTIFIER = JsonStringSchema(title="Identifier for the object", min_length=1)
 
 # define schema for dataset
 SCHEMA_STORE_IDENTIFIER = JsonStringSchema(
-    title="Store used to open the dataset", min_length=1
+    title="Store identifier used to open the dataset", min_length=1
 )
 SCHEMA_GRIDMAPPING_ID = JsonStringSchema(
-    title="Final grid mapping for the dataset", min_length=1
+    title="Grid mapping identifier for the dataset", min_length=1
 )
 SCHEMA_DATA_ID = JsonStringSchema(
     title="Data ID of the dataset in the assigned data store", min_length=1
@@ -55,7 +55,7 @@ SCHEMA_OPEN_PARAMS = JsonObjectSchema(
     title="Open data parameters", additional_properties=True
 )
 SCHEMA_XR_MERGE_PARAMS = JsonObjectSchema(
-    title="`xr.merge parameters`",
+    title="`xarry.merge parameters`",
     description=(
         "See documentation https://docs.xarray.dev/en/stable/generated/xarray.merge.html"
     ),
@@ -67,15 +67,24 @@ SCHEMA_XR_MERGE_PARAMS = JsonObjectSchema(
     ),
     additional_properties=True,
 )
-SCHEMA_FORTMAT_ID = JsonStringSchema(
+SCHEMA_FORMAT_ID = JsonStringSchema(
     title="Desired format of the saved datacube.",
     default="zarr",
     enum=["netcdf", "zarr"],
 )
 SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
     properties=dict(
-        module_path=JsonStringSchema(min_length=1),
-        function_name=JsonStringSchema(min_length=1),
+        module_path=JsonStringSchema(
+            title="Path to python module relative to config file.", min_length=1
+        ),
+        function_name=JsonStringSchema(
+            title="Name of function in the python module.",
+            description=(
+                "Any function is allowed with takes a `xarray.Dataset` as an "
+                "input and returns a modified xarray.Dataset."
+            ),
+            min_length=1,
+        ),
     ),
     required=["module_path", "function_name"],
     additional_properties=False,
@@ -100,7 +109,7 @@ SCHEMA_MULTI_DATASET = JsonObjectSchema(
             items=SCHEMA_DATA_VARIABLE,
         ),
         grid_mapping=SCHEMA_GRIDMAPPING_ID,
-        format_id=SCHEMA_FORTMAT_ID,
+        format_id=SCHEMA_FORMAT_ID,
         xr_merge_params=SCHEMA_XR_MERGE_PARAMS,
     ),
     required=["identifier", "variables"],
@@ -113,8 +122,7 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
         grid_mapping=SCHEMA_GRIDMAPPING_ID,
         data_id=SCHEMA_DATA_ID,
         open_params=SCHEMA_OPEN_PARAMS,
-        format_id=SCHEMA_FORTMAT_ID,
-        xr_merge_params=SCHEMA_XR_MERGE_PARAMS,
+        format_id=SCHEMA_FORMAT_ID,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
     ),
     required=["identifier", "store", "data_id"],
@@ -123,9 +131,36 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
 SCHEMA_DATASET = JsonComplexSchema(one_of=[SCHEMA_SINGLE_DATASET, SCHEMA_MULTI_DATASET])
 
 # define schema for data store
-SCHEMA_STORE_ID = JsonStringSchema(title="Store identifier", default="EPSG:4326")
+SCHEMA_STORE_ID = JsonStringSchema(
+    title="Store identifier",
+    enum=[
+        "cds",
+        "clms",
+        "cmems",
+        "esa-cci",
+        "esa-cci-kc",
+        "esa-cci-zarr",
+        "file",
+        "https",
+        "memory",
+        "s3",
+        "sentinelhub",
+        "sentinelhub-cdse",
+        "smos",
+        "stac",
+        "stac-cdse",
+        "stac-xcube",
+        "zenodo",
+    ],
+)
 SCHEMA_STORE_PARAMS = JsonObjectSchema(
-    title="STORE parameters", additional_properties=True
+    title="Store parameters",
+    description=(
+        "Store parameters can be obtained by `get_data_store_params_schema(store_id)`. "
+        "Further documentation can be found at "
+        "https://xcube.readthedocs.io/en/latest/dataaccess.html#data-store-framework."
+    ),
+    additional_properties=True,
 )
 SCHEMA_STORE = JsonObjectSchema(
     properties=dict(
@@ -150,17 +185,17 @@ SCHEMA_BBOX = JsonArraySchema(
     title="Bounding box [west, south, east, north]",
 )
 SCHEMA_TILE_SIZE = JsonComplexSchema(
-    title="Spatial size of chunk in grid mapping",
+    title="Spatial chunk size in grid mapping.",
     one_of=[
         JsonArraySchema(
             items=(
-                JsonNumberSchema(minimum=256, default=1024),
-                JsonNumberSchema(minimum=256, default=1024),
+                JsonNumberSchema(title="Chunk size in lat/x direction."),
+                JsonNumberSchema(title="Chunk size in lon/y direction."),
             ),
-            default=[1024, 1024],
         ),
-        JsonNumberSchema(minimum=256, default=1024),
+        JsonNumberSchema(title="Squared chunk size"),
     ],
+    default=1024,
 )
 
 SCHEMA_GRID_MAPPING = JsonObjectSchema(
@@ -263,7 +298,7 @@ class MultiSourceConfig:
 
     def __init__(self, config: str | dict[str, Any]):
         if not isinstance(config, dict):
-            config = read_yaml(config)
+            config = _read_yaml(config)
         schema = self.get_schema()
         schema.validate_instance(config)
         self.preload_datasets = config.get("preload_datasets", None)
@@ -286,7 +321,7 @@ class MultiSourceConfig:
 
     def _general_setup(self):
         if "visualize" not in self.general:
-            self.general["visualize"] = True if is_jupyter_notebook() else False
+            self.general["visualize"] = True if _is_jupyter_notebook() else False
         if "force_preload" not in self.general:
             self.general["force_preload"] = False
         if "dask_scheduler" not in self.general:
@@ -322,7 +357,7 @@ class MultiSourceConfig:
         preload_map = defaultdict(list)
         for config_preload in self.preload_datasets:
             for data_id in config_preload["data_ids"]:
-                data_id_mod = remove_compressed_extension(data_id)
+                data_id_mod = _remove_compressed_extension(data_id)
                 for identifier_ds, config_ds in self.datasets.items():
                     if "variables" in config_ds:
                         for config_da in config_ds["variables"]:
@@ -338,13 +373,13 @@ class MultiSourceConfig:
         return CONFIG_SCHEMA
 
 
-def read_yaml(config_path: str) -> dict[str, Any]:
+def _read_yaml(config_path: str) -> dict[str, Any]:
     with fsspec.open(config_path, "r") as file:
         config = yaml.safe_load(file)
     return config
 
 
-def is_jupyter_notebook():
+def _is_jupyter_notebook():
     try:
         from IPython import get_ipython
 
