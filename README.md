@@ -1,10 +1,14 @@
+<div style="text-align: right;">
+  <figure style="display: inline-flex; align-items: center;">
+    <img src="docs/assets/eo-lincs.png" alt="Logo" style="height: 100px;">
+    <figcaption style="font-weight: bold; font-size: 10px; margin-left: 10px;">EO-LINCS</figcaption>
+  </figure>
+</div>
+
 [![Build Status](https://github.com/xcube-dev/xcube-multistore/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/xcube-dev/xcube-multistore/actions)
 [![codecov](https://codecov.io/gh/xcube-dev/xcube-multistore/branch/main/graph/badge.svg)](https://codecov.io/gh/xcube-dev/xcube-multistore)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-<figure style="display: flex; justify-content: flex-end; align-items: center;">
-  <img src="docs/assets/eo-lincs.png" alt="Logo" style="height: 100px;">
-  <figcaption style="font-weight: bold;">EO-LINCS</figcaption>
-</figure>
+
 
 
 # xcube-multistore
