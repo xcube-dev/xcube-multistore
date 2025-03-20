@@ -1127,10 +1127,12 @@ datacube is required. For further information view the <a href="https://docs.xar
 the data. It allows for custom dataset manipulation, making it particularly useful 
 for handling unstructured datasets. The function must accept an <code>xarray.Dataset</code> as 
 input and return a modified <code>xarray.Dataset</code> as output.</p>
-<p><strong>Properties</strong>:<br />
-<em> </em><em>module_path</em><em>: Path to the Python module relative to the config file.<br />
-</em> <strong>function_name</strong>: Name of the function within the specified module. The function must
-  take an <code>xarray.Dataset</code> as input and return a transformed <code>xarray.Dataset</code>.  </p>
+<p><strong>Properties</strong>:  </p>
+<ul>
+<li><strong>module_path</strong>: Path to the Python module relative to the config file.  </li>
+<li><strong>function_name</strong>: Name of the function within the specified module. The function must
+  take an <code>xarray.Dataset</code> as input and return a transformed <code>xarray.Dataset</code>.  </li>
+</ul>
 <h3 id="store_id">store_id</h3>
 <p>The <strong>store identifier</strong> is used within the xcube ecosystem to specify different data 
 stores. For more information about the available data stores, refer to the 
