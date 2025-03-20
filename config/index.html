@@ -1004,18 +1004,20 @@ file and show you how to create a valid configuration.</p>
 
 <span class="n">MultiSourceDataStore</span><span class="o">.</span><span class="n">get_config_schema</span><span class="p">()</span>
 </code></pre></div>
-<p>Additionally, you can explore example configurations in the 
-<a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples">examples folder</a>.</p>
+<p>You can find an example 
+configuration in <a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml">examples/config.yml</a>.
+Additionally, you can explore more example configurations in the 
+<a href="https://github.com/xcube-dev/xcube-multistore/blob/main/examples">examples</a> folder.</p>
 <h2 id="entire-configuration-schema">Entire configuration schema</h2>
 <p>The entire configuration schema consists of the following sections: </p>
-<p><strong>Properties:</strong>
-- <strong>datasets</strong> (Required): list of <a href="#dataset-object">dataset objects</a> objects.
-- <strong>preload_datasets</strong> (Optional): list of <a href="#preload-dataset-object">preload dataset objects</a>.
-- <strong>data_stores</strong> (Required): list of <a href="#store-object">store objects</a>.<br />
-  A single data store with identifier <code>storage</code> is required for 
-  writing the final data cubes.
-- <strong>grid_mappings</strong> (Optional): list of <a href="#grid-mapping-object">grid mapping objects</a>.
-- <strong>general</strong> (Optional): following the <a href="#general-object">general object</a> mapping.</p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><strong>datasets</strong> (Required): list of <a href="#dataset-object">dataset objects</a> objects.</li>
+<li><strong>preload_datasets</strong> (Optional): list of <a href="#preload-dataset-object">preload dataset objects</a>.</li>
+<li><strong>data_stores</strong> (Required): list of <a href="#store-object">store objects</a>. A single data store with identifier <code>storage</code> is required for writing the final data cubes.</li>
+<li><strong>grid_mappings</strong> (Optional): list of <a href="#grid-mapping-object">grid mapping objects</a>.</li>
+<li><strong>general</strong> (Optional): following the <a href="#general-object">general object</a> mapping.</li>
+</ul>
 <h2 id="object-parameters">Object parameters</h2>
 <p>An object in this configuration schema can refer to a dataset, data store, or grid 
 mapping. </p>
@@ -1023,69 +1025,84 @@ mapping. </p>
 <p>Two different dataset types are available:</p>
 <h4 id="single-dataset-object">single dataset object</h4>
 <p>This configures a dataset object from a single data source.  </p>
-<p><strong>Properties</strong>:
-- <strong><a href="#identifier">identifier</a></strong>: This identifier defines the name of the final data cube.
-- <strong><a href="#store">store</a></strong>
-- <strong><a href="#grid_mapping">grid_mapping</a></strong>
-- <strong><a href="#data_id">data_id</a></strong>
-- <strong><a href="#open_params">open_params</a></strong>
-- <strong><a href="#format_id">format_id</a></strong>
-- <strong><a href="#custom_processing">custom_processing</a></strong></p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li><strong><a href="#identifier">identifier</a></strong>: This identifier defines the name of the final data cube.</li>
+<li><strong><a href="#store">store</a></strong></li>
+<li><strong><a href="#grid_mapping">grid_mapping</a></strong></li>
+<li><strong><a href="#data_id">data_id</a></strong></li>
+<li><strong><a href="#open_params">open_params</a></strong></li>
+<li><strong><a href="#format_id">format_id</a></strong></li>
+<li><strong><a href="#custom_processing">custom_processing</a></strong></li>
+</ul>
 <h4 id="multi-dataset-object">multi dataset object</h4>
 <p>This configures a datasets from multiple data sources. Each <a href="#variable-object">variable object</a> is 
 opened individually, and once all datasets are loaded, they are merged using 
 <code>xarray.merge()</code>.</p>
-<p><strong>Properties</strong>:
-- <strong><a href="#identifier">identifier</a></strong>: This identifier defines the name of the final data cube.
-- <strong><a href="#grid_mapping">grid_mapping</a></strong>
-- <strong><a href="#format_id">format_id</a></strong>
-- <strong><a href="#xr_merge_params">xr_merge_params</a></strong>
-- <strong>variables</strong>: List of <a href="#variable-object">variable object</a> objects.</p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li><strong><a href="#identifier">identifier</a></strong>: This identifier defines the name of the final data cube.</li>
+<li><strong><a href="#grid_mapping">grid_mapping</a></strong></li>
+<li><strong><a href="#format_id">format_id</a></strong></li>
+<li><strong><a href="#xr_merge_params">xr_merge_params</a></strong></li>
+<li><strong>variables</strong>: List of <a href="#variable-object">variable object</a> objects.</li>
+</ul>
 <h4 id="variable-object">variable object</h4>
 <p>This configures a variable object, which is stored as a data variable within a single 
 <code>xarray.Dataset</code> object.</p>
-<p><strong>Properties</strong>:
-- <strong><a href="#identifier">identifier</a></strong>: This identifier defines the variable name within the <code>xarray.Dataset</code>.
-- <strong><a href="#store">store</a></strong>
-- <strong><a href="#data_id">data_id</a></strong>
-- <strong><a href="#open_params">open_params</a></strong>
-- <strong><a href="#custom_processing">custom_processing</a></strong></p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li><strong><a href="#identifier">identifier</a></strong>: This identifier defines the variable name within the <code>xarray.Dataset</code>.</li>
+<li><strong><a href="#store">store</a></strong></li>
+<li><strong><a href="#data_id">data_id</a></strong></li>
+<li><strong><a href="#open_params">open_params</a></strong></li>
+<li><strong><a href="#custom_processing">custom_processing</a></strong></li>
+</ul>
 <h3 id="store-object">store object</h3>
 <p>This configures a store object representing one xcube data store instance.</p>
-<p><strong>Properties:</strong>
-- <strong><a href="#identifier">identifier</a></strong>
-- <strong><a href="#store_id">store_id</a></strong>
-- <strong><a href="#store_params">store_params</a></strong></p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><strong><a href="#identifier">identifier</a></strong></li>
+<li><strong><a href="#store_id">store_id</a></strong></li>
+<li><strong><a href="#store_params">store_params</a></strong></li>
+</ul>
 <h3 id="grid-mapping-object">grid mapping object</h3>
 <p>This configures a grid mapping object.</p>
-<p><strong>Properties:</strong>
-- <strong><a href="#identifier">identifier</a></strong>
-- <strong><a href="#bbox">bbox</a></strong>
-- <strong><a href="#crs">crs</a></strong>
-- <strong><a href="#spatial_res">spatial_res</a></strong>
-- <strong><a href="#tile_size">tile_size</a></strong>
-- </p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><strong><a href="#identifier">identifier</a></strong></li>
+<li><strong><a href="#bbox">bbox</a></strong></li>
+<li><strong><a href="#crs">crs</a></strong></li>
+<li><strong><a href="#spatial_res">spatial_res</a></strong></li>
+<li><strong><a href="#tile_size">tile_size</a></strong></li>
+</ul>
 <h3 id="preload-dataset-object">preload dataset object</h3>
 <p>This object configures the preloading of datasets that require it. Note that some 
 datasets are not accessible instantly via lazy loading, due to storage in compressed 
 formats or due to lengthy queuing processes during data requests. These dataset can 
 be preloaded once, which are then available to the user throughout the lifespan of
 a project.</p>
-<p>Currently, the preload API is available for the following data stores:
-- <a href="https://github.com/xcube-dev/xcube-clms">clms</a>
-- <a href="https://github.com/xcube-dev/xcube-zenodo">zenodo</a></p>
-<p><strong>Properties</strong>:
-- <strong><a href="#store">store</a></strong>: The data store where the dataset is located.
-- <strong>data_ids</strong>: A list of <a href="#data_id">data_id</a> values for the datasets to preload.
-- <strong>preload_params</strong>: Parameters specific to the respective data store for preloading.</p>
+<p>Currently, the preload API is available for the following data stores:</p>
+<ul>
+<li><a href="https://github.com/xcube-dev/xcube-clms">clms</a></li>
+<li><a href="https://github.com/xcube-dev/xcube-zenodo">zenodo</a></li>
+</ul>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li><strong><a href="#store">store</a></strong>: The data store where the dataset is located.</li>
+<li><strong>data_ids</strong>: A list of <a href="#data_id">data_id</a> values for the datasets to preload.</li>
+<li><strong>preload_params</strong>: Parameters specific to the respective data store for preloading.</li>
+</ul>
 <h3 id="general-object">general object</h3>
 <p>This object configures general parameters that control various aspects of the cube 
 generation process.</p>
-<p><strong>Properties:</strong>
-- <strong><a href="#visualize">visualize</a></strong>
-- <strong><a href="#force_preload">force_preload</a></strong>
-- <strong><a href="#dask_scheduler">dask_scheduler</a></strong>
-- <strong><a href="#gdal_http_params">gdal_http_params</a></strong></p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><strong><a href="#visualize">visualize</a></strong></li>
+<li><strong><a href="#force_preload">force_preload</a></strong></li>
+<li><strong><a href="#dask_scheduler">dask_scheduler</a></strong></li>
+<li><strong><a href="#gdal_http_params">gdal_http_params</a></strong></li>
+</ul>
 <h2 id="single-field-parameters">Single field parameters</h2>
 <h3 id="identifier">identifier</h3>
 <p>Identifier for any object like dataset, grid mapping, store.</p>
@@ -1111,8 +1128,8 @@ the data. It allows for custom dataset manipulation, making it particularly usef
 for handling unstructured datasets. The function must accept an <code>xarray.Dataset</code> as 
 input and return a modified <code>xarray.Dataset</code> as output.</p>
 <p><strong>Properties</strong>:<br />
-- <strong>module_path</strong>: Path to the Python module relative to the config file.<br />
-- <strong>function_name</strong>: Name of the function within the specified module. The function must
+<em> </em><em>module_path</em><em>: Path to the Python module relative to the config file.<br />
+</em> <strong>function_name</strong>: Name of the function within the specified module. The function must
   take an <code>xarray.Dataset</code> as input and return a transformed <code>xarray.Dataset</code>.  </p>
 <h3 id="store_id">store_id</h3>
 <p>The <strong>store identifier</strong> is used within the xcube ecosystem to specify different data 
@@ -1120,16 +1137,18 @@ stores. For more information about the available data stores, refer to the
 <a href="https://xcube.readthedocs.io/en/latest/dataaccess.html#data-store-framework">xcube data store documentation</a>,
 or check the README of each specific data store plugin on GitHub, where links are given 
 below.</p>
-<p><strong>Allowed Values</strong>:<br />
-- <a href="https://github.com/xcube-dev/xcube-cds">cds</a><br />
-- <a href="https://github.com/xcube-dev/xcube-clms">clms</a><br />
-- <a href="https://github.com/xcube-dev/xcube-cmems">cmems</a><br />
-- <a href="https://github.com/esa-cci/xcube-cci">esa-cci, esa-cci-kc, esa-cci-zarr</a>
-- <a href="https://xcube.readthedocs.io/en/latest/dataaccess.html#filesystem-based-data-stores">file, https, memory, s3</a> <br />
-- <a href="https://github.com/xcube-dev/xcube-sh">sentinelhub, sentinelhub-cdse</a><br />
-- <a href="https://github.com/xcube-dev/xcube-smos">smos</a><br />
-- <a href="https://github.com/xcube-dev/xcube-stac">stac, stac-cdse, stac-xcube</a>
-- <a href="https://github.com/xcube-dev/xcube-zenodo">zenodo</a>  </p>
+<p><strong>Allowed Values</strong>:  </p>
+<ul>
+<li><a href="https://github.com/xcube-dev/xcube-cds">cds</a>  </li>
+<li><a href="https://github.com/xcube-dev/xcube-clms">clms</a>  </li>
+<li><a href="https://github.com/xcube-dev/xcube-cmems">cmems</a>  </li>
+<li><a href="https://github.com/esa-cci/xcube-cci">esa-cci, esa-cci-kc, esa-cci-zarr</a></li>
+<li><a href="https://xcube.readthedocs.io/en/latest/dataaccess.html#filesystem-based-data-stores">file, https, memory, s3</a>   </li>
+<li><a href="https://github.com/xcube-dev/xcube-sh">sentinelhub, sentinelhub-cdse</a>  </li>
+<li><a href="https://github.com/xcube-dev/xcube-smos">smos</a>  </li>
+<li><a href="https://github.com/xcube-dev/xcube-stac">stac, stac-cdse, stac-xcube</a></li>
+<li><a href="https://github.com/xcube-dev/xcube-zenodo">zenodo</a>  </li>
+</ul>
 <hr />
 <h3 id="store_params">store_params</h3>
 <p>The <strong>store-specific parameters</strong> define the configuration for a particular data store. 
@@ -1164,9 +1183,11 @@ only non-preloaded datasets will be preloaded.  </p>
 <h3 id="gdal_http_params">gdal_http_params</h3>
 <p>GDAL http environment variables which are used when opening a tif file with 
 <code>rioxarray.open_rasterio</code>, which uses GDAL driver under the hood, from a remote source.  </p>
-<p><strong>Properties</strong>:<br />
-- <strong>gdal_http_max_retry</strong>: Maximal number of retries of an HTTP request in GDAL. Defaults set to <code>10</code>.<br />
-- <strong>gdal_http_retry_delay</strong>: Delay in seconds between retries of an HTTP request in GDAL. Defaults set to <code>5</code>.   </p>
+<p><strong>Properties</strong>:  </p>
+<ul>
+<li><strong>gdal_http_max_retry</strong>: Maximal number of retries of an HTTP request in GDAL. Defaults set to <code>10</code>.  </li>
+<li><strong>gdal_http_retry_delay</strong>: Delay in seconds between retries of an HTTP request in GDAL. Defaults set to <code>5</code>.   </li>
+</ul>
 
 
 
