@@ -1,4 +1,12 @@
+<div style="text-align: right;">
+  <figure style="display: inline-flex; align-items: center;">
+    <img src="assets/eo-lincs.png" alt="Logo" style="height: 100px;">
+    <figcaption style="font-weight: bold; font-size: 10px; margin-left: 10px;">EO-LINCS</figcaption>
+  </figure>
+</div>
+
 # xcube Multi-Source Data Store
+
 
 `xcube-multistore` is a Python package designed to create a Multi-Source Data Store 
 that enables the seamless integration of data from multiple sources into a unified 
