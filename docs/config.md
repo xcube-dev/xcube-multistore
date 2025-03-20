@@ -169,6 +169,7 @@ for handling unstructured datasets. The function must accept an `xarray.Dataset`
 input and return a modified `xarray.Dataset` as output.
 
 **Properties**:  
+
 * **module_path**: Path to the Python module relative to the config file.  
 * **function_name**: Name of the function within the specified module. The function must
   take an `xarray.Dataset` as input and return a transformed `xarray.Dataset`.  
