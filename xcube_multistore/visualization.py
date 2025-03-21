@@ -90,9 +90,9 @@ class GeneratorDisplay(ABC):
 
             if display is not None:
                 try:
-                    return IPyWidgetsGeneratorDisplay(states)
-                except ImportError:
                     return IPyGeneratorDisplay(states)
+                except ImportError:
+                    return IPyWidgetsGeneratorDisplay(states)
         except ImportError:
             pass
         return GeneratorDisplay(states)
