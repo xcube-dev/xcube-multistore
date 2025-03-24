@@ -9,7 +9,7 @@ datasets:
       tile_size: [1800, 1800]
     format_id: netcdf
     custom_processing:
-      module_path: "modify_dataset"
+      module_path: "scs4_modify_dataset"
       function_name: "biomass_xu_merge_years"
   # define dataset for ESA CCI biomass
   - identifier: esa_cci_biomass
@@ -31,7 +31,7 @@ data_stores:
   - identifier: zenodo
     store_id: zenodo
     store_params:
-      root: "4161694"
+        root: "4161694"
 
 grid_mappings:
   - identifier: gm_scs4

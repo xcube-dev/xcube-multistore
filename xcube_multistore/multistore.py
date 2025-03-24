@@ -261,10 +261,9 @@ class MultiSourceDataStore:
             ~np.isnan(lat)
             and ~np.isnan(lon)
             and "bbox" in schema.properties
-            and ["spatial_res"] in open_params
+            and "spatial_res" in open_params
             and "spatial_res" in schema.properties
         ):
-            lat, lon = open_params.pop("point")
             open_params["bbox"] = [
                 lon - 2 * open_params["spatial_res"],
                 lat - 2 * open_params["spatial_res"],
