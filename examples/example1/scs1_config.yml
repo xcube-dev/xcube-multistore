@@ -1,0 +1,173 @@
+datasets:
+- identifier: AU-Dry_sen2
+  store: stac-cdse
+  data_id: sentinel-2-l2a
+  open_params:
+    time_range:
+    - '2019-03-01'
+    - '2019-03-15'
+    bbox:
+    - 215577
+    - 8309343
+    - 219577
+    - 8313343
+    spatial_res: 10
+    crs: EPSG:32753
+    apply_scaling: true
+    asset_names:
+    - B01
+    - B02
+    - B03
+    - B04
+    - B05
+    - B06
+    - B07
+    - B08
+    - B8A
+    - B09
+    - B11
+    - B12
+    - SCL
+- identifier: AU-Dry_era5land
+  store: cds
+  data_id: reanalysis-era5-land
+  open_params:
+    variable_names:
+    - 2m_temperature
+    - total_precipitation
+    time_range:
+    - '2019-03-01'
+    - '2019-03-15'
+    point:
+    - -15.2588
+    - 132.3706
+    spatial_res: 0.1
+- identifier: AU-Dry_ccibiomass
+  store: esa_cci
+  grid_mapping: AU-Dry_sen2
+  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m
+  open_params:
+    time_range:
+    - '2019-01-01'
+    - '2019-12-31'
+- identifier: AU-How_sen2
+  store: stac-cdse
+  data_id: sentinel-2-l2a
+  open_params:
+    time_range:
+    - '2019-03-01'
+    - '2019-03-15'
+    bbox:
+    - 731912
+    - 8615836
+    - 735912
+    - 8619836
+    spatial_res: 10
+    crs: EPSG:32752
+    apply_scaling: true
+    asset_names:
+    - B01
+    - B02
+    - B03
+    - B04
+    - B05
+    - B06
+    - B07
+    - B08
+    - B8A
+    - B09
+    - B11
+    - B12
+    - SCL
+- identifier: AU-How_era5land
+  store: cds
+  data_id: reanalysis-era5-land
+  open_params:
+    variable_names:
+    - 2m_temperature
+    - total_precipitation
+    time_range:
+    - '2019-03-01'
+    - '2019-03-15'
+    point:
+    - -12.4943
+    - 131.1523
+    spatial_res: 0.1
+- identifier: AU-How_ccibiomass
+  store: esa_cci
+  grid_mapping: AU-How_sen2
+  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m
+  open_params:
+    time_range:
+    - '2019-01-01'
+    - '2019-12-31'
+- identifier: BE-Lon_sen2
+  store: stac-cdse
+  data_id: sentinel-2-l2a
+  open_params:
+    time_range:
+    - '2019-03-01'
+    - '2019-03-15'
+    bbox:
+    - 621704
+    - 5599419
+    - 625704
+    - 5603419
+    spatial_res: 10
+    crs: EPSG:32631
+    apply_scaling: true
+    asset_names:
+    - B01
+    - B02
+    - B03
+    - B04
+    - B05
+    - B06
+    - B07
+    - B08
+    - B8A
+    - B09
+    - B11
+    - B12
+    - SCL
+- identifier: BE-Lon_era5land
+  store: cds
+  data_id: reanalysis-era5-land
+  open_params:
+    variable_names:
+    - 2m_temperature
+    - total_precipitation
+    time_range:
+    - '2019-03-01'
+    - '2019-03-15'
+    point:
+    - 50.5516
+    - 4.7462
+    spatial_res: 0.1
+- identifier: BE-Lon_ccibiomass
+  store: esa_cci
+  grid_mapping: BE-Lon_sen2
+  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m
+  open_params:
+    time_range:
+    - '2019-01-01'
+    - '2019-12-31'
+data_stores:
+- identifier: storage
+  store_id: file
+  store_params:
+    root: data
+- identifier: esa_cci
+  store_id: cciodp
+- identifier: stac-cdse
+  store_id: stac-cdse
+  store_params:
+    key: <CDSE_S3_key>
+    secret: <CDSE_S3_secret>
+    stack_mode: true
+- identifier: cds
+  store_id: cds
+  store_params:
+    endpoint_url: https://cds.climate.copernicus.eu/api
+    cds_api_key: <cds_personal_access_token>
+    normalize_names: true

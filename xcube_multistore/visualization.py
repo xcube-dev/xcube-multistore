@@ -85,14 +85,9 @@ class GeneratorDisplay(ABC):
     @classmethod
     def create(cls, states: list[GeneratorState]) -> "GeneratorDisplay":
         try:
-            # noinspection PyUnresolvedReferences
             from IPython.display import display
 
-            if display is not None:
-                try:
-                    return IPyWidgetsGeneratorDisplay(states)
-                except ImportError:
-                    return IPyGeneratorDisplay(states)
+            return IPyGeneratorDisplay(states)
         except ImportError:
             pass
         return GeneratorDisplay(states)
@@ -146,39 +141,26 @@ class IPyGeneratorDisplay(GeneratorDisplay):
         from IPython import display
 
         self._ipy_display = display
+        self._html_display = None
 
     def show(self):
         """Display the widget container."""
-        self._ipy_display.display(self.to_html())
+        self._html_display = self._ipy_display.display(self.to_html(), display_id=True)
 
     def update(self):
         """Update the display."""
-        self._ipy_display.clear_output(wait=True)
-        self._ipy_display.display(self.to_html())
+        if self._html_display is None:
+            self._ipy_display.display(self.to_html())
+        else:
+            self._ipy_display.update_display(
+                self.to_html(), display_id=self._html_display.display_id
+            )
 
     def display_title(self, title: str):
         """Display a title"""
         self._ipy_display.display(
             self._ipy_display.HTML(f"<b style='font-size: 20px;'>{title}</b>")
         )
-
-
-class IPyWidgetsGeneratorDisplay(IPyGeneratorDisplay):
-    def __init__(self, states: list[GeneratorState]):
-        super().__init__(states)
-        import ipywidgets
-
-        self._state_table = ipywidgets.HTML(self.to_html())
-        self._output = ipywidgets.Output()  # not used yet
-        self._container = ipywidgets.VBox([self._state_table, self._output])
-
-    def show(self):
-        """Display the widget container."""
-        self._ipy_display.display(self._container)
-
-    def update(self):
-        """Update the display."""
-        self._state_table.value = self.to_html()
 
 
 def _to_dict(obj: object):

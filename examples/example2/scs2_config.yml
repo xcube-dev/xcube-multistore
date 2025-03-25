@@ -1,0 +1,124 @@
+preload_datasets:
+  - store: zenodo_senf
+    data_ids:
+      - "france.zip"
+  - store: clms
+    data_ids:
+      - "tree-cover-density-2018|TCD_2018_010m_fr_03035_v020"
+      - "dominant-leaf-type-2018|DLT_2018_010m_fr_03035_v020"
+      - "forest-type-2018|FTY_2018_010m_fr_03035_v010"
+
+datasets:
+  # create dataset for tree maps from CLMS
+  - identifier: clms
+    grid_mapping: gm_scs2
+    variables:
+    - identifier: tree_cover_density_2018
+      store: clms
+      data_id: "tree-cover-density-2018|TCD_2018_010m_fr_03035_v020/tree-cover-density-2018|TCD_2018_010m_fr_03035_v020.zarr"
+    - identifier: dominant_leaf_type_2018
+      store: clms
+      data_id: "dominant-leaf-type-2018|DLT_2018_010m_fr_03035_v020/dominant-leaf-type-2018|DLT_2018_010m_fr_03035_v020.zarr"
+    - identifier: forest_type_2018
+      store: clms
+      data_id: "forest-type-2018|FTY_2018_010m_fr_03035_v010/forest-type-2018|FTY_2018_010m_fr_03035_v010.zarr"
+  # create dataset for forest disturbance from Senf et al.
+  - identifier: senf
+    grid_mapping: gm_scs2
+    variables:
+    - identifier: annual_disturbances
+      store: zenodo_senf
+      data_id: "france/annual_disturbances_1985_2023_france.zarr"
+      custom_processing:
+        module_path: "scs2_modify_dataset"
+        function_name: "modify_time_axis"
+    - identifier: disturbance_agent
+      store: zenodo_senf
+      data_id: "france/disturbance_agent_1985_2023_france.zarr"
+      custom_processing:
+        module_path: "scs2_modify_dataset"
+        function_name: "modify_time_axis"
+    - identifier: greatest_disturbance
+      store: zenodo_senf
+      data_id: "france/greatest_disturbance_france.zarr"
+    - identifier: forest_mask
+      store: zenodo_senf
+      data_id: "france/forest_mask_france.zarr"
+    - identifier: disturbance_agent_aggregated
+      store: zenodo_senf
+      data_id: "france/disturbance_agent_aggregated_france.zarr"
+    - identifier: latest_disturbance
+      store: zenodo_senf
+      data_id: "france/latest_disturbance_france.zarr"
+    - identifier: number_disturbances
+      store: zenodo_senf
+      data_id: "france/number_disturbances_france.zarr"
+    - identifier: disturbance_probability
+      store: zenodo_senf
+      data_id: "france/disturbance_probability_1985_2023_france.zarr"
+      custom_processing:
+        module_path: "scs2_modify_dataset"
+        function_name: "modify_time_axis"
+    - identifier: disturbance_severity
+      store: zenodo_senf
+      data_id: "france/disturbance_severity_1985_2023_france.zarr"
+      custom_processing:
+        module_path: "scs2_modify_dataset"
+        function_name: "modify_time_axis"
+  # get Gami dataset
+  - identifier: gami
+    store: store_gami
+    grid_mapping: gm_scs2
+    data_id: "collections/GAMI/GAMI_v2.1.zarr"
+    custom_processing:
+      module_path: "scs2_modify_dataset"
+      function_name: "modify_gami"
+  # get Canopy height and biomass map by Liu et al.
+  - identifier: liu
+    grid_mapping: gm_scs2
+    variables:
+    - identifier: agb
+      store: zenodo_liu
+      data_id: "planet_agb_30m_v0.1.tif"
+    - identifier: canopy_cover
+      store: zenodo_liu
+      data_id: "planet_canopy_cover_30m_v0.1.tif"
+    - identifier: canopy_height
+      store: zenodo_liu
+      data_id: "planet_canopy_height_30m_v0.1.tif"
+
+data_stores:
+  - identifier: storage
+    store_id: file
+    store_params:
+      root: data
+  - identifier: clms
+    store_id: clms
+    store_params:
+      credentials: "clms-credentials.json"
+  - identifier: zenodo_liu
+    store_id: zenodo
+    store_params:
+      root: "8154445"
+  - identifier: zenodo_senf
+    store_id: zenodo
+    store_params:
+        root: "13333034"
+  - identifier: store_gami
+    store_id: s3
+    store_params:
+      root: "dog.atlaseo-glm.eo-gridded-data"
+      storage_options:
+        anon: True
+        endpoint_url: "https://s3.gfz-potsdam.de"
+
+grid_mappings:
+  - identifier: gm_scs2
+    bbox: [-1.25, 43.5, 0.5, 44.8]
+    spatial_res: 0.00025
+    crs: EPSG:4326
+    tile_size: 1000
+
+general:
+  dask_scheduler: "single-threaded"
+

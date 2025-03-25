@@ -8,7 +8,6 @@ from xcube_multistore.visualization import (
     GeneratorState,
     GeneratorStatus,
     IPyGeneratorDisplay,
-    IPyWidgetsGeneratorDisplay,
 )
 
 
@@ -41,16 +40,15 @@ class TestGeneratorDisplay(unittest.TestCase):
     def test_create_ipywidgets(self):
         states = [GeneratorState(identifier="dataset1", status=GeneratorStatus.started)]
         display_instance = GeneratorDisplay.create(states)
-        self.assertIsInstance(display_instance, IPyWidgetsGeneratorDisplay)
+        self.assertIsInstance(display_instance, IPyGeneratorDisplay)
 
-    def test_create_ipy(self):
-        with patch("ipywidgets.HTML", side_effect=ImportError):
-            states = [
-                GeneratorState(identifier="dataset1", status=GeneratorStatus.started)
-            ]
-            display_instance = GeneratorDisplay.create(states)
-            self.assertIsInstance(display_instance, IPyGeneratorDisplay)
-            self.assertNotIsInstance(display_instance, IPyWidgetsGeneratorDisplay)
+    # def test_create_ipy(self):
+    #     with patch("ipywidgets.HTML", side_effect=ImportError):
+    #         states = [
+    #             GeneratorState(identifier="dataset1", status=GeneratorStatus.started)
+    #         ]
+    #         display_instance = GeneratorDisplay.create(states)
+    #         self.assertIsInstance(display_instance, IPyGeneratorDisplay)
 
     @patch.dict(sys.modules, {"IPython.display": None})
     def test_create_fallback(self):

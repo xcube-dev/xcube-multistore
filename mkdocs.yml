@@ -8,6 +8,23 @@ nav:
   - Overview: index.md
   - Getting Started: start.md
   - Configuration Guide: config.md
+  - Examples:
+      - Example 1:
+        - Notebook page: examples/example1/scs1_xcube_multistore.ipynb
+        - Configuration File: examples/example1/scs1_config.yml
+        - Location of sites: examples/example1/scs1_sites.csv
+      - Example 2:
+        - Notebook page: examples/example2/scs2_xcube_multistore.ipynb
+        - Configuration File: examples/example2/scs2_config.yml
+        - Auxiliary Python functions: examples/example2/scs2_modify_dataset.py
+      - Example 3:
+        - Notebook page: examples/example3/scs3_xcube_multistore.ipynb
+        - Configuration File: examples/example3/scs3_config.yml
+        - Sites Locations: examples/example3/scs3_sites.csv
+      - Example 4:
+        - Notebook page: examples/example4/scs4_xcube_multistore.ipynb
+        - Configuration File: examples/example4/scs4_config.yml
+        - Auxiliary Python functions: examples/example4/scs4_modify_dataset.py
   - API Reference: api.md
   - About: about.md
 
@@ -45,8 +62,12 @@ extra:
 #    - icon: fontawesome/brands/python
 #      link: https://pypi.org/project/xarray-eopf/
 
+extra_css:
+  - stylesheets/xarray_dataset.css
+
 plugins:
   - search
+  - mkdocs-jupyter
   - autorefs
   - mkdocstrings:
       handlers:
