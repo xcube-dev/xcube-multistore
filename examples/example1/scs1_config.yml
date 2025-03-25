@@ -162,12 +162,12 @@ data_stores:
 - identifier: stac-cdse
   store_id: stac-cdse
   store_params:
-    key: OX94JKCFEF1PLNVNAU2J
-    secret: ceucxUr3s8yNhaP8k3g0FnQERKgm8SUfd9TdSFrF
+    key: <CDSE_S3_key>
+    secret: <CDSE_S3_secret>
     stack_mode: true
 - identifier: cds
   store_id: cds
   store_params:
     endpoint_url: https://cds.climate.copernicus.eu/api
-    cds_api_key: 8ba066d4-5195-4c1d-af91-6fb13bfc22df
+    cds_api_key: <cds_personal_access_token>
     normalize_names: true

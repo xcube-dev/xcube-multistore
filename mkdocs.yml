@@ -12,6 +12,7 @@ nav:
       - Example 1:
         - Notebook page: examples/example1/scs1_xcube_multistore.ipynb
         - Configuration File: examples/example1/scs1_config.yml
+        - Location of sites: examples/example1/scs1_sites.csv
       - Example 2:
         - Notebook page: examples/example2/scs2_xcube_multistore.ipynb
         - Configuration File: examples/example2/scs2_config.yml
@@ -19,7 +20,7 @@ nav:
       - Example 3:
         - Notebook page: examples/example3/scs3_xcube_multistore.ipynb
         - Configuration File: examples/example3/scs3_config.yml
-        - Sites Locations: examples/example1/scs1_sites.csv
+        - Sites Locations: examples/example3/scs3_sites.csv
       - Example 4:
         - Notebook page: examples/example4/scs4_xcube_multistore.ipynb
         - Configuration File: examples/example4/scs4_config.yml
