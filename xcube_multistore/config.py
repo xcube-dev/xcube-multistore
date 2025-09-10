@@ -35,6 +35,7 @@ from xcube.util.jsonschema import (
     JsonObjectSchema,
     JsonStringSchema,
 )
+from xcube.core.store import list_data_store_ids
 
 from .constants import NAME_WRITE_STORE
 from .utils import _remove_compressed_extension
@@ -133,30 +134,7 @@ SCHEMA_DATASET = JsonComplexSchema(one_of=[SCHEMA_SINGLE_DATASET, SCHEMA_MULTI_D
 # define schema for data store
 SCHEMA_STORE_ID = JsonStringSchema(
     title="Store identifier",
-    enum=[
-        "cds",
-        "clms",
-        "cmems",
-        "esa-cci",
-        "esa-cci-kc",
-        "esa-cdc-kc",
-        "esa-cci-zarr",
-        "esa-cdc-zarr",
-        "cciodp",
-        "ccizarr",
-        "ccikc",
-        "file",
-        "https",
-        "memory",
-        "s3",
-        "sentinelhub",
-        "sentinelhub-cdse",
-        "smos",
-        "stac",
-        "stac-cdse",
-        "stac-xcube",
-        "zenodo",
-    ],
+    enum=list_data_store_ids(),
 )
 SCHEMA_STORE_PARAMS = JsonObjectSchema(
     title="Store parameters",

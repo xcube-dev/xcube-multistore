@@ -1,3 +1,5 @@
+## Changes in 0.2.0 (under developement)
+
 ## Changes in 0.1.0
 
 * The initial version of the Multi-Source Data Store has been developed in 

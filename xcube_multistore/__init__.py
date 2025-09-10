@@ -20,6 +20,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .version import version
+from .version import __version__
 
-__version__ = version
+from .multistore import MultiSourceDataStore
+
+describe_data = MultiSourceDataStore.describe_data
+get_config_schema = MultiSourceDataStore.get_config_schema
+get_data_store_params_schema = MultiSourceDataStore.get_data_store_params_schema
+get_open_data_params_schema = MultiSourceDataStore.get_open_data_params_schema
+list_data_ids = MultiSourceDataStore.list_data_ids
+list_data_store_ids = MultiSourceDataStore.list_data_store_ids
+get_search_params_schema = MultiSourceDataStore.get_search_params_schema
+search_data_ids = MultiSourceDataStore.search_data_ids
+
+__all__ = [
+    "MultiSourceDataStore",
+    "describe_data",
+    "get_config_schema",
+    "get_data_store_params_schema",
+    "get_open_data_params_schema",
+    "get_search_params_schema",
+    "list_data_ids",
+    "list_data_store_ids",
+    "search_data_ids",
+]
