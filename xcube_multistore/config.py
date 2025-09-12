@@ -189,7 +189,7 @@ SCHEMA_GRID_MAPPING = JsonObjectSchema(
         spatial_res=SCHEMA_SPATIAL_RES,
         tile_size=SCHEMA_TILE_SIZE,
     ),
-    required=["bbox", "crs", "spatial_res"],
+    required=["identifier", "bbox", "crs", "spatial_res"],
     additional_properties=False,
 )
 
@@ -293,8 +293,14 @@ class MultiSourceConfig:
             config_store["identifier"]: config_store
             for config_store in config["data_stores"]
         }
-        self.grid_mappings = config.get("grid_mappings", None)
-
+        grid_mappings = config.get("grid_mappings", None)
+        if grid_mappings:
+            self.grid_mappings = {
+                config_gm["identifier"]: config_gm
+                for config_gm in config["grid_mappings"]
+            }
+        else:
+            self.grid_mappings = None
         self.general = config.get("general", {})
         self._general_setup()
 

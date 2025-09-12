@@ -15,11 +15,11 @@ from xcube_multistore.multistore import MultiSourceDataStore
 MultiSourceDataStore.get_config_schema()
 ```
 
-You can find an example 
-configuration in [examples/config.yml](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml).
-Additionally, you can explore more example configurations in the 
-[examples](https://github.com/xcube-dev/xcube-multistore/blob/main/examples) folder.
+In the notebook [setup_config.ipynb](https://xcube-dev.github.io/xcube-multistore/examples/setup_config/), you can find
+an example demonstrating how to use auxiliary functions to set up a configuration.  
 
+An example configuration is available in [examples/config.yml](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml).  
+Additional example configurations can be explored in the [examples](https://github.com/xcube-dev/xcube-multistore/blob/main/examples) folder.
 
 ## Entire configuration schema
 

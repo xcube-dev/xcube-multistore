@@ -50,7 +50,12 @@ from .utils import (
     clean_dataset,
     prepare_dataset_for_netcdf,
 )
-from .visualization import GeneratorDisplay, GeneratorState, GeneratorStatus
+from .visualization import (
+    ConfigDisplay,
+    GeneratorDisplay,
+    GeneratorState,
+    GeneratorStatus,
+)
 
 
 class MultiSourceDataStore:
@@ -103,6 +108,13 @@ class MultiSourceDataStore:
             A schema object defining the expected structure of the configuration.
         """
         return MultiSourceConfig.get_schema()
+
+    @classmethod
+    def display_config(cls, config: str | dict[str, Any]):
+        config = MultiSourceConfig(config)
+        display = ConfigDisplay.create(config)
+        display.display_title("Configuration")
+        display.show()
 
     @classmethod
     def list_data_store_ids(cls) -> list[str]:
@@ -259,25 +271,6 @@ class MultiSourceDataStore:
         )
 
     @classmethod
-    def describe_data(
-        cls, data_store_id: str, data_store_params: dict, data_id: str
-    ) -> DataDescriptor:
-        """
-        Describe a dataset from a data store.
-
-        Args:
-            data_store_id: The identifier of the data store.
-            data_store_params: Parameters used to initialize the data store.
-            data_id: The identifier of the dataset within the data store.
-
-        Returns:
-            An object describing the dataset, including
-            metadata such as its spatial, temporal, and variable information.
-        """
-        store = new_data_store(data_store_id, **data_store_params)
-        return store.describe_data(data_id)
-
-    @classmethod
     def get_search_params_schema(
         cls, data_store_ids_params: Mapping[str, dict]
     ) -> JsonObjectSchema:
@@ -313,6 +306,25 @@ class MultiSourceDataStore:
             title="Search parameters for each data store",
             properties=properties,
         )
+
+    @classmethod
+    def describe_data(
+        cls, data_store_id: str, data_store_params: dict, data_id: str
+    ) -> DataDescriptor:
+        """
+        Describe a dataset from a data store.
+
+        Args:
+            data_store_id: The identifier of the data store.
+            data_store_params: Parameters used to initialize the data store.
+            data_id: The identifier of the dataset within the data store.
+
+        Returns:
+            An object describing the dataset, including
+            metadata such as its spatial, temporal, and variable information.
+        """
+        store = new_data_store(data_store_id, **data_store_params)
+        return store.describe_data(data_id)
 
     def _notify(self, event: GeneratorState):
         state = self._states[event.identifier]
@@ -361,7 +373,7 @@ class MultiSourceDataStore:
                     [
                         GeneratorState(
                             identifier=data_id,
-                            status=GeneratorStatus.stopped,
+                            status=GeneratorStatus.completed,
                             message="Already preloaded.",
                         )
                         for data_id in data_ids_preloaded
@@ -390,7 +402,7 @@ class MultiSourceDataStore:
                 self._notify(
                     GeneratorState(
                         identifier,
-                        status=GeneratorStatus.stopped,
+                        status=GeneratorStatus.completed,
                         message=f"Dataset {identifier!r} already generated.",
                     )
                 )
@@ -429,7 +441,7 @@ class MultiSourceDataStore:
                 self._notify(
                     GeneratorState(
                         identifier,
-                        status=GeneratorStatus.stopped,
+                        status=GeneratorStatus.completed,
                         message=f"Dataset {identifier!r} finished.",
                     )
                 )

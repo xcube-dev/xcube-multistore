@@ -1,5 +1,10 @@
 ## Changes in 0.2.0 (under developement)
 
+* Added the method `display_config`, which provides an overview of the cube generation 
+  plan retrieved from the configuration file.  
+* Added auxiliary functions to support setting up configurations for cube generation. 
+  Examples of all functionalities are provided in the notebook [setup_config.ipynb](examples/setup_config.ipynb).
+
 ## Changes in 0.1.0
 
 * The initial version of the Multi-Source Data Store has been developed in 

@@ -9,6 +9,7 @@ nav:
   - Getting Started: start.md
   - Configuration Guide: config.md
   - Examples:
+      - Setup Configuration: examples/setup_config.ipynb
       - Example 1:
         - Notebook page: examples/example1/scs1_xcube_multistore.ipynb
         - Configuration File: examples/example1/scs1_config.yml

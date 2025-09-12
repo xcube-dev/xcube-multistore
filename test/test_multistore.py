@@ -19,14 +19,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 import shutil
 import unittest
+from io import StringIO
+from unittest.mock import patch
+from collections.abc import Container, Iterator
+from typing import Any
 
 import numpy as np
 import pytest
 import xarray as xr
 from xcube.core.store import new_data_store
-from xcube.util.jsonschema import JsonObjectSchema
+from xcube.util.jsonschema import JsonObjectSchema, JsonStringSchema
+from xcube.core.store import DataDescriptor, DataStore, DataTypeLike
 
 from xcube_multistore.multistore import MultiSourceDataStore
 
@@ -42,6 +48,65 @@ from .sample_data import (
     get_sample_data_2d,
     get_sample_data_3d,
 )
+
+
+class DummyStore(DataStore):
+    """Minimal stub for a data store"""
+
+    @classmethod
+    def get_data_store_params_schema(cls) -> JsonObjectSchema:
+        return JsonObjectSchema(properties={"key": JsonStringSchema()})
+
+    @classmethod
+    def get_data_types(cls) -> tuple[str, ...]:
+        return ("dataset",)
+
+    def get_data_types_for_data(self, data_id: str) -> tuple[str, ...]:
+        return ("dataset",)
+
+    def get_data_ids(
+        self,
+        data_type: DataTypeLike = None,
+        include_attrs: Container[str] | bool = False,
+    ) -> Iterator[str] | Iterator[tuple[str, dict[str, Any]]]:
+        return iter(["data1", "data2"])
+
+    def has_data(self, data_id: str, data_type: DataTypeLike = None) -> bool:
+        return data_id in self.list_data_ids()
+
+    def describe_data(
+        self, data_id: str, data_type: DataTypeLike = None
+    ) -> DataDescriptor:
+        return DataDescriptor(data_id=data_id, data_type="dataset")
+
+    def get_data_opener_ids(
+        self, data_id: str = None, data_type: DataTypeLike = None
+    ) -> tuple[str, ...]:
+        return ("dataset:dummy:file",)
+
+    def get_open_data_params_schema(
+        self, data_id: str = None, opener_id: str = None
+    ) -> JsonObjectSchema:
+        return JsonObjectSchema(properties={"key": JsonStringSchema()})
+
+    def open_data(self, data_id: str, opener_id: str = None, **open_params) -> Any:
+        return xr.Dataset()
+
+    def search_data(
+        self, data_type: DataTypeLike = None, **search_params
+    ) -> Iterator[DataDescriptor]:
+        return iter(
+            [
+                DataDescriptor(data_id="data1", data_type="dataset"),
+                DataDescriptor(data_id="data2", data_type="dataset"),
+            ]
+        )
+
+    @classmethod
+    def get_search_params_schema(
+        cls, data_type: DataTypeLike = None
+    ) -> JsonObjectSchema:
+        return JsonObjectSchema(properties={"key": JsonStringSchema()})
 
 
 class MultiSourceDataStoreTest(unittest.TestCase):
@@ -61,6 +126,76 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertIn("grid_mappings", schema.properties)
         self.assertIn("datasets", schema.required)
         self.assertIn("data_stores", schema.required)
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_display_config(self, mock_stdout):
+        config = get_config_dict0()
+        MultiSourceDataStore.display_config(config)
+        output = mock_stdout.getvalue()
+        self.assertIn("dataset1", output)
+        self.assertIn("memory", output)
+        self.assertIn("spatial_res", output)
+
+    @patch("xcube_multistore.multistore.list_data_store_ids")
+    def test_list_data_store_ids(self, mock_list_ids):
+        mock_list_ids.return_value = ["file"]
+        self.assertCountEqual(["file"], MultiSourceDataStore.list_data_store_ids())
+
+    @patch("xcube_multistore.multistore.list_data_store_ids")
+    def test_get_data_store_params_schema(self, mock_list_ids):
+        mock_list_ids.return_value = ["file", "memory"]
+        schema = MultiSourceDataStore.get_data_store_params_schema()
+        self.assertIn("file", schema.properties)
+        self.assertIn("memory", schema.properties)
+        self.assertNotIn("cmems", schema.properties)
+
+        schema = MultiSourceDataStore.get_data_store_params_schema(
+            data_store_ids="file"
+        )
+        self.assertIn("file", schema.properties)
+        self.assertNotIn("memory", schema.properties)
+
+        schema = MultiSourceDataStore.get_data_store_params_schema(
+            data_store_ids=["file"]
+        )
+        self.assertIn("file", schema.properties)
+        self.assertNotIn("memory", schema.properties)
+
+    @patch("xcube_multistore.multistore.new_data_store")
+    def test_list_data_ids(self, mock_data_store):
+        mock_data_store.return_value = DummyStore()
+        data_ids = MultiSourceDataStore.list_data_ids({"file": {}})
+        self.assertCountEqual(["data1", "data2"], data_ids.properties["file"].enum)
+        self.assertIsInstance(data_ids, JsonObjectSchema)
+
+    @patch("xcube_multistore.multistore.new_data_store")
+    def test_get_open_data_params_schema(self, mock_data_store):
+        mock_data_store.return_value = DummyStore()
+        schema = MultiSourceDataStore.get_open_data_params_schema("file", {}, "data1")
+        self.assertIsInstance(schema, JsonObjectSchema)
+        self.assertIn("key", schema.properties)
+        self.assertNotIn("key1", schema.properties)
+
+    @patch("xcube_multistore.multistore.new_data_store")
+    def test_search_data_ids(self, mock_data_store):
+        mock_data_store.return_value = DummyStore()
+        data_ids = MultiSourceDataStore.search_data_ids({"file": ({}, {})})
+        self.assertCountEqual(["data1", "data2"], data_ids.properties["file"].enum)
+
+    @patch("xcube_multistore.multistore.new_data_store")
+    def test_get_search_params_schema(self, mock_data_store):
+        mock_data_store.return_value = DummyStore()
+        schema = MultiSourceDataStore.get_search_params_schema({"file": {}})
+        self.assertIsInstance(schema, JsonObjectSchema)
+        self.assertIn("key", schema.properties["file"].properties)
+        self.assertNotIn("key1", schema.properties["file"].properties)
+
+    @patch("xcube_multistore.multistore.new_data_store")
+    def test_describe_data(self, mock_data_store):
+        mock_data_store.return_value = DummyStore()
+        descriptor = MultiSourceDataStore.describe_data("file", {}, "data1")
+        self.assertEqual("data1", descriptor.data_id)
+        self.assertEqual("dataset", str(descriptor.data_type))
 
     def test_init_no_visualization(self):
         # test without visualization, but logging
