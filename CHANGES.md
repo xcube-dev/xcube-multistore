@@ -1,4 +1,4 @@
-## Changes in 0.2.0 (under developement)
+## Changes in 0.2.0
 
 * Added the method `display_config`, which provides an overview of the cube generation 
   plan retrieved from the configuration file.  
