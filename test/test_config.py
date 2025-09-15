@@ -77,7 +77,7 @@ class MultiSourceConfigTest(unittest.TestCase):
             self.assertEqual(len(config.datasets), 2)
             self.assertEqual(config.datasets["dataset1"]["data_id"], "dataset1.zarr")
             self.assertEqual(len(config.grid_mappings), 1)
-            self.assertEqual(config.grid_mappings[0]["identifier"], "grid1")
+            self.assertEqual(next(iter(config.grid_mappings)), "grid1")
             self.assertEqual(len(config.data_stores), 2)
             self.assertEqual(config.data_stores["storage"]["store_id"], "memory")
             self.assertEqual(

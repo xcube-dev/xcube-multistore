@@ -20,6 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .version import version
+from .version import __version__
 
-__version__ = version
+from .multistore import MultiSourceDataStore
+
+__all__ = [
+    "MultiSourceDataStore",
+]

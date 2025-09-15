@@ -35,6 +35,7 @@ from xcube.util.jsonschema import (
     JsonObjectSchema,
     JsonStringSchema,
 )
+from xcube.core.store import list_data_store_ids
 
 from .constants import NAME_WRITE_STORE
 from .utils import _remove_compressed_extension
@@ -133,30 +134,7 @@ SCHEMA_DATASET = JsonComplexSchema(one_of=[SCHEMA_SINGLE_DATASET, SCHEMA_MULTI_D
 # define schema for data store
 SCHEMA_STORE_ID = JsonStringSchema(
     title="Store identifier",
-    enum=[
-        "cds",
-        "clms",
-        "cmems",
-        "esa-cci",
-        "esa-cci-kc",
-        "esa-cdc-kc",
-        "esa-cci-zarr",
-        "esa-cdc-zarr",
-        "cciodp",
-        "ccizarr",
-        "ccikc",
-        "file",
-        "https",
-        "memory",
-        "s3",
-        "sentinelhub",
-        "sentinelhub-cdse",
-        "smos",
-        "stac",
-        "stac-cdse",
-        "stac-xcube",
-        "zenodo",
-    ],
+    enum=list_data_store_ids(),
 )
 SCHEMA_STORE_PARAMS = JsonObjectSchema(
     title="Store parameters",
@@ -211,7 +189,7 @@ SCHEMA_GRID_MAPPING = JsonObjectSchema(
         spatial_res=SCHEMA_SPATIAL_RES,
         tile_size=SCHEMA_TILE_SIZE,
     ),
-    required=["bbox", "crs", "spatial_res"],
+    required=["identifier", "bbox", "crs", "spatial_res"],
     additional_properties=False,
 )
 
@@ -315,8 +293,13 @@ class MultiSourceConfig:
             config_store["identifier"]: config_store
             for config_store in config["data_stores"]
         }
-        self.grid_mappings = config.get("grid_mappings", None)
-
+        grid_mappings = config.get("grid_mappings")
+        if grid_mappings:
+            self.grid_mappings = {
+                config_gm["identifier"]: config_gm for config_gm in grid_mappings
+            }
+        else:
+            self.grid_mappings = None
         self.general = config.get("general", {})
         self._general_setup()
 

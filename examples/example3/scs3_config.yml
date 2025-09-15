@@ -13,7 +13,6 @@ datasets:
     - 8313343
     spatial_res: 10
     crs: EPSG:32753
-    apply_scaling: true
     asset_names:
     - B01
     - B02
@@ -64,7 +63,6 @@ datasets:
     - 8619836
     spatial_res: 10
     crs: EPSG:32752
-    apply_scaling: true
     asset_names:
     - B01
     - B02
@@ -115,7 +113,6 @@ datasets:
     - 5603419
     spatial_res: 10
     crs: EPSG:32631
-    apply_scaling: true
     asset_names:
     - B01
     - B02
@@ -160,11 +157,10 @@ data_stores:
 - identifier: esa_cci
   store_id: cciodp
 - identifier: stac-cdse
-  store_id: stac-cdse
+  store_id: stac-cdse-ardc
   store_params:
     key: <CDSE_S3_key>
     secret: <CDSE_S3_secret>
-    stack_mode: true
 - identifier: cds
   store_id: cds
   store_params:

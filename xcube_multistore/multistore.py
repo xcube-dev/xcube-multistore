@@ -22,7 +22,7 @@
 
 import copy
 import importlib
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
 import pyproj
@@ -30,8 +30,15 @@ import xarray as xr
 from xcube.core.chunk import chunk_dataset
 from xcube.core.geom import clip_dataset_by_geometry
 from xcube.core.gridmapping import GridMapping
+from xcube.core.store import (
+    list_data_store_ids,
+    get_data_store_params_schema,
+    DataStoreError,
+    DataDescriptor,
+    new_data_store,
+)
 from xcube.core.resampling.spatial import resample_in_space
-from xcube.util.jsonschema import JsonObjectSchema
+from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema
 
 from .config import MultiSourceConfig
 from .constants import LOG, MAP_FORMAT_ID_FILE_EXT, NAME_WRITE_STORE
@@ -43,7 +50,12 @@ from .utils import (
     clean_dataset,
     prepare_dataset_for_netcdf,
 )
-from .visualization import GeneratorDisplay, GeneratorState, GeneratorStatus
+from .visualization import (
+    ConfigDisplay,
+    GeneratorDisplay,
+    GeneratorState,
+    GeneratorStatus,
+)
 
 
 class MultiSourceDataStore:
@@ -97,6 +109,223 @@ class MultiSourceDataStore:
         """
         return MultiSourceConfig.get_schema()
 
+    @classmethod
+    def display_config(cls, config: str | dict[str, Any]):
+        config = MultiSourceConfig(config)
+        display = ConfigDisplay.create(config)
+        display.display_title("Configuration")
+        display.show()
+
+    @classmethod
+    def list_data_store_ids(cls) -> list[str]:
+        """
+        List the identifiers of all available data stores.
+
+        Returns:
+            A list of data store identifiers.
+
+        Note:
+            If a data store identifier is missing, ensure that the respective
+            xcube plugin is installed in the environment.
+        """
+        return list_data_store_ids()
+
+    @classmethod
+    def get_data_store_params_schema(
+        cls,
+        data_store_ids: str | list[str] | None = None,
+    ) -> JsonObjectSchema:
+        """
+        Get the parameter schema for one or more data stores.
+
+        Args:
+            data_store_ids: A single data store identifier, a list of identifiers,
+                or None. If None, all available data store identifiers are used.
+
+        Returns:
+            A JSON object schema containing the parameter schemas for the
+            requested data stores. Each key corresponds to a data store ID,
+            and each value is its parameter schema.
+        """
+        if data_store_ids is None:
+            data_store_ids = list_data_store_ids()
+        if isinstance(data_store_ids, str):
+            data_store_ids = [data_store_ids]
+        return JsonObjectSchema(
+            title="Data store parameters",
+            properties={
+                data_store_id: get_data_store_params_schema(data_store_id)
+                for data_store_id in data_store_ids
+            },
+        )
+
+    @classmethod
+    def list_data_ids(
+        cls, data_store_ids_params: Mapping[str, dict]
+    ) -> JsonObjectSchema:
+        """
+        List available data IDs for one or more data stores.
+
+        Args:
+            data_store_ids_params: A mapping of data store identifiers to their
+                data store parameters for initialization.
+
+        Returns:
+            A JSON object schema containing available data IDs for each data store.
+
+        Logs:
+            A warning is logged if data IDs cannot be listed for a given store.
+        """
+        properties = {}
+        for data_store_id, data_store_params in data_store_ids_params.items():
+            store = new_data_store(data_store_id, **data_store_params)
+            try:
+                properties[data_store_id] = JsonArraySchema(
+                    title=f"Data IDs in the {data_store_id!r} data store",
+                    enum=store.list_data_ids(),
+                )
+            except DataStoreError as err:
+                LOG.warning(
+                    "Could not list data IDs for store %r: %s", data_store_id, err
+                )
+
+        return JsonObjectSchema(
+            title="Available data IDs for each data store",
+            properties=properties,
+        )
+
+    @classmethod
+    def get_open_data_params_schema(
+        cls, data_store_id: str, data_store_params: dict, data_id: str
+    ) -> JsonObjectSchema:
+        """
+        Get the parameter schema to open a specific dataset.
+
+        Args:
+            data_store_id: The identifier of the data store.
+            data_store_params: Parameters used to initialize the data store.
+            data_id: The identifier of the dataset within the data store.
+
+        Returns:
+            A JSON object schema describing the parameters available for opening
+            the specified dataset.
+        """
+        store = new_data_store(data_store_id, **data_store_params)
+        return store.get_open_data_params_schema(data_id=data_id)
+
+    @classmethod
+    def search_data_ids(
+        cls,
+        data_store_ids_params: Mapping[
+            str, tuple[Mapping[str, Any], Mapping[str, Any]]
+        ],
+    ) -> JsonObjectSchema:
+        """
+        Search for available data IDs across multiple data stores.
+
+        Args:
+            data_store_ids_params: A mapping from data store identifiers (`str`) to a tuple:
+                - `data_store_params` (Mapping[str, Any]): Parameters to initialize the data store.
+                - `search_params` (Mapping[str, Any]): Parameters to use for searching data within the store.
+
+        Returns:
+            JsonObjectSchema: Contains one property per data store, each holding a
+            JsonArraySchema of found data IDs.
+
+        Logs:
+            Warnings are logged for any data store where the search fails. This can
+            happen if the store does not support searching or if there is an error
+            retrieving the data IDs.
+
+        Note:
+            Ensure that the search parameters match the expected format for each store.
+            To see the expected search parameters, use `get_search_params_schema`.
+        """
+        properties = {}
+        for data_store_id, (
+            data_store_params,
+            search_params,
+        ) in data_store_ids_params.items():
+            store = new_data_store(data_store_id, **data_store_params)
+            try:
+                descriptors = store.search_data(**search_params)
+                data_ids = [descriptor.data_id for descriptor in descriptors]
+
+                properties[data_store_id] = JsonArraySchema(
+                    title=(
+                        f"Data IDs found in the {data_store_id!r} data store for "
+                        f"search params {search_params!r}"
+                    ),
+                    enum=data_ids,
+                )
+            except Exception as err:
+                LOG.warning(
+                    "Could not search for data in store %r: %s",
+                    data_store_id,
+                    err,
+                )
+
+        return JsonObjectSchema(
+            title="Found data IDs for each data store for given search params.",
+            properties=properties,
+        )
+
+    @classmethod
+    def get_search_params_schema(
+        cls, data_store_ids_params: Mapping[str, dict]
+    ) -> JsonObjectSchema:
+        """
+        Retrieve the search parameter schemas for one or more data stores.
+
+        Args:
+            data_store_ids_params: A mapping of data store identifiers to their
+                initialization parameters.
+
+        Returns:
+            A JSON object schema containing the search parameter
+            schemas for each data store. Each key is a data store identifier,
+            and its value is the corresponding search parameter schema.
+
+        Logs:
+            A warning is logged if the search parameter schema cannot be retrieved
+            for a given store.
+        """
+        properties = {}
+        for data_store_id, data_store_params in data_store_ids_params.items():
+            store = new_data_store(data_store_id, **data_store_params)
+            try:
+                properties[data_store_id] = store.get_search_params_schema()
+            except DataStoreError as err:
+                LOG.warning(
+                    "Could not get search parameters for store %r: %s",
+                    data_store_id,
+                    err,
+                )
+
+        return JsonObjectSchema(
+            title="Search parameters for each data store",
+            properties=properties,
+        )
+
+    @classmethod
+    def describe_data(
+        cls, data_store_id: str, data_store_params: dict, data_id: str
+    ) -> DataDescriptor:
+        """
+        Describe a dataset from a data store.
+
+        Args:
+            data_store_id: The identifier of the data store.
+            data_store_params: Parameters used to initialize the data store.
+            data_id: The identifier of the dataset within the data store.
+
+        Returns:
+            An object describing the dataset, including
+            metadata such as its spatial, temporal, and variable information.
+        """
+        store = new_data_store(data_store_id, **data_store_params)
+        return store.describe_data(data_id)
+
     def _notify(self, event: GeneratorState):
         state = self._states[event.identifier]
         state.update(event)
@@ -144,7 +373,7 @@ class MultiSourceDataStore:
                     [
                         GeneratorState(
                             identifier=data_id,
-                            status=GeneratorStatus.stopped,
+                            status=GeneratorStatus.completed,
                             message="Already preloaded.",
                         )
                         for data_id in data_ids_preloaded
@@ -173,7 +402,7 @@ class MultiSourceDataStore:
                 self._notify(
                     GeneratorState(
                         identifier,
-                        status=GeneratorStatus.stopped,
+                        status=GeneratorStatus.completed,
                         message=f"Dataset {identifier!r} already generated.",
                     )
                 )
@@ -212,7 +441,7 @@ class MultiSourceDataStore:
                 self._notify(
                     GeneratorState(
                         identifier,
-                        status=GeneratorStatus.stopped,
+                        status=GeneratorStatus.completed,
                         message=f"Dataset {identifier!r} finished.",
                     )
                 )

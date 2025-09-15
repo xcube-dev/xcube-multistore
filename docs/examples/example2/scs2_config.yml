@@ -4,24 +4,24 @@ preload_datasets:
       - "france.zip"
   - store: clms
     data_ids:
-      - "tree-cover-density-2018|TCD_2018_010m_fr_03035_v020"
-      - "dominant-leaf-type-2018|DLT_2018_010m_fr_03035_v020"
-      - "forest-type-2018|FTY_2018_010m_fr_03035_v010"
+      - "tree-cover-density-2015|TCD_2015_020m_eu_03035_d05_E30N20"
+      - "dominant-leaf-type-2015|DLT_2015_020m_eu_03035_d04_E30N20"
+      - "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20"
 
 datasets:
   # create dataset for tree maps from CLMS
   - identifier: clms
     grid_mapping: gm_scs2
     variables:
-    - identifier: tree_cover_density_2018
+    - identifier: tree_cover_density
       store: clms
-      data_id: "tree-cover-density-2018|TCD_2018_010m_fr_03035_v020/tree-cover-density-2018|TCD_2018_010m_fr_03035_v020.zarr"
-    - identifier: dominant_leaf_type_2018
+      data_id: "tree-cover-density-2015|TCD_2015_020m_eu_03035_d05_E30N20.zarr"
+    - identifier: dominant_leaf_type
       store: clms
-      data_id: "dominant-leaf-type-2018|DLT_2018_010m_fr_03035_v020/dominant-leaf-type-2018|DLT_2018_010m_fr_03035_v020.zarr"
-    - identifier: forest_type_2018
+      data_id: "dominant-leaf-type-2015|DLT_2015_020m_eu_03035_d04_E30N20.zarr"
+    - identifier: forest_type
       store: clms
-      data_id: "forest-type-2018|FTY_2018_010m_fr_03035_v010/forest-type-2018|FTY_2018_010m_fr_03035_v010.zarr"
+      data_id: "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20.zarr"
   # create dataset for forest disturbance from Senf et al.
   - identifier: senf
     grid_mapping: gm_scs2
