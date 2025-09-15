@@ -90,7 +90,7 @@ class GeneratorDisplay(ABC):
             from IPython.display import display
             from IPython import get_ipython
 
-            # Only use IPyConfigDisplay if we are actually inside a notebook
+            # Only use IPyGeneratorDisplay if we are actually inside a notebook
             shell = get_ipython().__class__.__name__
             if shell == "ZMQInteractiveShell":
                 return IPyGeneratorDisplay(states)
@@ -234,10 +234,12 @@ class ConfigDisplay(ABC):
                 gm_id = config_ds.get("grid_mapping")
                 gm_dispaly = None
                 if gm_id:
-                    if gm_id in self.config.grid_mappings:
-                        gm_dispaly = self.config.grid_mappings[gm_id]
-                    elif gm_id in self.config.datasets:
+                    if gm_id in self.config.datasets:
                         gm_dispaly = f"Like {gm_id!r}"
+                    elif hasattr(self.config, "grid_mappings"):
+                        gm_dispaly = self.config.grid_mappings.get(gm_id)
+                    if gm_dispaly is None:
+                        gm_dispaly = f"Grid mapping identifier {gm_id} not found."
 
                 row = [
                     dataset_id,
