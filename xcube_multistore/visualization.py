@@ -232,14 +232,14 @@ class ConfigDisplay(ABC):
             for config_variable in config_ds["variables"]:
                 config_store = self.config.data_stores[config_variable["store"]]
                 gm_id = config_ds.get("grid_mapping")
-                gm_dispaly = None
+                gm_display = None
                 if gm_id:
                     if gm_id in self.config.datasets:
-                        gm_dispaly = f"Like {gm_id!r}"
+                        gm_display = f"Like {gm_id!r}"
                     elif hasattr(self.config, "grid_mappings"):
-                        gm_dispaly = self.config.grid_mappings.get(gm_id)
-                    if gm_dispaly is None:
-                        gm_dispaly = f"Grid mapping identifier {gm_id} not found."
+                        gm_display = self.config.grid_mappings.get(gm_id)
+                    if gm_display is None:
+                        gm_display = f"Grid mapping identifier {gm_id} not found."
 
                 row = [
                     dataset_id,
@@ -247,7 +247,7 @@ class ConfigDisplay(ABC):
                     _format_params(config_store.get("store_params")),
                     config_variable["data_id"],
                     _format_params(config_variable.get("open_params")),
-                    _format_params(gm_dispaly),
+                    _format_params(gm_display),
                     _format_params(config_ds.get("format_id"), default="Zarr"),
                 ]
 

@@ -293,11 +293,10 @@ class MultiSourceConfig:
             config_store["identifier"]: config_store
             for config_store in config["data_stores"]
         }
-        grid_mappings = config.get("grid_mappings", None)
+        grid_mappings = config.get("grid_mappings")
         if grid_mappings:
             self.grid_mappings = {
-                config_gm["identifier"]: config_gm
-                for config_gm in config["grid_mappings"]
+                config_gm["identifier"]: config_gm for config_gm in grid_mappings
             }
         else:
             self.grid_mappings = None
