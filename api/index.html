@@ -964,18 +964,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#xcube_multistore.multistore.MultiSourceDataStore.describe_data" class="md-nav__link">
+  <a href="#xcube_multistore.multistore.MultiSourceDataStore.get_search_params_schema" class="md-nav__link">
     <span class="md-ellipsis">
-      describe_data
+      get_search_params_schema
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#xcube_multistore.multistore.MultiSourceDataStore.get_search_params_schema" class="md-nav__link">
+  <a href="#xcube_multistore.multistore.MultiSourceDataStore.describe_data" class="md-nav__link">
     <span class="md-ellipsis">
-      get_search_params_schema
+      describe_data
     </span>
   </a>
   
@@ -1143,18 +1143,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#xcube_multistore.multistore.MultiSourceDataStore.describe_data" class="md-nav__link">
+  <a href="#xcube_multistore.multistore.MultiSourceDataStore.get_search_params_schema" class="md-nav__link">
     <span class="md-ellipsis">
-      describe_data
+      get_search_params_schema
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#xcube_multistore.multistore.MultiSourceDataStore.get_search_params_schema" class="md-nav__link">
+  <a href="#xcube_multistore.multistore.MultiSourceDataStore.describe_data" class="md-nav__link">
     <span class="md-ellipsis">
-      get_search_params_schema
+      describe_data
     </span>
   </a>
   
@@ -2016,25 +2016,6 @@ reference to a YAML configuration file.</p>
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">describe_data</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_store_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data_id</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataDescriptor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Describe a dataset from a data store.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data_store_id: The identifier of the data store.</span>
-<span class="sd">            data_store_params: Parameters used to initialize the data store.</span>
-<span class="sd">            data_id: The identifier of the dataset within the data store.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            An object describing the dataset, including</span>
-<span class="sd">            metadata such as its spatial, temporal, and variable information.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">store</span> <span class="o">=</span> <span class="n">new_data_store</span><span class="p">(</span><span class="n">data_store_id</span><span class="p">,</span> <span class="o">**</span><span class="n">data_store_params</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">describe_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
-
-    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_search_params_schema</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_ids_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
@@ -2070,6 +2051,25 @@ reference to a YAML configuration file.</p>
             <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Search parameters for each data store&quot;</span><span class="p">,</span>
             <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">describe_data</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_store_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataDescriptor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Describe a dataset from a data store.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_store_id: The identifier of the data store.</span>
+<span class="sd">            data_store_params: Parameters used to initialize the data store.</span>
+<span class="sd">            data_id: The identifier of the dataset within the data store.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An object describing the dataset, including</span>
+<span class="sd">            metadata such as its spatial, temporal, and variable information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="n">new_data_store</span><span class="p">(</span><span class="n">data_store_id</span><span class="p">,</span> <span class="o">**</span><span class="n">data_store_params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">describe_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">GeneratorState</span><span class="p">):</span>
         <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_states</span><span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">identifier</span><span class="p">]</span>
@@ -3163,6 +3163,184 @@ To see the expected search parameters, use <code>get_search_params_schema</code>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="xcube_multistore.multistore.MultiSourceDataStore.get_search_params_schema" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_search_params_schema</span><span class="p">(</span><span class="n">data_store_ids_params</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieve the search parameter schemas for one or more data stores.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>data_store_ids_params</code>
+            </td>
+            <td>
+                  <code><span title="typing.Mapping">Mapping</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A mapping of data store identifiers to their
+initialization parameters.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="xcube.util.jsonschema.JsonObjectSchema">JsonObjectSchema</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A JSON object schema containing the search parameter</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="xcube.util.jsonschema.JsonObjectSchema">JsonObjectSchema</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>schemas for each data store. Each key is a data store identifier,</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="xcube.util.jsonschema.JsonObjectSchema">JsonObjectSchema</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>and its value is the corresponding search parameter schema.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="logs" open>
+  <summary>Logs</summary>
+  <p>A warning is logged if the search parameter schema cannot be retrieved
+for a given store.</p>
+</details>
+
+            <details class="quote">
+              <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_search_params_schema</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_ids_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve the search parameter schemas for one or more data stores.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_store_ids_params: A mapping of data store identifiers to their</span>
+<span class="sd">            initialization parameters.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A JSON object schema containing the search parameter</span>
+<span class="sd">        schemas for each data store. Each key is a data store identifier,</span>
+<span class="sd">        and its value is the corresponding search parameter schema.</span>
+
+<span class="sd">    Logs:</span>
+<span class="sd">        A warning is logged if the search parameter schema cannot be retrieved</span>
+<span class="sd">        for a given store.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">data_store_id</span><span class="p">,</span> <span class="n">data_store_params</span> <span class="ow">in</span> <span class="n">data_store_ids_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="n">new_data_store</span><span class="p">(</span><span class="n">data_store_id</span><span class="p">,</span> <span class="o">**</span><span class="n">data_store_params</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">properties</span><span class="p">[</span><span class="n">data_store_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">get_search_params_schema</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DataStoreError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Could not get search parameters for store </span><span class="si">%r</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">data_store_id</span><span class="p">,</span>
+                <span class="n">err</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">JsonObjectSchema</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Search parameters for each data store&quot;</span><span class="p">,</span>
+        <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="xcube_multistore.multistore.MultiSourceDataStore.describe_data" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">describe_data</span><span class="p">(</span><span class="n">data_store_id</span><span class="p">,</span> <span class="n">data_store_params</span><span class="p">,</span> <span class="n">data_id</span><span class="p">)</span></code>
 
@@ -3276,167 +3454,7 @@ To see the expected search parameters, use <code>get_search_params_schema</code>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">describe_data</span><span class="p">(</span>
-    <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_store_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data_id</span><span class="p">:</span> <span class="nb">str</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataDescriptor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Describe a dataset from a data store.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data_store_id: The identifier of the data store.</span>
-<span class="sd">        data_store_params: Parameters used to initialize the data store.</span>
-<span class="sd">        data_id: The identifier of the dataset within the data store.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        An object describing the dataset, including</span>
-<span class="sd">        metadata such as its spatial, temporal, and variable information.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">store</span> <span class="o">=</span> <span class="n">new_data_store</span><span class="p">(</span><span class="n">data_store_id</span><span class="p">,</span> <span class="o">**</span><span class="n">data_store_params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">describe_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="xcube_multistore.multistore.MultiSourceDataStore.get_search_params_schema" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_search_params_schema</span><span class="p">(</span><span class="n">data_store_ids_params</span><span class="p">)</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
-  </span>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Retrieve the search parameter schemas for one or more data stores.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>data_store_ids_params</code>
-            </td>
-            <td>
-                  <code><span title="typing.Mapping">Mapping</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A mapping of data store identifiers to their
-initialization parameters.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="xcube.util.jsonschema.JsonObjectSchema">JsonObjectSchema</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A JSON object schema containing the search parameter</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="xcube.util.jsonschema.JsonObjectSchema">JsonObjectSchema</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>schemas for each data store. Each key is a data store identifier,</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="xcube.util.jsonschema.JsonObjectSchema">JsonObjectSchema</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>and its value is the corresponding search parameter schema.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<details class="logs" open>
-  <summary>Logs</summary>
-  <p>A warning is logged if the search parameter schema cannot be retrieved
-for a given store.</p>
-</details>
-
-            <details class="quote">
-              <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span>
 <span class="normal">313</span>
@@ -3454,41 +3472,23 @@ for a given store.</p>
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_search_params_schema</span><span class="p">(</span>
-    <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_ids_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">describe_data</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_store_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data_id</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataDescriptor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retrieve the search parameter schemas for one or more data stores.</span>
+<span class="sd">    Describe a dataset from a data store.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data_store_ids_params: A mapping of data store identifiers to their</span>
-<span class="sd">            initialization parameters.</span>
+<span class="sd">        data_store_id: The identifier of the data store.</span>
+<span class="sd">        data_store_params: Parameters used to initialize the data store.</span>
+<span class="sd">        data_id: The identifier of the dataset within the data store.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A JSON object schema containing the search parameter</span>
-<span class="sd">        schemas for each data store. Each key is a data store identifier,</span>
-<span class="sd">        and its value is the corresponding search parameter schema.</span>
-
-<span class="sd">    Logs:</span>
-<span class="sd">        A warning is logged if the search parameter schema cannot be retrieved</span>
-<span class="sd">        for a given store.</span>
+<span class="sd">        An object describing the dataset, including</span>
+<span class="sd">        metadata such as its spatial, temporal, and variable information.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">properties</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">data_store_id</span><span class="p">,</span> <span class="n">data_store_params</span> <span class="ow">in</span> <span class="n">data_store_ids_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">store</span> <span class="o">=</span> <span class="n">new_data_store</span><span class="p">(</span><span class="n">data_store_id</span><span class="p">,</span> <span class="o">**</span><span class="n">data_store_params</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">properties</span><span class="p">[</span><span class="n">data_store_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">get_search_params_schema</span><span class="p">()</span>
-        <span class="k">except</span> <span class="n">DataStoreError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="n">LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Could not get search parameters for store </span><span class="si">%r</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">data_store_id</span><span class="p">,</span>
-                <span class="n">err</span><span class="p">,</span>
-            <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">JsonObjectSchema</span><span class="p">(</span>
-        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Search parameters for each data store&quot;</span><span class="p">,</span>
-        <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">new_data_store</span><span class="p">(</span><span class="n">data_store_id</span><span class="p">,</span> <span class="o">**</span><span class="n">data_store_params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">describe_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

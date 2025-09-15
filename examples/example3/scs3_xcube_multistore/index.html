@@ -1999,6 +1999,77 @@ config["data_stores"].append(config_store)</cds_personal_access_token></cdse_s3_
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d4072b00-5b5c-4299-b562-0718a9dbea3a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We can view the configuration using the method <code>display_config</code>, executing the follwoing cell.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=03b60f4d-4143-4ee6-af95-3ceb27700808">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-6">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">MultiSourceDataStore</span><span class="o">.</span><span class="n">display_config</span><span class="p">(</span><span class="s2">"scs3_config.yml"</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-6">MultiSourceDataStore.display_config("scs3_config.yml")</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<b style="font-size: 20px;">Configuration</b>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<table>
+<thead>
+<tr><th>User-defined ID  </th><th>Data Store ID  </th><th>Data Store Params                                                                                                   </th><th>Data ID                                                             </th><th>Open Data Params                                                                                                                                                                                                              </th><th>Grid-Mapping      </th><th>Format  </th></tr>
+</thead>
+<tbody>
+<tr><td>AU-Dry_sen2      </td><td>stac-cdse-ardc </td><td>key: &lt;CDSE_S3_key&gt;; secret: &lt;CDSE_S3_secret&gt;                                                                        </td><td>sentinel-2-l2a                                                      </td><td>time_range: ['2019-03-01', '2019-03-15']; bbox: [215577, 8309343, 219577, 8313343]; spatial_res: 10; crs: EPSG:32753; asset_names: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B09', 'B11', 'B12', 'SCL']</td><td>-                 </td><td>Zarr    </td></tr>
+<tr><td>AU-Dry_era5land  </td><td>cds            </td><td>endpoint_url: https://cds.climate.copernicus.eu/api; cds_api_key: &lt;cds_personal_access_token&gt;; normalize_names: True</td><td>reanalysis-era5-land                                                </td><td>variable_names: ['2m_temperature', 'total_precipitation']; time_range: ['2019-03-01', '2019-03-15']; point: [-15.2588, 132.3706]; spatial_res: 0.1                                                                            </td><td>-                 </td><td>Zarr    </td></tr>
+<tr><td>AU-Dry_ccibiomass</td><td>cciodp         </td><td>-                                                                                                                   </td><td>esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m</td><td>time_range: ['2019-01-01', '2019-12-31']                                                                                                                                                                                      </td><td>Like 'AU-Dry_sen2'</td><td>Zarr    </td></tr>
+<tr><td>AU-How_sen2      </td><td>stac-cdse-ardc </td><td>key: &lt;CDSE_S3_key&gt;; secret: &lt;CDSE_S3_secret&gt;                                                                        </td><td>sentinel-2-l2a                                                      </td><td>time_range: ['2019-03-01', '2019-03-15']; bbox: [731912, 8615836, 735912, 8619836]; spatial_res: 10; crs: EPSG:32752; asset_names: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B09', 'B11', 'B12', 'SCL']</td><td>-                 </td><td>Zarr    </td></tr>
+<tr><td>AU-How_era5land  </td><td>cds            </td><td>endpoint_url: https://cds.climate.copernicus.eu/api; cds_api_key: &lt;cds_personal_access_token&gt;; normalize_names: True</td><td>reanalysis-era5-land                                                </td><td>variable_names: ['2m_temperature', 'total_precipitation']; time_range: ['2019-03-01', '2019-03-15']; point: [-12.4943, 131.1523]; spatial_res: 0.1                                                                            </td><td>-                 </td><td>Zarr    </td></tr>
+<tr><td>AU-How_ccibiomass</td><td>cciodp         </td><td>-                                                                                                                   </td><td>esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m</td><td>time_range: ['2019-01-01', '2019-12-31']                                                                                                                                                                                      </td><td>Like 'AU-How_sen2'</td><td>Zarr    </td></tr>
+<tr><td>BE-Lon_sen2      </td><td>stac-cdse-ardc </td><td>key: &lt;CDSE_S3_key&gt;; secret: &lt;CDSE_S3_secret&gt;                                                                        </td><td>sentinel-2-l2a                                                      </td><td>time_range: ['2019-03-01', '2019-03-15']; bbox: [621704, 5599419, 625704, 5603419]; spatial_res: 10; crs: EPSG:32631; asset_names: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B09', 'B11', 'B12', 'SCL']</td><td>-                 </td><td>Zarr    </td></tr>
+<tr><td>BE-Lon_era5land  </td><td>cds            </td><td>endpoint_url: https://cds.climate.copernicus.eu/api; cds_api_key: &lt;cds_personal_access_token&gt;; normalize_names: True</td><td>reanalysis-era5-land                                                </td><td>variable_names: ['2m_temperature', 'total_precipitation']; time_range: ['2019-03-01', '2019-03-15']; point: [50.5516, 4.7462]; spatial_res: 0.1                                                                               </td><td>-                 </td><td>Zarr    </td></tr>
+<tr><td>BE-Lon_ccibiomass</td><td>cciodp         </td><td>-                                                                                                                   </td><td>esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m</td><td>time_range: ['2019-01-01', '2019-12-31']                                                                                                                                                                                      </td><td>Like 'BE-Lon_sen2'</td><td>Zarr    </td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=163fc9bf-2ce8-4b45-801a-00d1a41cc56f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -2019,7 +2090,7 @@ config["data_stores"].append(config_store)</cds_personal_access_token></cdse_s3_
 <div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-6">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -2031,7 +2102,7 @@ config["data_stores"].append(config_store)</cds_personal_access_token></cdse_s3_
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">msds</span> <span class="o">=</span> <span class="n">MultiSourceDataStore</span><span class="p">(</span><span class="s2">"scs3_config.yml"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-6">msds = MultiSourceDataStore("scs3_config.yml")</div>
+<div class="clipboard-copy-txt" id="cell-7">msds = MultiSourceDataStore("scs3_config.yml")</div>
 </div>
 </div>
 </div>
@@ -2090,7 +2161,7 @@ config["data_stores"].append(config_store)</cds_personal_access_token></cdse_s3_
 <div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -2103,7 +2174,7 @@ config["data_stores"].append(config_store)</cds_personal_access_token></cdse_s3_
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">msds</span><span class="o">.</span><span class="n">stores</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="s2">"AU-Dry_sen2.zarr"</span><span class="p">)</span>
 <span class="n">ds</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-7">ds = msds.stores.storage.open_data("AU-Dry_sen2.zarr")
+<div class="clipboard-copy-txt" id="cell-8">ds = msds.stores.storage.open_data("AU-Dry_sen2.zarr")
 ds</div>
 </div>
 </div>
@@ -3533,7 +3604,7 @@ Attributes:
 <div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-9">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3545,7 +3616,7 @@ Attributes:
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">ds</span><span class="o">.</span><span class="n">B04</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-8">ds.B04.isel(time=0).plot(vmin=0., vmax=0.2)</div>
+<div class="clipboard-copy-txt" id="cell-9">ds.B04.isel(time=0).plot(vmin=0., vmax=0.2)</div>
 </div>
 </div>
 </div>
@@ -3578,7 +3649,7 @@ Attributes:
 <div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-9">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-10">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -3591,7 +3662,7 @@ Attributes:
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">msds</span><span class="o">.</span><span class="n">stores</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="s2">"AU-Dry_era5land.zarr"</span><span class="p">)</span>
 <span class="n">ds</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-9">ds = msds.stores.storage.open_data("AU-Dry_era5land.zarr")
+<div class="clipboard-copy-txt" id="cell-10">ds = msds.stores.storage.open_data("AU-Dry_era5land.zarr")
 ds</div>
 </div>
 </div>
@@ -4240,7 +4311,7 @@ Attributes:
 <div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-10">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-11">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4252,7 +4323,7 @@ Attributes:
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">ds</span><span class="o">.</span><span class="n">t2m</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-10">ds.t2m.plot()</div>
+<div class="clipboard-copy-txt" id="cell-11">ds.t2m.plot()</div>
 </div>
 </div>
 </div>
@@ -4285,7 +4356,7 @@ Attributes:
 <div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-11">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-12">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4298,7 +4369,7 @@ Attributes:
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">msds</span><span class="o">.</span><span class="n">stores</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="s2">"AU-Dry_ccibiomass.zarr"</span><span class="p">)</span>
 <span class="n">ds</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-11">ds = msds.stores.storage.open_data("AU-Dry_ccibiomass.zarr")
+<div class="clipboard-copy-txt" id="cell-12">ds = msds.stores.storage.open_data("AU-Dry_ccibiomass.zarr")
 ds</div>
 </div>
 </div>
@@ -4935,7 +5006,7 @@ Attributes: (12/19)
 <div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-12">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-13">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -4947,7 +5018,7 @@ Attributes: (12/19)
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">ds</span><span class="p">[</span><span class="s2">"agb"</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-12">ds["agb"].plot()</div>
+<div class="clipboard-copy-txt" id="cell-13">ds["agb"].plot()</div>
 </div>
 </div>
 </div>
