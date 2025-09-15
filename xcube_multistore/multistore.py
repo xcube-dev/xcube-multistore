@@ -464,12 +464,12 @@ class MultiSourceDataStore:
                 ds = self._open_single_dataset(config_var)
                 if len(ds.data_vars) > 1:
                     name_dict = {
-                        var: f"{config_var["identifier"]}_{var}"
+                        var: f"{config_var['identifier']}_{var}"
                         for var in ds.data_vars.keys()
                     }
                 else:
                     name_dict = {
-                        var: f"{config_var["identifier"]}"
+                        var: f"{config_var['identifier']}"
                         for var in ds.data_vars.keys()
                     }
                 dss.append(ds.rename_vars(name_dict=name_dict))
