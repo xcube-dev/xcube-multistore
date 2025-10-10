@@ -47,6 +47,7 @@ from .sample_data import (
     get_config_dict8,
     get_sample_data_2d,
     get_sample_data_3d,
+    get_config_dict9,
 )
 
 
@@ -202,6 +203,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         config_dict = get_config_dict0()
         with self.assertLogs("xcube.multistore", level="INFO") as cm:
             msds = MultiSourceDataStore(config_dict)
+        print(cm.output)
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(4, len(cm.output))
         msg = "INFO:xcube.multistore:Dataset 'dataset1' finished."
@@ -371,6 +373,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         config_dict = get_config_dict8()
         with self.assertLogs("xcube.multistore", level="INFO") as cm:
             msds = MultiSourceDataStore(config_dict)
+        print(cm.output)
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(4, len(cm.output))
         msg = (
@@ -378,3 +381,24 @@ class MultiSourceDataStoreTest(unittest.TestCase):
             "object has no attribute 'write_data'"
         )
         self.assertEqual(msg, str(cm.output[-1]))
+
+    def test_resample_params_process_dataset(self):
+        config_dict = get_config_dict9()
+        with self.assertLogs("xcube.multistore", level="INFO") as cm:
+            msds = MultiSourceDataStore(config_dict)
+        print(cm.output)
+        # self.assertEqual(4, len(cm.output))
+        self.assertIsInstance(msds, MultiSourceDataStore)
+        config_ds = msds.config.datasets
+        self.assertEqual({'agg_methods': 'max'},
+                         config_ds['dataset_final']['variables'][0][
+                             'resample_params']
+                         )
+        self.assertEqual(
+            {"tile_size": [400, 400]},
+            config_ds["dataset_final"]["variables"][1]["resample_params"],
+        )
+        # print(msds.stores.storage.list_data_ids())
+        # ds = msds.stores.storage.open_data("dataset_final.zarr")
+        # print(ds)
+        # self.assertIsInstance(ds, xr.Dataset)

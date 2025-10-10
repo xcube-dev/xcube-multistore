@@ -222,6 +222,7 @@ class ConfigDisplay(ABC):
                     identifier=config_ds["identifier"],
                     variables=[variable],
                 )
+
                 if "grid_mapping" in config_ds:
                     config_ds_new["grid_mapping"] = config_ds["grid_mapping"]
                 if "format_id" in config_ds:
@@ -229,6 +230,7 @@ class ConfigDisplay(ABC):
                 if "xr_merge_params" in config_ds:
                     config_ds_new["xr_merge_params"] = config_ds["xr_merge_params"]
                 config_ds = config_ds_new
+            print("config_ds", config_ds)
             for config_variable in config_ds["variables"]:
                 config_store = self.config.data_stores[config_variable["store"]]
                 gm_id = config_ds.get("grid_mapping")
@@ -248,6 +250,7 @@ class ConfigDisplay(ABC):
                     config_variable["data_id"],
                     _format_params(config_variable.get("open_params")),
                     _format_params(gm_display),
+                    _format_params(config_variable.get("resample_params")),
                     _format_params(config_ds.get("format_id"), default="Zarr"),
                 ]
 
@@ -262,6 +265,7 @@ class ConfigDisplay(ABC):
                 "Data ID",
                 "Open Data Params",
                 "Grid-Mapping",
+                "Resample Params",
                 "Format",
             ],
             tablefmt=table_format,

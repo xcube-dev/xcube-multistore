@@ -90,7 +90,95 @@ SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
     required=["module_path", "function_name"],
     additional_properties=False,
 )
-
+SCHEMA_RESAMPLE_PARAMS = JsonObjectSchema(
+    properties=dict(
+    variables=JsonComplexSchema(
+        title="A single variable name or iterable of variable names to be "
+              "resampled. If None, all data variables will be processed.",
+        any_of=[JsonStringSchema(), JsonArraySchema()]
+    ),
+    interp_methods=JsonComplexSchema(
+        title="Optional interpolation method to be used for upsampling spatial "
+              "data variables.",
+        description="Tnterpolation method to be used. Can be a single "
+                    "interpolation method for all variables or a dictionary "
+                    "mapping variable names or dtypes to interpolation "
+                    "method.",
+        any_of=[
+            JsonComplexSchema(any_of=[
+                JsonStringSchema(
+                   enum=["nearest", "triangular", "bilinear"]
+                ),
+                JsonNumberSchema(
+                    description="0 => nearest neighbor "
+                                "1 => linear/bilinear",
+                    enum=[0, 1],
+                )
+            ]),
+            JsonObjectSchema(
+                description="A dictionary mapping variable names or dtypes to "
+                            "interpolation as shown in the enum in the sibling "
+                            "schema.",
+            )
+        ],
+        default="0 for integer arrays, else 1"
+    ),
+    agg_methods=JsonComplexSchema(
+        title="Optional aggregation methods for downsampling spatial "
+              "variables.",
+        any_of=[
+            JsonStringSchema(
+                enum=[
+                    "center", "count", "first", "last", "max", "mean", "median",
+                    "mode", "min", "prod", "std", "sum", "var"
+                ]
+            ),
+            JsonObjectSchema(
+                description="A dictionary mapping variable names or dtypes to"
+                            " methods as shown in the enum in the sibling "
+                            "schema."
+            )
+        ],
+        default="Defaults to 'center' for integer arrays, else 'mean'."
+    ),
+    recover_nans=JsonComplexSchema(
+        title="Optional boolean or mapping to enable NaN recovery during "
+              "upsampling (only applies when interpolation method is not "
+              "nearest).",
+        any_of=[
+            JsonBooleanSchema(),
+            JsonObjectSchema(
+                description="A dictionary mapping variable names or dtypes to "
+                            "booleans"
+            )
+        ],
+        default="False"
+    ),
+    fill_values=JsonComplexSchema(
+        title="Optional fill value(s) for areas outside input coverage.",
+        any_of=[
+            JsonNumberSchema(),
+            JsonObjectSchema(
+                description="A dictionary by variable or type"
+            )
+        ],
+        default="Defaults based on data type are used:"
+            "- float: NaN"
+            "- uint8: 255"
+            "- uint16: 65535"
+            "- other ints: -1"
+    ),
+    tile_size=JsonComplexSchema(
+        title="Optional tile size used when generating a regular grid from "
+              "an irregular source grid mapping. Only used if `target_gm` is not "
+              "provided.",
+        any_of=[
+            JsonNumberSchema(),
+            JsonArraySchema(items=JsonNumberSchema(), min_items=2, max_items=2)
+        ]
+    ),
+    )
+)
 SCHEMA_DATA_VARIABLE = JsonObjectSchema(
     properties=dict(
         identifier=SCHEMA_IDENTIFIER,
@@ -98,6 +186,7 @@ SCHEMA_DATA_VARIABLE = JsonObjectSchema(
         data_id=SCHEMA_DATA_ID,
         open_params=SCHEMA_OPEN_PARAMS,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
+        resample_params=SCHEMA_RESAMPLE_PARAMS,
     ),
     required=["identifier", "store", "data_id"],
     additional_properties=False,
@@ -125,6 +214,7 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
         open_params=SCHEMA_OPEN_PARAMS,
         format_id=SCHEMA_FORMAT_ID,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
+        resample_params=SCHEMA_RESAMPLE_PARAMS,
     ),
     required=["identifier", "store", "data_id"],
     additional_properties=False,
