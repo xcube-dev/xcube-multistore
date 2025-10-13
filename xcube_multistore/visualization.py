@@ -230,7 +230,7 @@ class ConfigDisplay(ABC):
                 if "xr_merge_params" in config_ds:
                     config_ds_new["xr_merge_params"] = config_ds["xr_merge_params"]
                 config_ds = config_ds_new
-            print("config_ds", config_ds)
+
             for config_variable in config_ds["variables"]:
                 config_store = self.config.data_stores[config_variable["store"]]
                 gm_id = config_ds.get("grid_mapping")

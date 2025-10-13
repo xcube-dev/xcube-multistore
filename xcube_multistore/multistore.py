@@ -522,9 +522,6 @@ class MultiSourceDataStore:
         if "grid_mapping" in config:
             if hasattr(self._grid_mappings, config["grid_mapping"]):
                 target_gm = getattr(self._grid_mappings, config["grid_mapping"])
-                print("target_gn::::", target_gm, type(target_gm))
-                print("self._grid_mappings::::", self._grid_mappings, type(self._grid_mappings))
-                print("config[grid_mapping]::::", config["grid_mapping"], type(config["grid_mapping"]))
             else:
                 config_ref = self.config.datasets[config["grid_mapping"]]
                 data_id = _get_data_id(config_ref)
@@ -546,7 +543,6 @@ class MultiSourceDataStore:
             ]
 
             resample_params = config.get("resample_params") or {}
-            print('resample_params::', resample_params)
 
             ds = clip_dataset_by_geometry(ds, geometry=bbox)
             ds = resample_in_space(ds, target_gm=target_gm, **resample_params)
