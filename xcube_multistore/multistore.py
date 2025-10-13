@@ -29,7 +29,6 @@ import pyproj
 import xarray as xr
 from xcube.core.chunk import chunk_dataset
 from xcube.core.geom import clip_dataset_by_geometry
-from xcube.core.gridmapping import GridMapping
 from xcube.core.store import (
     list_data_store_ids,
     get_data_store_params_schema,
@@ -38,6 +37,7 @@ from xcube.core.store import (
     new_data_store,
 )
 from xcube_resampling import resample_in_space
+from xcube_resampling.gridmapping import GridMapping
 from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema
 
 from .config import MultiSourceConfig

@@ -203,7 +203,6 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         config_dict = get_config_dict0()
         with self.assertLogs("xcube.multistore", level="INFO") as cm:
             msds = MultiSourceDataStore(config_dict)
-        print(cm.output)
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(4, len(cm.output))
         msg = "INFO:xcube.multistore:Dataset 'dataset1' finished."
@@ -373,7 +372,6 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         config_dict = get_config_dict8()
         with self.assertLogs("xcube.multistore", level="INFO") as cm:
             msds = MultiSourceDataStore(config_dict)
-        print(cm.output)
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(4, len(cm.output))
         msg = (
@@ -386,8 +384,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         config_dict = get_config_dict9()
         with self.assertLogs("xcube.multistore", level="INFO") as cm:
             msds = MultiSourceDataStore(config_dict)
-        print(cm.output)
-        # self.assertEqual(4, len(cm.output))
+        self.assertEqual(4, len(cm.output))
         self.assertIsInstance(msds, MultiSourceDataStore)
         config_ds = msds.config.datasets
         self.assertEqual({'agg_methods': 'max'},
@@ -398,7 +395,5 @@ class MultiSourceDataStoreTest(unittest.TestCase):
             {"tile_size": [400, 400]},
             config_ds["dataset_final"]["variables"][1]["resample_params"],
         )
-        # print(msds.stores.storage.list_data_ids())
-        # ds = msds.stores.storage.open_data("dataset_final.zarr")
-        # print(ds)
-        # self.assertIsInstance(ds, xr.Dataset)
+        ds = msds.stores.storage.open_data("dataset_final.zarr")
+        self.assertIsInstance(ds, xr.Dataset)
