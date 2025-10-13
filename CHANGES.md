@@ -1,3 +1,11 @@
+## Changes in 0.3.0 (in development)
+
+* Switched to the new unified `xcube-resampling` library from 
+  `xcube.core.resampling`.
+* Added `resample_params` support and updated the config visualization to
+  display the `Resample Params`.
+
+
 ## Changes in 0.2.0
 
 * Added the method `display_config`, which provides an overview of the cube generation 
