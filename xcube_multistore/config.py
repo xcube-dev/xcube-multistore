@@ -100,7 +100,7 @@ SCHEMA_RESAMPLE_PARAMS = JsonObjectSchema(
     interp_methods=JsonComplexSchema(
         title="Optional interpolation method to be used for upsampling spatial "
               "data variables.",
-        description="Tnterpolation method to be used. Can be a single "
+        description="Interpolation method to be used. Can be a single "
                     "interpolation method for all variables or a dictionary "
                     "mapping variable names or dtypes to interpolation "
                     "method.",
