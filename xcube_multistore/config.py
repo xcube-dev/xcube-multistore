@@ -163,10 +163,10 @@ SCHEMA_RESAMPLE_PARAMS = JsonObjectSchema(
             )
         ],
         default="Defaults based on data type are used:"
-            "- float: NaN"
-            "- uint8: 255"
-            "- uint16: 65535"
-            "- other ints: -1"
+            " `float`: `NaN`, "
+            "  `uint8`: `255`, "
+            "  `uint16`: `65535`, "
+            "  `other ints`: `-1`"
     ),
     tile_size=JsonComplexSchema(
         title="Optional tile size used when generating a regular grid from "
