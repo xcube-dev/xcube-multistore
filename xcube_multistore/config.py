@@ -144,7 +144,7 @@ SCHEMA_RESAMPLE_PARAMS = JsonObjectSchema(
     recover_nans=JsonComplexSchema(
         title="Optional boolean or mapping to enable NaN recovery during "
               "upsampling (only applies when interpolation method is not "
-              "nearest).",
+              "`nearest`).",
         any_of=[
             JsonBooleanSchema(),
             JsonObjectSchema(
