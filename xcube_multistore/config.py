@@ -90,7 +90,7 @@ SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
     required=["module_path", "function_name"],
     additional_properties=False,
 )
-SCHEMA_RESAMPLE_PARAMS = JsonObjectSchema(
+SCHEMA_SPATIAL_RESAMPLE_PARAMS = JsonObjectSchema(
     properties=dict(
     variables=JsonComplexSchema(
         title="A single variable name or iterable of variable names to be "
@@ -105,21 +105,19 @@ SCHEMA_RESAMPLE_PARAMS = JsonObjectSchema(
                     "mapping variable names or dtypes to interpolation "
                     "method.",
         any_of=[
-            JsonComplexSchema(any_of=[
-                JsonStringSchema(
-                   enum=["nearest", "triangular", "bilinear"]
-                ),
-                JsonNumberSchema(
-                    description="0 => nearest neighbor "
-                                "1 => linear/bilinear",
-                    enum=[0, 1],
-                )
-            ]),
+            JsonStringSchema(
+                enum=["nearest", "triangular", "bilinear"]
+            ),
+            JsonNumberSchema(
+                description="0 => nearest neighbor "
+                            "1 => linear/bilinear",
+                enum=[0, 1],
+            ),
             JsonObjectSchema(
                 description="A dictionary mapping variable names or dtypes to "
                             "interpolation as shown in the enum in the sibling "
                             "schema.",
-            )
+            ),
         ],
         default="0 for integer arrays, else 1"
     ),
@@ -186,7 +184,7 @@ SCHEMA_DATA_VARIABLE = JsonObjectSchema(
         data_id=SCHEMA_DATA_ID,
         open_params=SCHEMA_OPEN_PARAMS,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
-        resample_params=SCHEMA_RESAMPLE_PARAMS,
+        spatial_resample_params=SCHEMA_SPATIAL_RESAMPLE_PARAMS,
     ),
     required=["identifier", "store", "data_id"],
     additional_properties=False,
@@ -214,7 +212,7 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
         open_params=SCHEMA_OPEN_PARAMS,
         format_id=SCHEMA_FORMAT_ID,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
-        resample_params=SCHEMA_RESAMPLE_PARAMS,
+        spatial_resample_params=SCHEMA_SPATIAL_RESAMPLE_PARAMS,
     ),
     required=["identifier", "store", "data_id"],
     additional_properties=False,

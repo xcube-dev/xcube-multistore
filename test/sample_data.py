@@ -345,7 +345,7 @@ def get_config_dict9():
                         "identifier": "data_var1",
                         "store": "datasource",
                         "data_id": "dataset1.zarr",
-                        "resample_params": {
+                        "spatial_resample_params": {
                             "agg_methods": "max",
                         },
                     },
@@ -391,7 +391,7 @@ def get_config_dict10():
                         "identifier": "data_var1",
                         "store": "datasource",
                         "data_id": "dataset1.zarr",
-                        "resample_params": {
+                        "spatial_resample_params": {
                             "interp_methods": "nearest",
                         },
                     },

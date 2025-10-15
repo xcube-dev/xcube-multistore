@@ -542,10 +542,10 @@ class MultiSourceDataStore:
                 bbox[3] + 2 * source_gm.y_res,
             ]
 
-            resample_params = config.get("resample_params") or {}
+            spatial_resample_params = config.get("spatial_resample_params") or {}
 
             ds = clip_dataset_by_geometry(ds, geometry=bbox)
-            ds = resample_in_space(ds, target_gm=target_gm, **resample_params)
+            ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
             # this is needed since resample in space returns one chunk along the time
             # axis; this part can be removed once https://github.com/xcube-dev/xcube/issues/1124
             # is resolved.
