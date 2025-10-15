@@ -2,8 +2,8 @@
 
 * Switched to the new unified `xcube-resampling` library from 
   `xcube.core.resampling`.
-* Added `resample_params` support and updated the config visualization to
-  display the `Resample Params`.
+* Added `spatial_resample_params` support and updated the config visualization to
+  display the `Spatial Resample Params`.
 
 
 ## Changes in 0.2.0
