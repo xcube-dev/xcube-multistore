@@ -48,6 +48,7 @@ from .sample_data import (
     get_sample_data_2d,
     get_sample_data_3d,
     get_config_dict9,
+    get_config_dict10,
 )
 
 
@@ -391,9 +392,25 @@ class MultiSourceDataStoreTest(unittest.TestCase):
                          config_ds['dataset_final']['variables'][0][
                              'resample_params']
                          )
-        self.assertEqual(
-            {"tile_size": [400, 400]},
-            config_ds["dataset_final"]["variables"][1]["resample_params"],
-        )
         ds = msds.stores.storage.open_data("dataset_final.zarr")
         self.assertIsInstance(ds, xr.Dataset)
+        self.assertEqual({'lat': (2, 1), 'lon': (2, 1)},
+                         ds.data_var1.chunksizes)
+        self.assertEqual({'lat': 3, 'lon': 3}, ds.dims)
+
+    def test_resample_params_process_dataset_interpolate(self):
+        config_dict = get_config_dict10()
+        with self.assertLogs("xcube.multistore", level="INFO") as cm:
+            msds = MultiSourceDataStore(config_dict)
+        self.assertEqual(4, len(cm.output))
+        self.assertIsInstance(msds, MultiSourceDataStore)
+        config_ds = msds.config.datasets
+        self.assertEqual({'interp_methods': 'nearest'},
+                         config_ds['dataset_final']['variables'][0][
+                             'resample_params']
+                         )
+        ds = msds.stores.storage.open_data("dataset_final.zarr")
+        self.assertIsInstance(ds, xr.Dataset)
+        self.assertEqual({'lat': (10, 10, 10), 'lon': (10, 10, 10)},
+                         ds.data_var1.chunksizes)
+        self.assertEqual({"lat": 30, "lon": 30}, ds.dims)
