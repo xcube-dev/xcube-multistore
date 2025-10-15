@@ -250,7 +250,8 @@ class ConfigDisplay(ABC):
                     config_variable["data_id"],
                     _format_params(config_variable.get("open_params")),
                     _format_params(gm_display),
-                    _format_params(config_variable.get("resample_params")),
+                    _format_params(config_variable.get(
+                        "spatial_resample_params")),
                     _format_params(config_ds.get("format_id"), default="Zarr"),
                 ]
 
@@ -265,7 +266,7 @@ class ConfigDisplay(ABC):
                 "Data ID",
                 "Open Data Params",
                 "Grid-Mapping",
-                "Resample Params",
+                "Spatial Resample Params",
                 "Format",
             ],
             tablefmt=table_format,
