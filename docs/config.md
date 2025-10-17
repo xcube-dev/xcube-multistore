@@ -172,7 +172,9 @@ input and return a modified `xarray.Dataset` as output.
 
 ### spatial_resample_params
 This section enables user to define the parameters for spatial resampling of 
-the dataset. For the supported params, please see [here](* * **[spatial_resample_params](#spatial_resample_params)**)
+the dataset. For a full list of supported parameters, refer to the
+[`xcube_resampling.resample_in_space` Python API documentation](https://xcube-dev.github.io/xcube-resampling/api/#xcube_resampling.resample_in_space).
+
 
 _NOTE_: The first 3 arguments `(source_ds, target_gm, source_gm)` in the `xcube_resampling.resample_in_space` are not
 required and will be inferred automatically from the config file's dataset and 
