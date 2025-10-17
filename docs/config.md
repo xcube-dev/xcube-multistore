@@ -55,7 +55,7 @@ This configures a dataset object from a single data source.
 * **[open_params](#open_params)**
 * **[format_id](#format_id)**
 * **[custom_processing](#custom_processing)**
-* * **[spatial_resample_params](#spatial_resample_params)**
+* **[spatial_resample_params](#spatial_resample_params)**
 
 
 #### multi dataset object
