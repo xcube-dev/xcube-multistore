@@ -82,7 +82,7 @@ This configures a variable object, which is stored as a data variable within a s
 * **[data_id](#data_id)**
 * **[open_params](#open_params)**
 * **[custom_processing](#custom_processing)**
-* * **[spatial_resample_params](#spatial_resample_params)**
+* **[spatial_resample_params](#spatial_resample_params)**
 
 ### store object
 This configures a store object representing one xcube data store instance.
