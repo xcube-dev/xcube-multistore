@@ -29,7 +29,6 @@ import pyproj
 import xarray as xr
 from xcube.core.chunk import chunk_dataset
 from xcube.core.geom import clip_dataset_by_geometry
-from xcube.core.gridmapping import GridMapping
 from xcube.core.store import (
     list_data_store_ids,
     get_data_store_params_schema,
@@ -37,7 +36,8 @@ from xcube.core.store import (
     DataDescriptor,
     new_data_store,
 )
-from xcube.core.resampling.spatial import resample_in_space
+from xcube_resampling import resample_in_space
+from xcube_resampling.gridmapping import GridMapping
 from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema
 
 from .config import MultiSourceConfig
@@ -542,8 +542,10 @@ class MultiSourceDataStore:
                 bbox[3] + 2 * source_gm.y_res,
             ]
 
+            spatial_resample_params = config.get("spatial_resample_params") or {}
+
             ds = clip_dataset_by_geometry(ds, geometry=bbox)
-            ds = resample_in_space(ds, target_gm=target_gm, encode_cf=True)
+            ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
             # this is needed since resample in space returns one chunk along the time
             # axis; this part can be removed once https://github.com/xcube-dev/xcube/issues/1124
             # is resolved.

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from xcube.core.gridmapping import GridMapping
+from xcube_resampling.gridmapping import GridMapping
 
 from .config import MultiSourceConfig
 

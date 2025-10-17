@@ -55,6 +55,8 @@ This configures a dataset object from a single data source.
 * **[open_params](#open_params)**
 * **[format_id](#format_id)**
 * **[custom_processing](#custom_processing)**
+* **[spatial_resample_params](#spatial_resample_params)**
+
 
 #### multi dataset object
 This configures a datasets from multiple data sources. Each [variable object](#variable-object) is 
@@ -80,7 +82,7 @@ This configures a variable object, which is stored as a data variable within a s
 * **[data_id](#data_id)**
 * **[open_params](#open_params)**
 * **[custom_processing](#custom_processing)**
-
+* **[spatial_resample_params](#spatial_resample_params)**
 
 ### store object
 This configures a store object representing one xcube data store instance.
@@ -167,6 +169,16 @@ This section enables users to define a Python function that is executed after op
 the data. It allows for custom dataset manipulation, making it particularly useful 
 for handling unstructured datasets. The function must accept an `xarray.Dataset` as 
 input and return a modified `xarray.Dataset` as output.
+
+### spatial_resample_params
+This section enables user to define the parameters for spatial resampling of 
+the dataset. For a full list of supported parameters, refer to the
+[`xcube_resampling.resample_in_space` Python API documentation](https://xcube-dev.github.io/xcube-resampling/api/#xcube_resampling.resample_in_space).
+
+
+_NOTE_: The first 3 arguments `(source_ds, target_gm, source_gm)` in the `xcube_resampling.resample_in_space` are not
+required and will be inferred automatically from the config file's dataset and 
+gridmapping section.
 
 **Properties**:  
 

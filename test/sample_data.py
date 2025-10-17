@@ -334,6 +334,98 @@ def get_config_dict8():
     }
 
 
+def get_config_dict9():
+    return {
+        "datasets": [
+            {
+                "identifier": "dataset_final",
+                "grid_mapping": "grid1",
+                "variables": [
+                    {
+                        "identifier": "data_var1",
+                        "store": "datasource",
+                        "data_id": "dataset1.zarr",
+                        "spatial_resample_params": {
+                            "agg_methods": "max",
+                        },
+                    },
+                ],
+            },
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "memory",
+                "store_params": {"root": "data"},
+            },
+            {
+                "identifier": "datasource",
+                "store_id": "memory",
+                "store_params": {"root": "datasource"},
+            },
+        ],
+        "grid_mappings": [
+            {
+                "identifier": "grid1",
+                "bbox": [0, 30, 30, 60],
+                "spatial_res": 10,
+                "crs": "EPSG:4326",
+                "tile_size": 2,
+            }
+        ],
+        "general": {
+            "dask_scheduler": "single-threaded",
+            "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+        },
+    }
+
+
+def get_config_dict10():
+    return {
+        "datasets": [
+            {
+                "identifier": "dataset_final",
+                "grid_mapping": "grid1",
+                "variables": [
+                    {
+                        "identifier": "data_var1",
+                        "store": "datasource",
+                        "data_id": "dataset1.zarr",
+                        "spatial_resample_params": {
+                            "interp_methods": "nearest",
+                        },
+                    },
+
+                ],
+            },
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "memory",
+                "store_params": {"root": "data"},
+            },
+            {
+                "identifier": "datasource",
+                "store_id": "memory",
+                "store_params": {"root": "datasource"},
+            },
+        ],
+        "grid_mappings": [
+            {
+                "identifier": "grid1",
+                "bbox": [0, 30, 30, 60],
+                "spatial_res": 1,
+                "crs": "EPSG:4326",
+                "tile_size": 10,
+            }
+        ],
+        "general": {
+            "dask_scheduler": "single-threaded",
+            "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+        },
+    }
+
 def get_sample_data_2d():
     lon = np.arange(-5.0, 36.0, 5.0)
     lat = np.arange(65.0, 24.0, -5.0)
