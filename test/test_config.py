@@ -67,7 +67,6 @@ class MultiSourceConfigTest(unittest.TestCase):
         self.assertIn("tile_size", schema.properties["grid_mappings"].items.properties)
         self.assertIn("visualize", schema.properties["general"].properties)
         self.assertIn("force_preload", schema.properties["general"].properties)
-        self.assertIn("dask_scheduler", schema.properties["general"].properties)
         self.assertIn("gdal_http_params", schema.properties["general"].properties)
 
     def test_init(self):
@@ -92,7 +91,6 @@ class MultiSourceConfigTest(unittest.TestCase):
             )
             self.assertEqual(config.general["visualize"], False)
             self.assertEqual(config.general["force_preload"], False)
-            self.assertEqual(config.general["dask_scheduler"], "single-threaded")
             self.assertDictEqual(gdal_http_params, config.general["gdal_http_params"])
 
         # test config given as dict

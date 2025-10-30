@@ -24,7 +24,6 @@ import os
 from collections import defaultdict
 from typing import Any
 
-import dask
 import fsspec
 import yaml
 from xcube.util.jsonschema import (
@@ -91,91 +90,134 @@ SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
     additional_properties=False,
 )
 SCHEMA_SPATIAL_RESAMPLE_PARAMS = JsonObjectSchema(
+    title="Resample parameters used for xcube_resampling.resample_in_space",
+    description="For further information on the parameters refer to "
+    "https://xcube-dev.github.io/xcube-resampling/api/#xcube_resampling.resample_in_space.",
     properties=dict(
-    variables=JsonComplexSchema(
-        title="A single variable name or iterable of variable names to be "
-              "resampled. If None, all data variables will be processed.",
-        any_of=[JsonStringSchema(), JsonArraySchema()]
-    ),
-    interp_methods=JsonComplexSchema(
-        title="Optional interpolation method to be used for upsampling spatial "
-              "data variables.",
-        description="Interpolation method to be used. Can be a single "
-                    "interpolation method for all variables or a dictionary "
-                    "mapping variable names or dtypes to interpolation "
-                    "method.",
-        any_of=[
-            JsonStringSchema(
-                enum=["nearest", "triangular", "bilinear"]
-            ),
-            JsonNumberSchema(
-                description="0 => nearest neighbor "
-                            "1 => linear/bilinear",
-                enum=[0, 1],
-            ),
-            JsonObjectSchema(
-                description="A dictionary mapping variable names or dtypes to "
-                            "interpolation as shown in the enum in the sibling "
-                            "schema.",
-            ),
-        ],
-        default="0 for integer arrays, else 1"
-    ),
-    agg_methods=JsonComplexSchema(
-        title="Optional aggregation methods for downsampling spatial "
-              "variables.",
-        any_of=[
-            JsonStringSchema(
-                enum=[
-                    "center", "count", "first", "last", "max", "mean", "median",
-                    "mode", "min", "prod", "std", "sum", "var"
-                ]
-            ),
-            JsonObjectSchema(
-                description="A dictionary mapping variable names or dtypes to"
-                            " methods as shown in the enum in the sibling "
-                            "schema."
-            )
-        ],
-        default="Defaults to 'center' for integer arrays, else 'mean'."
-    ),
-    recover_nans=JsonComplexSchema(
-        title="Optional boolean or mapping to enable NaN recovery during "
-              "upsampling (only applies when interpolation method is not "
-              "`nearest`).",
-        any_of=[
-            JsonBooleanSchema(),
-            JsonObjectSchema(
-                description="A dictionary mapping variable names or dtypes to "
-                            "booleans"
-            )
-        ],
-        default="False"
-    ),
-    fill_values=JsonComplexSchema(
-        title="Optional fill value(s) for areas outside input coverage.",
-        any_of=[
-            JsonNumberSchema(),
-            JsonObjectSchema(
-                description="A dictionary by variable or type"
-            )
-        ],
-        default="Defaults based on data type are used:"
+        variables=JsonComplexSchema(
+            title="A single variable name or iterable of variable names to be "
+            "resampled. If None, all data variables will be processed.",
+            any_of=[JsonStringSchema(), JsonArraySchema()],
+        ),
+        interp_methods=JsonComplexSchema(
+            title="Optional interpolation method to be used for upsampling spatial "
+            "data variables.",
+            description="Interpolation method to be used. Can be a single "
+            "interpolation method for all variables or a dictionary "
+            "mapping variable names or dtypes to interpolation "
+            "method.",
+            any_of=[
+                JsonStringSchema(enum=["nearest", "triangular", "bilinear"]),
+                JsonNumberSchema(
+                    description="0 => nearest neighbor " "1 => linear/bilinear",
+                    enum=[0, 1],
+                ),
+                JsonObjectSchema(
+                    description="A dictionary mapping variable names or dtypes to "
+                    "interpolation as shown in the enum in the sibling "
+                    "schema.",
+                ),
+            ],
+            default="0 for integer arrays, else 1",
+        ),
+        agg_methods=JsonComplexSchema(
+            title="Optional aggregation methods for downsampling spatial " "variables.",
+            any_of=[
+                JsonStringSchema(
+                    enum=[
+                        "center",
+                        "count",
+                        "first",
+                        "last",
+                        "max",
+                        "mean",
+                        "median",
+                        "mode",
+                        "min",
+                        "prod",
+                        "std",
+                        "sum",
+                        "var",
+                    ]
+                ),
+                JsonObjectSchema(
+                    description="A dictionary mapping variable names or dtypes to"
+                    " methods as shown in the enum in the sibling "
+                    "schema."
+                ),
+            ],
+            default="Defaults to 'center' for integer arrays, else 'mean'.",
+        ),
+        recover_nans=JsonComplexSchema(
+            title="Optional boolean or mapping to enable NaN recovery during "
+            "upsampling (only applies when interpolation method is not "
+            "`nearest`).",
+            any_of=[
+                JsonBooleanSchema(),
+                JsonObjectSchema(
+                    description="A dictionary mapping variable names or dtypes to "
+                    "booleans"
+                ),
+            ],
+            default="False",
+        ),
+        fill_values=JsonComplexSchema(
+            title="Optional fill value(s) for areas outside input coverage.",
+            any_of=[
+                JsonNumberSchema(),
+                JsonObjectSchema(description="A dictionary by variable or type"),
+            ],
+            default="Defaults based on data type are used:"
             " `float`: `NaN`, "
             "  `uint8`: `255`, "
             "  `uint16`: `65535`, "
-            "  `other ints`: `-1`"
+            "  `other ints`: `-1`",
+        ),
+        tile_size=JsonComplexSchema(
+            title="Optional tile size used when generating a regular grid from "
+            "an irregular source grid mapping. Only used if `target_gm` is not "
+            "provided.",
+            any_of=[
+                JsonNumberSchema(),
+                JsonArraySchema(items=JsonNumberSchema(), min_items=2, max_items=2),
+            ],
+        ),
     ),
-    tile_size=JsonComplexSchema(
-        title="Optional tile size used when generating a regular grid from "
-              "an irregular source grid mapping. Only used if `target_gm` is not "
-              "provided.",
-        any_of=[
-            JsonNumberSchema(),
-            JsonArraySchema(items=JsonNumberSchema(), min_items=2, max_items=2)
-        ]
+)
+SCHEMA_TEMPORAL_RESAMPLE_PARAMS = JsonObjectSchema(
+    title="Resample parameters used for xcube_resampling.resample_in_time",
+    description="For further information on the parameters refer to "
+    "https://xcube-dev.github.io/xcube-resampling/api/#xcube_resampling.resample_in_time.",
+    properties=dict(
+        frequency=JsonStringSchema(
+            title="Target temporal frequency",
+            description="Target temporal frequency, following Pandas period aliases. "
+            "Format `<count><period>`, where `<period>` may be one of 's', 'min', 'h', "
+            "'D', 'W', 'M', 'Q', 'Y'.",
+        ),
+        variables=JsonComplexSchema(
+            title="A single variable name or iterable of variable names to be "
+            "resampled. If None, all data variables will be processed.",
+            any_of=[JsonStringSchema(), JsonArraySchema()],
+        ),
+        interp_methods=JsonComplexSchema(
+            title="Optional interpolation method(s) for upsampling.",
+            any_of=[JsonStringSchema(), JsonArraySchema(), JsonObjectSchema()],
+        ),
+        agg_methods=JsonComplexSchema(
+            title="Optional aggregation method(s) for downsampling.",
+            any_of=[JsonStringSchema(), JsonArraySchema(), JsonObjectSchema()],
+        ),
+        offset=JsonStringSchema(
+            title="offset to adjust resampled time labels. Uses the same syntax "
+            "as frequency."
+        ),
+        tolerance=JsonStringSchema(
+            title="maximum allowed distance for selective downsampling methods (e.g., "
+            "`'backfill'`, `'ffill'`, `'nearest'`). Defaults to the resampling "
+            "frequency."
+        ),
     ),
-    )
 )
 SCHEMA_DATA_VARIABLE = JsonObjectSchema(
     properties=dict(
@@ -185,6 +227,7 @@ SCHEMA_DATA_VARIABLE = JsonObjectSchema(
         open_params=SCHEMA_OPEN_PARAMS,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
         spatial_resample_params=SCHEMA_SPATIAL_RESAMPLE_PARAMS,
+        temporal_resample_params=SCHEMA_TEMPORAL_RESAMPLE_PARAMS,
     ),
     required=["identifier", "store", "data_id"],
     additional_properties=False,
@@ -213,6 +256,7 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
         format_id=SCHEMA_FORMAT_ID,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
         spatial_resample_params=SCHEMA_SPATIAL_RESAMPLE_PARAMS,
+        temporal_resample_params=SCHEMA_TEMPORAL_RESAMPLE_PARAMS,
     ),
     required=["identifier", "store", "data_id"],
     additional_properties=False,
@@ -306,11 +350,6 @@ SCHEMA_FORCE_PRELOAD = JsonBooleanSchema(
     "preloaded. If False, only non-preloaded datasets will be preloaded.",
     default=True,
 )
-SCHEMA_DASK_SCHEDULER = JsonStringSchema(
-    description="Scheduler mode put into `dask.config.set(scheduler=<scheduler_mode>)`",
-    enum=["threads", "processes", "single-threaded", "sync", "distributed"],
-    default="threads",
-)
 SCHEMA_GDAL_HTTP_PARAMS = JsonObjectSchema(
     properties=dict(
         gdal_http_max_retry=JsonNumberSchema(
@@ -337,7 +376,6 @@ SCHEMA_GENERAL = JsonObjectSchema(
     properties=dict(
         visualize=SCHEMA_VISUALIZE,
         force_preload=SCHEMA_FORCE_PRELOAD,
-        dask_scheduler=SCHEMA_DASK_SCHEDULER,
         gdal_http_params=SCHEMA_GDAL_HTTP_PARAMS,
     ),
     required=[],
@@ -397,11 +435,9 @@ class MultiSourceConfig:
 
     def _general_setup(self):
         if "visualize" not in self.general:
-            self.general["visualize"] = True if _is_jupyter_notebook() else False
+            self.general["visualize"] = True
         if "force_preload" not in self.general:
             self.general["force_preload"] = False
-        if "dask_scheduler" not in self.general:
-            self.general["dask_scheduler"] = "threads"
         _GDAL_HTTP_MAX_RETRY_DEFAULT = 10
         _GDAL_HTTP_RETRY_DELAY_DEFAULT = 5
         if "gdal_http_params" not in self.general:
@@ -419,7 +455,6 @@ class MultiSourceConfig:
             ] = _GDAL_HTTP_RETRY_DELAY_DEFAULT
 
         # apply general setup
-        dask.config.set(scheduler=self.general["dask_scheduler"])
         os.environ["GDAL_HTTP_MAX_RETRY"] = str(
             self.general["gdal_http_params"]["gdal_http_max_retry"]
         )

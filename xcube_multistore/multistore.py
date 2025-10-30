@@ -22,13 +22,14 @@
 
 import copy
 import importlib
+import datetime
+import sys
 from typing import Any, Mapping
 
+import geopandas as gpd
+from shapely.geometry import box, Point
 import numpy as np
-import pyproj
 import xarray as xr
-from xcube.core.chunk import chunk_dataset
-from xcube.core.geom import clip_dataset_by_geometry
 from xcube.core.store import (
     list_data_store_ids,
     get_data_store_params_schema,
@@ -36,9 +37,11 @@ from xcube.core.store import (
     DataDescriptor,
     new_data_store,
 )
-from xcube_resampling import resample_in_space
+from xcube_resampling import resample_in_space, resample_in_time
 from xcube_resampling.gridmapping import GridMapping
+from xcube_resampling.utils import resolution_meters_to_degrees
 from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema
+from xcube.core.mldataset import MultiLevelDataset
 
 from .config import MultiSourceConfig
 from .constants import LOG, MAP_FORMAT_ID_FILE_EXT, NAME_WRITE_STORE
@@ -77,7 +80,7 @@ class MultiSourceDataStore:
     def __init__(self, config: str | dict[str, Any]):
         config = MultiSourceConfig(config)
         self.config = config
-        self.stores = DataStores.setup_data_stores(config)
+        self.stores = None
         if config.grid_mappings:
             self._grid_mappings = GridMappings.setup_grid_mappings(config)
         else:
@@ -88,14 +91,17 @@ class MultiSourceDataStore:
             )
             for identifier, config_ds in config.datasets.items()
         }
+        if self.config.general["visualize"]:
+            self._display = GeneratorDisplay.create(list(self._states.values()))
 
+    def generate(self):
+        self.stores = DataStores.setup_data_stores(self.config)
         # preload data, which is not preloaded as default
-        if config.preload_datasets is not None:
+        if self.config.preload_datasets is not None:
             self._preload_datasets()
 
         # generate data cubes
         if self.config.general["visualize"]:
-            self._display = GeneratorDisplay.create(list(self._states.values()))
             self._display.display_title("Cube Generation")
             self._display.show()
         self._generate_cubes()
@@ -109,12 +115,110 @@ class MultiSourceDataStore:
         """
         return MultiSourceConfig.get_schema()
 
-    @classmethod
-    def display_config(cls, config: str | dict[str, Any]):
-        config = MultiSourceConfig(config)
-        display = ConfigDisplay.create(config)
+    def display_config(self):
+        display = ConfigDisplay.create(self.config)
         display.display_title("Configuration")
         display.show()
+
+    def display_geolocations(self):
+        records = []
+
+        for config_ds in self.config.datasets.values():
+            name = config_ds.get("identifier", "Unnamed")
+
+            # Case 1: grid mapping
+            if "grid_mapping" in config_ds:
+                gm_name = config_ds["grid_mapping"]
+                if self.config.grid_mappings and gm_name in self.config.grid_mappings:
+                    gm = self.config.grid_mappings[gm_name]
+                    geom = box(*gm["bbox"])
+                    gdf_temp = gpd.GeoDataFrame(
+                        geometry=[geom], crs=gm.get("crs", "EPSG:4326")
+                    )
+                    gdf_temp = gdf_temp.to_crs("EPSG:4326")
+                    records.append(
+                        {"name": name, "geometry": gdf_temp.geometry.iloc[0]}
+                    )
+                else:
+                    LOG.debug(
+                        f"Grid mapping of datacube {name!r} is the same as "
+                        f"{gm_name!r}. No geometry assigned."
+                    )
+
+            # Case 2: dataset with variables
+            elif "variables" in config_ds:
+                gdf = self._get_gdf_from_dataset(config_ds["variables"][0])
+                gdf["name"] = name
+                gdf = gdf.to_crs("EPSG:4326")
+                for _, row in gdf.iterrows():
+                    records.append({"name": row["name"], "geometry": row["geometry"]})
+
+            # Case 3: direct dataset
+            else:
+                gdf = self._get_gdf_from_dataset(config_ds)
+                gdf["name"] = name
+                gdf = gdf.to_crs("EPSG:4326")
+                for _, row in gdf.iterrows():
+                    records.append({"name": row["name"], "geometry": row["geometry"]})
+
+        if not records:
+            LOG.warning("No geometries found.")
+            return None
+
+        # Create GeoDataFrame directly in EPSG:4326
+        gdf_all = gpd.GeoDataFrame(records, geometry="geometry", crs="EPSG:4326")
+
+        # Display using interactive GeoPandas explorer
+        m = gdf_all.explore(
+            tooltip="name",
+            color="blue",
+            style_kwds=dict(weight=4, fillOpacity=0.1),
+            tiles="OpenStreetMap",
+        )
+        return m
+
+    def _get_gdf_from_dataset(self, config_ds: dict) -> gpd.GeoDataFrame:
+        op = config_ds.get("open_params", {})
+
+        # Case: bounding box
+        if "bbox" in op:
+            return gpd.GeoDataFrame(
+                geometry=[box(*op["bbox"])],
+                crs=op.get("crs", "EPSG:4326"),
+            )
+
+        # Case: point with radius
+        elif "point" in op:
+            point = Point(op["point"])
+
+            # If radius is given, create a circle
+            if "radius" in op:
+                gdf_temp = gpd.GeoDataFrame(geometry=[point], crs="EPSG:4326")
+                gdf_temp["geometry"] = gdf_temp.buffer(op["radius"])
+                return gdf_temp
+
+            # Case: bbox_width (xcube-stac)
+            elif "bbox_width" in op:
+                lon, lat = op["point"]
+                lon_width, lat_width = resolution_meters_to_degrees(
+                    op["bbox_width"], lat
+                )
+                bbox = [
+                    lon - lon_width / 2,
+                    lat - lat_width / 2,
+                    lon + lon_width / 2,
+                    lat + lat_width / 2,
+                ]
+                return gpd.GeoDataFrame(geometry=[box(*bbox)], crs="EPSG:4326")
+
+            else:
+                return gpd.GeoDataFrame(geometry=[point], crs="EPSG:4326")
+
+        # Fallback: use GridMapping
+        else:
+            ds = self._open_dataset(config_ds)
+            gm = GridMapping.from_dataset(ds)
+            return gpd.GeoDataFrame(geometry=[box(*gm.xy_bbox)], crs=gm.crs)
 
     @classmethod
     def list_data_store_ids(cls) -> list[str]:
@@ -345,6 +449,8 @@ class MultiSourceDataStore:
                 exception=exception,
             )
         )
+        if "Keyboard Interrupt caught! Exiting gracefully." == exception:
+            sys.exit(1)
 
     def _preload_datasets(self):
         for config_preload in self.config.preload_datasets:
@@ -392,11 +498,12 @@ class MultiSourceDataStore:
             if data_ids:
                 preload_params = config_preload.get("preload_params", {})
                 if "silent" not in preload_params:
-                    preload_params["silent"] = self.config.general["visualize"]
-                _ = store.preload_data(*data_ids, **preload_params)
+                    preload_params["silent"] = not self.config.general["visualize"]
+                cache_store = store.preload_data(*data_ids, **preload_params)
 
     def _generate_cubes(self):
         for identifier, config_ds in self.config.datasets.items():
+            start = datetime.datetime.now()
             data_id = _get_data_id(config_ds)
             if getattr(self.stores, "storage").has_data(data_id):
                 self._notify(
@@ -415,7 +522,9 @@ class MultiSourceDataStore:
                 )
             )
             ds = self._open_dataset(config_ds)
-            if isinstance(ds, xr.Dataset):
+            if isinstance(ds, xr.Dataset) or (
+                isinstance(ds, list) and isinstance(ds[0], xr.Dataset)
+            ):
                 self._notify(
                     GeneratorState(
                         identifier,
@@ -438,11 +547,13 @@ class MultiSourceDataStore:
                 continue
             ds = self._write_dataset(ds, config_ds)
             if isinstance(ds, xr.Dataset):
+                delta = datetime.datetime.now() - start
+                time_delta = str(datetime.timedelta(seconds=int(delta.total_seconds())))
                 self._notify(
                     GeneratorState(
                         identifier,
                         status=GeneratorStatus.completed,
-                        message=f"Dataset {identifier!r} finished.",
+                        message=f"Dataset {identifier!r} finished: {time_delta}",
                     )
                 )
             else:
@@ -455,7 +566,7 @@ class MultiSourceDataStore:
                 self._notify_error(identifier, ds)
 
     @_safe_execute()
-    def _open_dataset(self, config: dict) -> xr.Dataset | Exception:
+    def _open_dataset(self, config: dict) -> xr.Dataset | list[xr.Dataset] | Exception:
         if "data_id" in config:
             return self._open_single_dataset(config)
         else:
@@ -473,18 +584,12 @@ class MultiSourceDataStore:
                         for var in ds.data_vars.keys()
                     }
                 dss.append(ds.rename_vars(name_dict=name_dict))
-            merge_params = config.get("xr_merge_params", {})
-            if "join" not in merge_params:
-                merge_params["join"] = "exact"
-            if "combine_attrs" not in merge_params:
-                merge_params["combine_attrs"] = "drop_conflicts"
-            ds = xr.merge(dss, **merge_params)
-        return clean_dataset(ds)
+            return dss
 
     def _open_single_dataset(self, config: dict) -> xr.Dataset | Exception:
         store = getattr(self.stores, config["store"])
         open_params = copy.deepcopy(config.get("open_params", {}))
-        lat, lon = open_params.pop("point", [np.nan, np.nan])
+        lon, lat = open_params.pop("point", [np.nan, np.nan])
         schema = store.get_open_data_params_schema(data_id=config["data_id"])
         if (
             ~np.isnan(lat)
@@ -507,6 +612,8 @@ class MultiSourceDataStore:
                 ds = store.open_data(config["data_id"], **open_params)
         else:
             ds = store.open_data(config["data_id"], **open_params)
+        if isinstance(ds, MultiLevelDataset):
+            ds = ds.base_dataset
 
         # custom processing
         if "custom_processing" in config:
@@ -517,7 +624,38 @@ class MultiSourceDataStore:
         return clean_dataset(ds)
 
     @_safe_execute()
-    def _process_dataset(self, ds: xr.Dataset, config: dict) -> xr.Dataset | Exception:
+    def _process_dataset(
+        self, ds: xr.Dataset | list[xr.Dataset], config: dict
+    ) -> xr.Dataset | Exception:
+        if isinstance(ds, list):
+            dss_processed = [self._process_single_dataset(ds[0], config)]
+            for dataset in ds[1:]:
+                dss_processed.append(
+                    self._process_single_dataset(dataset, config, ds_ref=ds[0])
+                )
+            dss_reindexed = [dss_processed[0]]
+            for ds in dss_processed[1:]:
+                dss_reindexed.append(
+                    ds.reindex_like(dss_processed[0], method="nearest", tolerance=1e-5)
+                )
+            merge_params = config.get("xr_merge_params", {})
+            if "join" not in merge_params:
+                merge_params["join"] = "exact"
+            if "combine_attrs" not in merge_params:
+                merge_params["combine_attrs"] = "drop_conflicts"
+            return xr.merge(dss_reindexed, **merge_params)
+        else:
+            return self._process_single_dataset(ds, config)
+
+    @_safe_execute()
+    def _process_single_dataset(
+        self, ds: xr.Dataset, config: dict, ds_ref: xr.Dataset = None
+    ) -> xr.Dataset | Exception:
+        if "temporal_resample_params" in config:
+            temporal_resample_params = config["temporal_resample_params"]
+            frequency = temporal_resample_params.pop("frequency")
+            ds = resample_in_time(ds, frequency, **temporal_resample_params)
+
         # if grid mapping is given, resample the dataset
         if "grid_mapping" in config:
             if hasattr(self._grid_mappings, config["grid_mapping"]):
@@ -527,39 +665,19 @@ class MultiSourceDataStore:
                 data_id = _get_data_id(config_ref)
                 ds_ref = getattr(self.stores, "storage").open_data(data_id)
                 target_gm = GridMapping.from_dataset(ds_ref)
-                for var_name, data_array in ds.items():
-                    if np.issubdtype(data_array.dtype, np.number):
-                        ds[var_name] = data_array.astype(target_gm.x_coords.dtype)
-            source_gm = GridMapping.from_dataset(ds)
-            transformer = pyproj.Transformer.from_crs(
-                target_gm.crs, source_gm.crs, always_xy=True
-            )
-            bbox = transformer.transform_bounds(*target_gm.xy_bbox, densify_pts=21)
-            bbox = [
-                bbox[0] - 2 * source_gm.x_res,
-                bbox[1] - 2 * source_gm.y_res,
-                bbox[2] + 2 * source_gm.x_res,
-                bbox[3] + 2 * source_gm.y_res,
-            ]
-
-            spatial_resample_params = config.get("spatial_resample_params") or {}
-
-            ds = clip_dataset_by_geometry(ds, geometry=bbox)
+            spatial_resample_params = config.get("spatial_resample_params", {})
             ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
-            # this is needed since resample in space returns one chunk along the time
-            # axis; this part can be removed once https://github.com/xcube-dev/xcube/issues/1124
-            # is resolved.
-            if "time" in ds.coords:
-                ds = chunk_dataset(
-                    ds, dict(time=1), format_name=config.get("format_id", "zarr")
-                )
+        elif ds_ref is not None:
+            target_gm = GridMapping.from_dataset(ds_ref)
+            spatial_resample_params = config.get("spatial_resample_params", {})
+            ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
 
         # if "point" in open_params, timeseries is requested
         open_params = config.get("open_params", {})
         if "point" in open_params:
             ds = ds.interp(
-                lat=open_params["point"][0],
-                lon=open_params["point"][1],
+                lat=open_params["point"][1],
+                lon=open_params["point"][0],
                 method="linear",
             )
 

@@ -197,7 +197,6 @@ def get_config_dict4():
             }
         ],
         "general": {
-            "dask_scheduler": "single-threaded",
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
         },
     }
@@ -374,7 +373,6 @@ def get_config_dict9():
             }
         ],
         "general": {
-            "dask_scheduler": "single-threaded",
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
         },
     }
@@ -395,7 +393,6 @@ def get_config_dict10():
                             "interp_methods": "nearest",
                         },
                     },
-
                 ],
             },
         ],
@@ -421,10 +418,10 @@ def get_config_dict10():
             }
         ],
         "general": {
-            "dask_scheduler": "single-threaded",
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
         },
     }
+
 
 def get_sample_data_2d():
     lon = np.arange(-5.0, 36.0, 5.0)

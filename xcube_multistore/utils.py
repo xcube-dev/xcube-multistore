@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import functools
+import traceback
 
 import numpy as np
 import pyproj
@@ -193,7 +194,11 @@ def _safe_execute():
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                return e
+                # Capture full traceback as a string
+                tb_str = "".join(
+                    traceback.format_exception(type(e), e, e.__traceback__)
+                )
+                return tb_str
             except KeyboardInterrupt:
                 return "Keyboard Interrupt caught! Exiting gracefully."
 
