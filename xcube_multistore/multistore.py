@@ -43,8 +43,9 @@ from xcube_resampling.utils import resolution_meters_to_degrees
 from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema
 from xcube.core.mldataset import MultiLevelDataset
 
+from .accessors import guess_accessor
 from .config import MultiSourceConfig
-from .constants import LOG, MAP_FORMAT_ID_FILE_EXT, NAME_WRITE_STORE
+from .constants import LOG, NAME_WRITE_STORE
 from .gridmappings import GridMappings
 from .stores import DataStores
 from .utils import (
@@ -121,6 +122,7 @@ class MultiSourceDataStore:
         display.show()
 
     def display_geolocations(self):
+        self.stores = DataStores.setup_data_stores(self.config)
         records = []
 
         for config_ds in self.config.datasets.values():
@@ -499,7 +501,7 @@ class MultiSourceDataStore:
                 preload_params = config_preload.get("preload_params", {})
                 if "silent" not in preload_params:
                     preload_params["silent"] = not self.config.general["visualize"]
-                cache_store = store.preload_data(*data_ids, **preload_params)
+                _ = store.preload_data(*data_ids, **preload_params)
 
     def _generate_cubes(self):
         for identifier, config_ds in self.config.datasets.items():
@@ -559,9 +561,7 @@ class MultiSourceDataStore:
             else:
                 store = getattr(self.stores, NAME_WRITE_STORE)
                 format_id = config_ds.get("format_id", "zarr")
-                data_id = (
-                    f"{config_ds['identifier']}.{MAP_FORMAT_ID_FILE_EXT[format_id]}"
-                )
+                data_id = _get_data_id(config_ds)
                 store.has_data(data_id) and store.delete_data(data_id)
                 self._notify_error(identifier, ds)
 
@@ -588,30 +588,10 @@ class MultiSourceDataStore:
 
     def _open_single_dataset(self, config: dict) -> xr.Dataset | Exception:
         store = getattr(self.stores, config["store"])
+        store_id = getattr(self.stores, f"{config["store"]}_store_id")
         open_params = copy.deepcopy(config.get("open_params", {}))
-        lon, lat = open_params.pop("point", [np.nan, np.nan])
-        schema = store.get_open_data_params_schema(data_id=config["data_id"])
-        if (
-            ~np.isnan(lat)
-            and ~np.isnan(lon)
-            and "bbox" in schema.properties
-            and "spatial_res" in open_params
-            and "spatial_res" in schema.properties
-        ):
-            open_params["bbox"] = [
-                lon - 2 * open_params["spatial_res"],
-                lat - 2 * open_params["spatial_res"],
-                lon + 2 * open_params["spatial_res"],
-                lat + 2 * open_params["spatial_res"],
-            ]
-
-        if hasattr(store, "cache_store"):
-            try:
-                ds = store.cache_store.open_data(config["data_id"], **open_params)
-            except Exception:
-                ds = store.open_data(config["data_id"], **open_params)
-        else:
-            ds = store.open_data(config["data_id"], **open_params)
+        accessor = guess_accessor(store_id, store)
+        ds = accessor.open_data(config["data_id"], **open_params)
         if isinstance(ds, MultiLevelDataset):
             ds = ds.base_dataset
 
@@ -643,6 +623,8 @@ class MultiSourceDataStore:
                 merge_params["join"] = "exact"
             if "combine_attrs" not in merge_params:
                 merge_params["combine_attrs"] = "drop_conflicts"
+            if "compat" not in merge_params:
+                merge_params["compat"] = "override"
             return xr.merge(dss_reindexed, **merge_params)
         else:
             return self._process_single_dataset(ds, config)
@@ -672,15 +654,6 @@ class MultiSourceDataStore:
             spatial_resample_params = config.get("spatial_resample_params", {})
             ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
 
-        # if "point" in open_params, timeseries is requested
-        open_params = config.get("open_params", {})
-        if "point" in open_params:
-            ds = ds.interp(
-                lat=open_params["point"][1],
-                lon=open_params["point"][0],
-                method="linear",
-            )
-
         return ds
 
     @_safe_execute()
@@ -689,7 +662,7 @@ class MultiSourceDataStore:
         format_id = config.get("format_id", "zarr")
         if format_id == "netcdf":
             ds = prepare_dataset_for_netcdf(ds)
-        data_id = f"{config['identifier']}.{MAP_FORMAT_ID_FILE_EXT[format_id]}"
+        data_id = _get_data_id(config)
         ds = clean_dataset(ds)
         store.write_data(ds, data_id, replace=True)
         return ds

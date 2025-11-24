@@ -41,4 +41,5 @@ class DataStores:
                 identifier,
                 new_data_store(config_store["store_id"], **store_params),
             )
+            setattr(cls, f"{identifier}_store_id", config_store["store_id"])
         return cls

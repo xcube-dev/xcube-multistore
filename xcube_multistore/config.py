@@ -70,7 +70,7 @@ SCHEMA_XR_MERGE_PARAMS = JsonObjectSchema(
 SCHEMA_FORMAT_ID = JsonStringSchema(
     title="Desired format of the saved datacube.",
     default="zarr",
-    enum=["netcdf", "zarr"],
+    enum=["netcdf", "zarr", "levels"],
 )
 SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
     properties=dict(
@@ -410,6 +410,7 @@ class MultiSourceConfig:
             config = _read_yaml(config)
         schema = self.get_schema()
         schema.validate_instance(config)
+        self.original: dict = config
         self.preload_datasets = config.get("preload_datasets", None)
         self.datasets = {
             config_ds["identifier"]: config_ds for config_ds in config["datasets"]

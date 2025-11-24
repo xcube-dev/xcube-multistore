@@ -150,6 +150,8 @@ def _normalize_grid_mapping(ds: xr.Dataset) -> xr.Dataset:
     ds = ds.assign_coords(spatial_ref=xr.DataArray(0, attrs=crs.to_cf()))
     for var in ds.data_vars:
         ds[var].attrs["grid_mapping"] = "spatial_ref"
+        if "grid_mapping" in ds[var].encoding:
+            del ds[var].encoding["grid_mapping"]
     return ds
 
 
@@ -182,6 +184,8 @@ def _get_data_id(config: dict) -> str:
     format_id = config.get("format_id", "zarr")
     if format_id == "netcdf":
         data_id = f"{config['identifier']}.nc"
+    elif format_id == "levels":
+        data_id = f"{config['identifier']}.levels"
     else:
         data_id = f"{config['identifier']}.zarr"
     return data_id

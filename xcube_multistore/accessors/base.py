@@ -20,21 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from abc import ABC
-
 import xarray as xr
 from xcube.core.mldataset import MultiLevelDataset
-from xcube.core.store import DataStore
+
+from xcube_multistore.accessor import Accessor
 
 
-class Accessor(ABC):
+class BaseAccessor(Accessor):
     """Provides methods for accessing dataset from a data store"""
 
-    def open_data(
-        self,
-        store: DataStore,
-        data_id: str,
-        **open_params,
-    ) -> xr.Dataset | MultiLevelDataset:
-        """Open and return the dataset corresponding to data ID."""
-        return store.open_data(data_id, **open_params)
+    def open_data(self, data_id: str, **open_params) -> xr.Dataset | MultiLevelDataset:
+        return self.store.open_data(data_id, **open_params)

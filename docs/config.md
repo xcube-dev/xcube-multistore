@@ -163,7 +163,7 @@ datacube is required. For further information view the [xarray.merge documentati
 Desired format of the saved datacube.  
 
 **Default:** `zarr`  
-**Allowed values:** `netcdf`, `zarr`
+**Allowed values:** `netcdf`, `zarr`, [`levels`](https://xcube.readthedocs.io/en/latest/mldatasets.html#the-xcube-levels-format)
 
 ### custom_processing
 This section enables users to define a Python function that is executed after opening 

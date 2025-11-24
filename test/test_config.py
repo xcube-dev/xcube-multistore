@@ -89,7 +89,7 @@ class MultiSourceConfigTest(unittest.TestCase):
                     "dataset1.zarr.zip": ["dataset1.zarr"],
                 },
             )
-            self.assertEqual(config.general["visualize"], False)
+            self.assertEqual(config.general["visualize"], True)
             self.assertEqual(config.general["force_preload"], False)
             self.assertDictEqual(gdal_http_params, config.general["gdal_http_params"])
 
@@ -119,5 +119,10 @@ class MultiSourceConfigTest(unittest.TestCase):
         subtest_config(config, gdal_http_params)
 
     def test_is_jupyter_notebook(self):
-        with patch.dict(sys.modules, {"IPython": None}):
+        with patch("IPython.get_ipython", side_effect=ModuleNotFoundError):
             self.assertFalse(_is_jupyter_notebook())
+
+        with patch("IPython.get_ipython") as mock_get_ipython:
+            mock_get_ipython.return_value = object()   # anything non-None
+            self.assertTrue(_is_jupyter_notebook())
+

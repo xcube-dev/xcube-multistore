@@ -217,24 +217,14 @@ def get_config_dict5():
                     {
                         "identifier": "annual_disturbances_1985_2023",
                         "store": "zenodo_senf",
-                        "data_id": "andorra/annual_disturbances_1985_2023_andorra.zarr",
+                        "data_id": "andorra/annual_disturbances_1985_2023_andorra.tif",
                     },
                     {
                         "identifier": "forest_mask",
                         "store": "zenodo_senf",
-                        "data_id": "andorra/forest_mask_andorra.zarr",
+                        "data_id": "andorra/forest_mask_andorra.tif",
                     },
                 ],
-            },
-            {
-                "identifier": "biomass_xu",
-                "store": "zenodo_xu",
-                "grid_mapping": "senf_andorra",
-                "data_id": "test10a_cd_ab_pred_corr_2000_2019_v2.tif",
-                "custom_processing": {
-                    "module_path": "test.sample_data",
-                    "function_name": "biomass_xu_merge_years",
-                },
             },
         ],
         "data_stores": [
@@ -248,37 +238,8 @@ def get_config_dict5():
                 "store_id": "zenodo",
                 "store_params": {"root": "13333034"},
             },
-            {
-                "identifier": "zenodo_xu",
-                "store_id": "zenodo",
-                "store_params": {"root": "4161694"},
-            },
         ],
-    }
-
-
-def get_config_dict6():
-    return {
-        "datasets": [
-            {
-                "identifier": "dataset3",
-                "store": "datasource",
-                "data_id": "dataset3.zarr",
-                "open_params": {"point": [40, 0]},
-            },
-        ],
-        "data_stores": [
-            {
-                "identifier": "storage",
-                "store_id": "memory",
-                "store_params": {"root": "data"},
-            },
-            {
-                "identifier": "datasource",
-                "store_id": "memory",
-                "store_params": {"root": "datasource"},
-            },
-        ],
+        "general": {"visualize": False},
     }
 
 
@@ -374,6 +335,7 @@ def get_config_dict9():
         ],
         "general": {
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+            "visualize": False,
         },
     }
 
@@ -419,6 +381,7 @@ def get_config_dict10():
         ],
         "general": {
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+            "visualize": False,
         },
     }
 
@@ -469,9 +432,10 @@ def modify_dataset(ds: xr.Dataset) -> xr.Dataset:
 
 def biomass_xu_merge_years(ds: xr.Dataset) -> xr.Dataset:
     ds = ds.rename(name_dict={"x": "lon", "y": "lat"})
+    var_sel = [f"band_{i}" for i in range(1, 3)]
+    ds = ds[var_sel]
     ds_arr = ds.to_dataarray(dim="time")
-    time = [np.datetime64(f"{year}-01-01T00:00:00") for year in range(2000, 2019 + 1)]
+    time = [np.datetime64(f"{year}-01-01T00:00:00") for year in range(2000, 2002)]
     ds["carbon_density"] = ds_arr.assign_coords(coords=dict(time=time))
-    var_del = [f"da_{i}" for i in range(1, 21)]
-    ds = ds.drop_vars(var_del)
+    ds = ds.drop_vars(var_sel)
     return ds
