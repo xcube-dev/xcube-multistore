@@ -525,15 +525,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#custom_processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      custom_processing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#spatial_resample_params" class="md-nav__link">
     <span class="md-ellipsis">
       spatial_resample_params
@@ -546,6 +537,15 @@
   <a href="#temporal_resample_params" class="md-nav__link">
     <span class="md-ellipsis">
       temporal_resample_params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom_processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      custom_processing
     </span>
   </a>
   
@@ -1419,15 +1419,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#custom_processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      custom_processing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#spatial_resample_params" class="md-nav__link">
     <span class="md-ellipsis">
       spatial_resample_params
@@ -1440,6 +1431,15 @@
   <a href="#temporal_resample_params" class="md-nav__link">
     <span class="md-ellipsis">
       temporal_resample_params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom_processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      custom_processing
     </span>
   </a>
   
@@ -1682,11 +1682,6 @@ datacube is required. For further information view the <a href="https://docs.xar
 <p>Desired format of the saved datacube.  </p>
 <p><strong>Default:</strong> <code>zarr</code><br />
 <strong>Allowed values:</strong> <code>netcdf</code>, <code>zarr</code>, <a href="https://xcube.readthedocs.io/en/latest/mldatasets.html#the-xcube-levels-format"><code>levels</code></a></p>
-<h3 id="custom_processing">custom_processing</h3>
-<p>This section enables users to define a Python function that is executed after opening 
-the data. It allows for custom dataset manipulation, making it particularly useful 
-for handling unstructured datasets. The function must accept an <code>xarray.Dataset</code> as 
-input and return a modified <code>xarray.Dataset</code> as output.</p>
 <h3 id="spatial_resample_params">spatial_resample_params</h3>
 <p>This section enables user to define the parameters for spatial resampling of 
 the dataset. For a full list of supported parameters, refer to the
@@ -1700,6 +1695,11 @@ the dataset. For a full list of supported parameters, refer to the
 <a href="https://xcube-dev.github.io/xcube-resampling/api/#xcube_resampling.resample_in_time"><code>xcube_resampling.resample_in_time</code> Python API documentation</a>.</p>
 <p><em>NOTE</em>: The argument <code>frequency</code> is required; the remaining keyword arguments are
 optional.</p>
+<h3 id="custom_processing">custom_processing</h3>
+<p>This section enables users to define a Python function that is executed after opening
+the data. It allows for custom dataset manipulation, making it particularly useful
+for handling unstructured datasets. The function must accept an <code>xarray.Dataset</code> as
+input and return a modified <code>xarray.Dataset</code> as output.</p>
 <p><strong>Properties</strong>:  </p>
 <ul>
 <li><strong>module_path</strong>: Path to the Python module relative to the config file.  </li>
