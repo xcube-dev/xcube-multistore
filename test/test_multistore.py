@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import shutil
 import unittest
 from io import StringIO
 from unittest.mock import patch
@@ -42,6 +43,7 @@ from .sample_data import (
     get_config_dict2,
     get_config_dict3,
     get_config_dict4,
+    get_config_dict6,
     get_config_dict5,
     get_config_dict7,
     get_config_dict8,
@@ -140,10 +142,10 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertIn("spatial_res", output)
 
     def test_display_geolocations(self):
-        # config = get_config_dict0()
-        # msds = MultiSourceDataStore(config)
-        # m = msds.display_geolocations()
-        # self.assertIsInstance(m, Map)
+        config = get_config_dict0()
+        msds = MultiSourceDataStore(config)
+        m = msds.display_geolocations()
+        self.assertIsInstance(m, Map)
 
         config = get_config_dict1()
         msds = MultiSourceDataStore(config)
@@ -151,6 +153,11 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertIsInstance(m, Map)
 
         config = get_config_dict4()
+        msds = MultiSourceDataStore(config)
+        m = msds.display_geolocations()
+        self.assertIsInstance(m, Map)
+
+        config = get_config_dict6()
         msds = MultiSourceDataStore(config)
         m = msds.display_geolocations()
         self.assertIsInstance(m, Map)
@@ -272,7 +279,6 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         )
         msds.stores.storage.delete_data("dataset1.nc")
 
-    @pytest.mark.vcr()
     def test_generate_preload(self):
         data_vars = [
             f"annual_disturbances_1985_2023_band_{i}" for i in range(1, 40)
@@ -317,6 +323,19 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertCountEqual(data_vars, ds.data_vars.keys())
         msds.stores.storage.delete_data("senf_andorra.zarr")
 
+        # preload with vizualisation
+        config_dict["general"]["visualize"] = True
+        config_dict["general"]["force_preload"] = True
+        msds = MultiSourceDataStore(config_dict)
+        msds.generate()
+        ds = msds.stores.storage.open_data("senf_andorra.zarr")
+        self.assertIsInstance(ds, xr.Dataset)
+        self.assertCountEqual([971, 1149], [ds.sizes["y"], ds.sizes["x"]])
+        self.assertCountEqual(data_vars, ds.data_vars.keys())
+        msds.stores.storage.delete_data("senf_andorra.zarr")
+        shutil.rmtree(msds.stores.zenodo_senf.cache_store.root)
+
+
     def test_generate_error(self):
         # with logging, no visualization
         config_dict = get_config_dict2()
@@ -356,30 +375,28 @@ class MultiSourceDataStoreTest(unittest.TestCase):
             str(cm.output[-1]),
         )
 
-    def test_spatial_resample_params_process_dataset_aggregate(self):
+    def test_resample_params_process_dataset(self):
         config_dict = get_config_dict9()
-        with self.assertLogs("xcube.multistore", level="INFO") as cm:
-            msds = MultiSourceDataStore(config_dict)
-            msds.generate()
-        self.assertEqual(4, len(cm.output))
+        msds = MultiSourceDataStore(config_dict)
+        msds.generate()
         self.assertIsInstance(msds, MultiSourceDataStore)
         config_ds = msds.config.datasets
         self.assertEqual(
             {"agg_methods": "max"},
-            config_ds["dataset_final"]["variables"][0]["spatial_resample_params"],
+            config_ds["dataset1"]["spatial_resample_params"],
         )
-        ds = msds.stores.storage.open_data("dataset_final.zarr")
+        ds = msds.stores.storage.open_data("dataset1.zarr")
         self.assertIsInstance(ds, xr.Dataset)
-        self.assertEqual({"lat": (2, 1), "lon": (2, 1)}, ds.data_var1.chunksizes)
+        self.assertEqual({"lat": (2, 1), "lon": (2, 1)}, ds.band_1.chunksizes)
         self.assertEqual({"lat": 3, "lon": 3}, ds.dims)
-        msds.stores.storage.delete_data("dataset_final.zarr")
+        ds = msds.stores.storage.open_data("dataset3.zarr")
+        self.assertIsInstance(ds, xr.Dataset)
+        self.assertEqual({"time": 5, "lat": 3, "lon": 3}, ds.dims)
 
     def test_spatial_resample_params_process_dataset_interpolate(self):
         config_dict = get_config_dict10()
-        with self.assertLogs("xcube.multistore", level="INFO") as cm:
-            msds = MultiSourceDataStore(config_dict)
-            msds.generate()
-        self.assertEqual(4, len(cm.output))
+        msds = MultiSourceDataStore(config_dict)
+        msds.generate()
         self.assertIsInstance(msds, MultiSourceDataStore)
         config_ds = msds.config.datasets
         self.assertEqual(

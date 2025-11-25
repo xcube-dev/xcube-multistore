@@ -601,7 +601,7 @@ class MultiSourceDataStore:
             function = getattr(module, config["custom_processing"]["function_name"])
             ds = function(ds)
 
-        return clean_dataset(ds)
+        return ds
 
     @_safe_execute()
     def _process_dataset(

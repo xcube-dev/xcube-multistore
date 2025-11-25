@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
+import pandas as pd
 import pyproj
 import xarray as xr
 
@@ -242,6 +243,67 @@ def get_config_dict5():
         "general": {"visualize": False},
     }
 
+def get_config_dict6():
+    return {
+        "datasets": [
+            {
+                "identifier": "dataset1",
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+                "open_params": {"point": (0, 0)},
+                "format_id": "netcdf",
+            },
+            {
+                "identifier": "dataset2",
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+                "open_params": {
+                    "point": (0, 0),
+                    "radius": 0.3,
+                },
+                "format_id": "netcdf",
+            },
+            {
+                "identifier": "dataset3",
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+                "open_params": {
+                    "point": (0, 0),
+                    "bbox_width": 0.5,
+                },
+                "format_id": "netcdf",
+            },
+            {
+                "identifier": "dataset4",
+                "variables": [
+                    {
+                        "identifier": "data_var1",
+                        "store": "datasource",
+                        "data_id": "dataset3.zarr",
+                        "open_params": {"bbox": [0, 1, 1, 2]},
+                    },
+                    {
+                        "identifier": "data_var2",
+                        "store": "datasource",
+                        "data_id": "dataset1.zarr",
+                    },
+                ],
+            },
+        ],
+        "data_stores": [
+            {
+                "identifier": "storage",
+                "store_id": "memory",
+                "store_params": {"root": "data"},
+            },
+            {
+                "identifier": "datasource",
+                "store_id": "memory",
+                "store_params": {"root": "datasource"},
+            },
+        ],
+    }
+
 
 def get_config_dict7():
     return {
@@ -298,18 +360,25 @@ def get_config_dict9():
     return {
         "datasets": [
             {
-                "identifier": "dataset_final",
+                "identifier": "dataset1",
                 "grid_mapping": "grid1",
-                "variables": [
-                    {
-                        "identifier": "data_var1",
-                        "store": "datasource",
-                        "data_id": "dataset1.zarr",
-                        "spatial_resample_params": {
-                            "agg_methods": "max",
-                        },
-                    },
-                ],
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+                "spatial_resample_params": {
+                    "agg_methods": "max",
+                },
+            },
+            {
+                "identifier": "dataset3",
+                "grid_mapping": "grid1",
+                "store": "datasource",
+                "data_id": "dataset3.zarr",
+                "spatial_resample_params": {
+                    "agg_methods": "max",
+                },
+                "temporal_resample_params": {
+                    "frequency": "2D",
+                },
             },
         ],
         "data_stores": [
@@ -407,7 +476,7 @@ def get_sample_data_2d():
 def get_sample_data_3d():
     lon = np.arange(-5.0, 6.0, 5.0)
     lat = np.arange(45.0, 34.0, -5.0)
-    time = np.arange(10)
+    time = pd.date_range(start="2025-01-01", periods=10, freq="D")
     spatial_ref = np.array(0)
     band_1 = np.arange(90).reshape((10, 3, 3))
     ds = xr.Dataset(

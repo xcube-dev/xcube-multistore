@@ -15,7 +15,6 @@
 * Fixed visualization of preload handle
 
 
-
 ## Changes in 0.2.0
 
 * Added the method `display_config`, which provides an overview of the cube generation 
