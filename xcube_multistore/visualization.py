@@ -53,6 +53,7 @@ class GeneratorState:
         status: GeneratorStatus | None = None,
         message: str | None = None,
         exception: BaseException | None = None,
+        time: str | None = None,
     ):
         assert_given(identifier, name="identifier")
         self.identifier = identifier
@@ -250,8 +251,6 @@ class ConfigDisplay(ABC):
                     config_variable["data_id"],
                     _format_params(config_variable.get("open_params")),
                     _format_params(gm_display),
-                    _format_params(config_variable.get(
-                        "spatial_resample_params")),
                     _format_params(config_ds.get("format_id"), default="Zarr"),
                 ]
 
@@ -266,7 +265,6 @@ class ConfigDisplay(ABC):
                 "Data ID",
                 "Open Data Params",
                 "Grid-Mapping",
-                "Spatial Resample Params",
                 "Format",
             ],
             tablefmt=table_format,
@@ -312,6 +310,9 @@ def _to_dict(obj: object):
 def _format_params(params: dict | str | None = None, default: str = "-") -> str:
     if not params:
         return default
-    if isinstance(params, dict):
+    # if CLMS store, do not present the CLMS credentials json
+    if "credentials" in params and "client_id" in params["credentials"]:
+        return "CLMS credentials"
+    elif isinstance(params, dict):
         return "; ".join(f"{k}: {v}" for k, v in params.items() if k != "identifier")
     return str(params)

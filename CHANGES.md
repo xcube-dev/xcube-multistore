@@ -1,9 +1,18 @@
 ## Changes in 0.3.0 (in development)
 
-* Switched to the new unified `xcube-resampling` library from 
-  `xcube.core.resampling`.
-* Added `spatial_resample_params` support and updated the config visualization to
-  display the `Spatial Resample Params`.
+* **Unified spatial resampling**: Switched to the new
+  `xcube_resampling.resample_in_space` library, replacing
+  `xcube.core.resampling.resample_in_space`.
+* **Spatial resample parameters**: Added support for `spatial_resample_params`
+  and updated the configuration visualization to display these parameters.
+* **Temporal resampling**: Introduced `xcube_resampling.resample_in_time` with
+  `temporal_resample_params` added to the configuration to cover temporal resampling.
+* **Controlled cube generation**: `xcube_multistore.MultiSourceDataStore` is now only
+  initialized in the constructor without automatically starting cube generation.
+  A new `generate()` method is provided to explicitly start cube creation.
+* **Geolocation visualization**: Added `display_geolocations()` to visualize
+  all requested geolocations of the datacubes to be generated.
+* Fixed visualization of preload handle
 
 
 ## Changes in 0.2.0
@@ -12,6 +21,7 @@
   plan retrieved from the configuration file.  
 * Added auxiliary functions to support setting up configurations for cube generation. 
   Examples of all functionalities are provided in the notebook [setup_config.ipynb](examples/setup_config.ipynb).
+
 
 ## Changes in 0.1.0
 

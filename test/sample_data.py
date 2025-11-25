@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
+import pandas as pd
 import pyproj
 import xarray as xr
 
@@ -197,7 +198,6 @@ def get_config_dict4():
             }
         ],
         "general": {
-            "dask_scheduler": "single-threaded",
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
         },
     }
@@ -218,24 +218,14 @@ def get_config_dict5():
                     {
                         "identifier": "annual_disturbances_1985_2023",
                         "store": "zenodo_senf",
-                        "data_id": "andorra/annual_disturbances_1985_2023_andorra.zarr",
+                        "data_id": "andorra/annual_disturbances_1985_2023_andorra.tif",
                     },
                     {
                         "identifier": "forest_mask",
                         "store": "zenodo_senf",
-                        "data_id": "andorra/forest_mask_andorra.zarr",
+                        "data_id": "andorra/forest_mask_andorra.tif",
                     },
                 ],
-            },
-            {
-                "identifier": "biomass_xu",
-                "store": "zenodo_xu",
-                "grid_mapping": "senf_andorra",
-                "data_id": "test10a_cd_ab_pred_corr_2000_2019_v2.tif",
-                "custom_processing": {
-                    "module_path": "test.sample_data",
-                    "function_name": "biomass_xu_merge_years",
-                },
             },
         ],
         "data_stores": [
@@ -249,23 +239,55 @@ def get_config_dict5():
                 "store_id": "zenodo",
                 "store_params": {"root": "13333034"},
             },
-            {
-                "identifier": "zenodo_xu",
-                "store_id": "zenodo",
-                "store_params": {"root": "4161694"},
-            },
         ],
+        "general": {"visualize": False},
     }
-
 
 def get_config_dict6():
     return {
         "datasets": [
             {
+                "identifier": "dataset1",
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+                "open_params": {"point": (0, 0)},
+                "format_id": "netcdf",
+            },
+            {
+                "identifier": "dataset2",
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+                "open_params": {
+                    "point": (0, 0),
+                    "radius": 0.3,
+                },
+                "format_id": "netcdf",
+            },
+            {
                 "identifier": "dataset3",
                 "store": "datasource",
-                "data_id": "dataset3.zarr",
-                "open_params": {"point": [40, 0]},
+                "data_id": "dataset1.zarr",
+                "open_params": {
+                    "point": (0, 0),
+                    "bbox_width": 0.5,
+                },
+                "format_id": "netcdf",
+            },
+            {
+                "identifier": "dataset4",
+                "variables": [
+                    {
+                        "identifier": "data_var1",
+                        "store": "datasource",
+                        "data_id": "dataset3.zarr",
+                        "open_params": {"bbox": [0, 1, 1, 2]},
+                    },
+                    {
+                        "identifier": "data_var2",
+                        "store": "datasource",
+                        "data_id": "dataset1.zarr",
+                    },
+                ],
             },
         ],
         "data_stores": [
@@ -338,18 +360,25 @@ def get_config_dict9():
     return {
         "datasets": [
             {
-                "identifier": "dataset_final",
+                "identifier": "dataset1",
                 "grid_mapping": "grid1",
-                "variables": [
-                    {
-                        "identifier": "data_var1",
-                        "store": "datasource",
-                        "data_id": "dataset1.zarr",
-                        "spatial_resample_params": {
-                            "agg_methods": "max",
-                        },
-                    },
-                ],
+                "store": "datasource",
+                "data_id": "dataset1.zarr",
+                "spatial_resample_params": {
+                    "agg_methods": "max",
+                },
+            },
+            {
+                "identifier": "dataset3",
+                "grid_mapping": "grid1",
+                "store": "datasource",
+                "data_id": "dataset3.zarr",
+                "spatial_resample_params": {
+                    "agg_methods": "max",
+                },
+                "temporal_resample_params": {
+                    "frequency": "2D",
+                },
             },
         ],
         "data_stores": [
@@ -374,8 +403,8 @@ def get_config_dict9():
             }
         ],
         "general": {
-            "dask_scheduler": "single-threaded",
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+            "visualize": False,
         },
     }
 
@@ -395,7 +424,6 @@ def get_config_dict10():
                             "interp_methods": "nearest",
                         },
                     },
-
                 ],
             },
         ],
@@ -421,10 +449,11 @@ def get_config_dict10():
             }
         ],
         "general": {
-            "dask_scheduler": "single-threaded",
             "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
+            "visualize": False,
         },
     }
+
 
 def get_sample_data_2d():
     lon = np.arange(-5.0, 36.0, 5.0)
@@ -447,7 +476,7 @@ def get_sample_data_2d():
 def get_sample_data_3d():
     lon = np.arange(-5.0, 6.0, 5.0)
     lat = np.arange(45.0, 34.0, -5.0)
-    time = np.arange(10)
+    time = pd.date_range(start="2025-01-01", periods=10, freq="D")
     spatial_ref = np.array(0)
     band_1 = np.arange(90).reshape((10, 3, 3))
     ds = xr.Dataset(
@@ -472,9 +501,10 @@ def modify_dataset(ds: xr.Dataset) -> xr.Dataset:
 
 def biomass_xu_merge_years(ds: xr.Dataset) -> xr.Dataset:
     ds = ds.rename(name_dict={"x": "lon", "y": "lat"})
+    var_sel = [f"band_{i}" for i in range(1, 3)]
+    ds = ds[var_sel]
     ds_arr = ds.to_dataarray(dim="time")
-    time = [np.datetime64(f"{year}-01-01T00:00:00") for year in range(2000, 2019 + 1)]
+    time = [np.datetime64(f"{year}-01-01T00:00:00") for year in range(2000, 2002)]
     ds["carbon_density"] = ds_arr.assign_coords(coords=dict(time=time))
-    var_del = [f"da_{i}" for i in range(1, 21)]
-    ds = ds.drop_vars(var_del)
+    ds = ds.drop_vars(var_sel)
     return ds

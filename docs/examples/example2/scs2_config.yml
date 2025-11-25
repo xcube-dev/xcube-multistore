@@ -119,6 +119,3 @@ grid_mappings:
     crs: EPSG:4326
     tile_size: 1000
 
-general:
-  dask_scheduler: "single-threaded"
-

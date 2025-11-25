@@ -56,6 +56,7 @@ This configures a dataset object from a single data source.
 * **[format_id](#format_id)**
 * **[custom_processing](#custom_processing)**
 * **[spatial_resample_params](#spatial_resample_params)**
+* **[temporal_resample_params](#temporal_resample_params)**
 
 
 #### multi dataset object
@@ -83,6 +84,7 @@ This configures a variable object, which is stored as a data variable within a s
 * **[open_params](#open_params)**
 * **[custom_processing](#custom_processing)**
 * **[spatial_resample_params](#spatial_resample_params)**
+* **[temporal_resample_params](#temporal_resample_params)**
 
 ### store object
 This configures a store object representing one xcube data store instance.
@@ -132,7 +134,6 @@ generation process.
 
 * **[visualize](#visualize)**
 * **[force_preload](#force_preload)**
-* **[dask_scheduler](#dask_scheduler)**
 * **[gdal_http_params](#gdal_http_params)**
 
 
@@ -162,7 +163,7 @@ datacube is required. For further information view the [xarray.merge documentati
 Desired format of the saved datacube.  
 
 **Default:** `zarr`  
-**Allowed values:** `netcdf`, `zarr`
+**Allowed values:** `netcdf`, `zarr`, [`levels`](https://xcube.readthedocs.io/en/latest/mldatasets.html#the-xcube-levels-format)
 
 ### custom_processing
 This section enables users to define a Python function that is executed after opening 
@@ -176,9 +177,18 @@ the dataset. For a full list of supported parameters, refer to the
 [`xcube_resampling.resample_in_space` Python API documentation](https://xcube-dev.github.io/xcube-resampling/api/#xcube_resampling.resample_in_space).
 
 
-_NOTE_: The first 3 arguments `(source_ds, target_gm, source_gm)` in the `xcube_resampling.resample_in_space` are not
-required and will be inferred automatically from the config file's dataset and 
-gridmapping section.
+_NOTE_: The first 3 arguments `(source_ds, target_gm, source_gm)` in the
+`xcube_resampling.resample_in_space` are not required and will be inferred
+automatically from the config file's dataset and gridmapping section.
+
+### temporal_resample_params
+This section enables user to define the parameters for temporal resampling of
+the dataset. For a full list of supported parameters, refer to the
+[`xcube_resampling.resample_in_time` Python API documentation](https://xcube-dev.github.io/xcube-resampling/api/#xcube_resampling.resample_in_time).
+
+_NOTE_: The argument `frequency` is required; the remaining keyword arguments are
+optional.
+
 
 **Properties**:  
 
@@ -202,7 +212,7 @@ below.
 * [file, https, memory, s3](https://xcube.readthedocs.io/en/latest/dataaccess.html#filesystem-based-data-stores)   
 * [sentinelhub, sentinelhub-cdse](https://github.com/xcube-dev/xcube-sh)  
 * [smos](https://github.com/xcube-dev/xcube-smos)  
-* [stac, stac-cdse, stac-xcube](https://github.com/xcube-dev/xcube-stac)
+* [stac, stac-cdse, stac-cdse-ardc, stac-pc, stac-pc-ardc, stac-xcube](https://github.com/xcube-dev/xcube-stac)
 * [zenodo](https://github.com/xcube-dev/xcube-zenodo)  
 
 ---
@@ -242,12 +252,6 @@ If True, all data IDS given in section `preload_datasets` will be preloaded. If 
 only non-preloaded datasets will be preloaded.  
 
 **Default:** `True`
-
-### dask_scheduler
-Scheduler mode put into `dask.config.set(scheduler=<scheduler_mode>)`  
-  
-**Default:** `threads`  
-**Allowed values:** `threads`, `processes`, `single-threaded`, `sync`, `distributed`
 
 ### gdal_http_params
 GDAL http environment variables which are used when opening a tif file with 

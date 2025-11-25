@@ -21,10 +21,12 @@
 # SOFTWARE.
 
 import functools
+import traceback
 
-import numpy as np
 import pyproj
 import xarray as xr
+from xcube_resampling.utils import normalize_grid_mapping
+from xcube_resampling.gridmapping import GridMapping
 
 from .constants import COMPRESSED_FORMATS, CRS_WGS84
 
@@ -114,7 +116,7 @@ def get_bbox(
     return bbox_final, crs_final
 
 
-def clean_dataset(ds: xr.Dataset) -> xr.Dataset:
+def clean_dataset(ds: xr.Dataset, gm: GridMapping | None = None) -> xr.Dataset:
     """Cleans an xarray Dataset by removing boundary variables and normalizing the
     grid mapping.
 
@@ -136,37 +138,18 @@ def clean_dataset(ds: xr.Dataset) -> xr.Dataset:
         if var in ds:
             sel_vars.append(var)
     ds = ds.drop_vars(sel_vars)
-    ds = _normalize_grid_mapping(ds)
+    if gm is None:
+        try:
+            gm = GridMapping.from_dataset(ds)
+        except:
+            pass
+    if gm is not None:
+        ds = normalize_grid_mapping(ds, gm)
+        for var in ds.data_vars:
+            if "grid_mapping" in ds[var].encoding:
+                del ds[var].encoding["grid_mapping"]
+
     return ds
-
-
-def _normalize_grid_mapping(ds: xr.Dataset) -> xr.Dataset:
-    gm_name = _get_grid_mapping_name(ds)
-    if gm_name is None:
-        return ds
-    crs = pyproj.crs.CRS.from_cf(ds[gm_name].attrs)
-    ds = ds.drop_vars(gm_name)
-    ds = ds.assign_coords(spatial_ref=xr.DataArray(0, attrs=crs.to_cf()))
-    for var in ds.data_vars:
-        ds[var].attrs["grid_mapping"] = "spatial_ref"
-    return ds
-
-
-def _get_grid_mapping_name(ds: xr.Dataset) -> str | None:
-    gm_names = []
-    for var in ds.data_vars:
-        if "grid_mapping" in ds[var].attrs:
-            gm_names.append(ds[var].attrs["grid_mapping"])
-    if "crs" in ds:
-        gm_names.append("crs")
-    if "spatial_ref" in ds.coords:
-        gm_names.append("spatial_ref")
-    gm_names = np.unique(gm_names)
-    assert len(gm_names) <= 1, "Multiple grid mapping names found."
-    if len(gm_names) == 1:
-        return str(gm_names[0])
-    else:
-        return None
 
 
 def _remove_compressed_extension(data_id: str) -> str:
@@ -181,6 +164,8 @@ def _get_data_id(config: dict) -> str:
     format_id = config.get("format_id", "zarr")
     if format_id == "netcdf":
         data_id = f"{config['identifier']}.nc"
+    elif format_id == "levels":
+        data_id = f"{config['identifier']}.levels"
     else:
         data_id = f"{config['identifier']}.zarr"
     return data_id
@@ -193,7 +178,11 @@ def _safe_execute():
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                return e
+                # Capture full traceback as a string
+                tb_str = "".join(
+                    traceback.format_exception(type(e), e, e.__traceback__)
+                )
+                return tb_str
             except KeyboardInterrupt:
                 return "Keyboard Interrupt caught! Exiting gracefully."
 

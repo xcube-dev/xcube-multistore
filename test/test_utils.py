@@ -23,13 +23,15 @@
 import unittest
 
 import numpy as np
+import pyproj
 import xarray as xr
 
 from xcube_multistore.utils import (
     get_bbox,
     get_utm_zone,
-    _normalize_grid_mapping,
+    _get_data_id,
     _safe_execute,
+    clean_dataset,
 )
 
 
@@ -97,15 +99,65 @@ class TestGetBBox(unittest.TestCase):
         self.assertEqual(len(bbox), 4)
 
 
-class TestNormalizeGridMapping(unittest.TestCase):
+class TestCleanDataset(unittest.TestCase):
 
-    def test_normalize_grid_mapping_no_gm_name(self):
+    def test_clean_dataset(self):
         ds = xr.Dataset(
             {
                 "temperature": (("x", "y"), np.random.rand(4, 4)),
                 "humidity": (("x", "y"), np.random.rand(4, 4)),
             },
-            coords={"x": np.arange(4), "y": np.arange(4)},
+            coords={
+                "x": np.arange(4),
+                "y": np.arange(4),
+                "x_bnds": (("bnds", "x"), np.arange(8).reshape((2, 4))),
+                "y_bnds": (("bnds", "x"), np.arange(8).reshape((2, 4))),
+                "spatial_ref": xr.DataArray(
+                    0, attrs=pyproj.CRS.from_string("EPSG:4326").to_cf()
+                ),
+            },
         )
-        normalized_ds = _normalize_grid_mapping(ds)
-        xr.testing.assert_identical(ds, normalized_ds)
+        normalized_ds = clean_dataset(ds)
+        self.assertNotIn("x_bnds", normalized_ds)
+        self.assertNotIn("y_bnds", normalized_ds)
+
+    def test_clean_dataset_wo_grid_mapping(self):
+        ds = xr.Dataset(
+            {
+                "temperature": (("x", "y"), np.random.rand(4, 4)),
+                "humidity": (("x", "y"), np.random.rand(4, 4)),
+            },
+            coords={
+                "x": np.arange(4),
+                "y": np.arange(4),
+                "x_bnds": (("bnds", "x"), np.arange(8).reshape((2, 4))),
+                "y_bnds": (("bnds", "x"), np.arange(8).reshape((2, 4))),
+            },
+        )
+        normalized_ds = clean_dataset(ds)
+        self.assertNotIn("x_bnds", normalized_ds)
+        self.assertNotIn("y_bnds", normalized_ds)
+
+
+class TestGetDataId(unittest.TestCase):
+
+    def test_netcdf_format(self):
+        cfg = {"format_id": "netcdf", "identifier": "mydata"}
+        self.assertEqual(_get_data_id(cfg), "mydata.nc")
+
+    def test_levels_format(self):
+        cfg = {"format_id": "levels", "identifier": "profile"}
+        self.assertEqual(_get_data_id(cfg), "profile.levels")
+
+    def test_default_format_zarr(self):
+        cfg = {"identifier": "dataset"}  # no format_id -> default to zarr
+        self.assertEqual(_get_data_id(cfg), "dataset.zarr")
+
+    def test_unknown_format_falls_back_to_zarr(self):
+        cfg = {"format_id": "unknown", "identifier": "ds"}
+        self.assertEqual(_get_data_id(cfg), "ds.zarr")
+
+    def test_missing_identifier_raises_keyerror(self):
+        cfg = {"format_id": "netcdf"}
+        with self.assertRaises(KeyError):
+            _get_data_id(cfg)
