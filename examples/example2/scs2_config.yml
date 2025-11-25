@@ -28,40 +28,40 @@ datasets:
     variables:
     - identifier: annual_disturbances
       store: zenodo_senf
-      data_id: "france/annual_disturbances_1985_2023_france.tif"
+      data_id: "france/annual_disturbances_1985_2023_france.zarr"
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
     - identifier: disturbance_agent
       store: zenodo_senf
-      data_id: "france/disturbance_agent_1985_2023_france.tif"
+      data_id: "france/disturbance_agent_1985_2023_france.zarr"
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
     - identifier: greatest_disturbance
       store: zenodo_senf
-      data_id: "france/greatest_disturbance_france.tif"
+      data_id: "france/greatest_disturbance_france.zarr"
     - identifier: forest_mask
       store: zenodo_senf
-      data_id: "france/forest_mask_france.tif"
+      data_id: "france/forest_mask_france.zarr"
     - identifier: disturbance_agent_aggregated
       store: zenodo_senf
-      data_id: "france/disturbance_agent_aggregated_france.tif"
+      data_id: "france/disturbance_agent_aggregated_france.zarr"
     - identifier: latest_disturbance
       store: zenodo_senf
-      data_id: "france/latest_disturbance_france.tif"
+      data_id: "france/latest_disturbance_france.zarr"
     - identifier: number_disturbances
       store: zenodo_senf
-      data_id: "france/number_disturbances_france.tif"
+      data_id: "france/number_disturbances_france.zarr"
     - identifier: disturbance_probability
       store: zenodo_senf
-      data_id: "france/disturbance_probability_1985_2023_france.tif"
+      data_id: "france/disturbance_probability_1985_2023_france.zarr"
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
     - identifier: disturbance_severity
       store: zenodo_senf
-      data_id: "france/disturbance_severity_1985_2023_france.tif"
+      data_id: "france/disturbance_severity_1985_2023_france.zarr"
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
@@ -118,4 +118,7 @@ grid_mappings:
     spatial_res: 0.00025
     crs: EPSG:4326
     tile_size: 1000
+
+general:
+  dask_scheduler: "single-threaded"
 

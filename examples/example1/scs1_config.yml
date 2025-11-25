@@ -38,8 +38,8 @@ datasets:
     - '2019-03-01'
     - '2019-03-15'
     point:
-    - 132.3706
     - -15.2588
+    - 132.3706
     spatial_res: 0.1
 - identifier: AU-Dry_ccibiomass
   store: esa_cci
@@ -88,8 +88,8 @@ datasets:
     - '2019-03-01'
     - '2019-03-15'
     point:
-    - 131.1523
     - -12.4943
+    - 131.1523
     spatial_res: 0.1
 - identifier: AU-How_ccibiomass
   store: esa_cci
@@ -138,8 +138,8 @@ datasets:
     - '2019-03-01'
     - '2019-03-15'
     point:
-    - 4.7462
     - 50.5516
+    - 4.7462
     spatial_res: 0.1
 - identifier: BE-Lon_ccibiomass
   store: esa_cci
