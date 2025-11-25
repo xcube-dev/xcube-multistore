@@ -165,12 +165,6 @@ Desired format of the saved datacube.
 **Default:** `zarr`  
 **Allowed values:** `netcdf`, `zarr`, [`levels`](https://xcube.readthedocs.io/en/latest/mldatasets.html#the-xcube-levels-format)
 
-### custom_processing
-This section enables users to define a Python function that is executed after opening 
-the data. It allows for custom dataset manipulation, making it particularly useful 
-for handling unstructured datasets. The function must accept an `xarray.Dataset` as 
-input and return a modified `xarray.Dataset` as output.
-
 ### spatial_resample_params
 This section enables user to define the parameters for spatial resampling of 
 the dataset. For a full list of supported parameters, refer to the
@@ -189,6 +183,11 @@ the dataset. For a full list of supported parameters, refer to the
 _NOTE_: The argument `frequency` is required; the remaining keyword arguments are
 optional.
 
+### custom_processing
+This section enables users to define a Python function that is executed after opening
+the data. It allows for custom dataset manipulation, making it particularly useful
+for handling unstructured datasets. The function must accept an `xarray.Dataset` as
+input and return a modified `xarray.Dataset` as output.
 
 **Properties**:  
 
