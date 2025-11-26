@@ -243,6 +243,7 @@ def get_config_dict5():
         "general": {"visualize": False},
     }
 
+
 def get_config_dict6():
     return {
         "datasets": [
@@ -448,10 +449,7 @@ def get_config_dict10():
                 "tile_size": 10,
             }
         ],
-        "general": {
-            "gdal_http_params": dict(gdal_http_max_retry=20, gdal_http_retry_delay=2),
-            "visualize": False,
-        },
+        "general": {"visualize": False},
     }
 
 

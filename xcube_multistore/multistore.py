@@ -607,16 +607,18 @@ class MultiSourceDataStore:
     def _process_dataset(
         self, ds: xr.Dataset | list[xr.Dataset], config: dict
     ) -> xr.Dataset | Exception:
+        gm_name = config.get("grid_mapping")
         if isinstance(ds, list):
-            dss_processed = [self._process_single_dataset(ds[0], config)]
-            for dataset in ds[1:]:
-                dss_processed.append(
-                    self._process_single_dataset(dataset, config, ds_ref=ds[0])
+            dss_processed = [
+                self._process_single_dataset(
+                    ds[0], config["variables"][0], gm_name=gm_name
                 )
-            dss_reindexed = [dss_processed[0]]
-            for ds in dss_processed[1:]:
-                dss_reindexed.append(
-                    ds.reindex_like(dss_processed[0], method="nearest", tolerance=1e-5)
+            ]
+            for i in range(1, len(ds)):
+                dss_processed.append(
+                    self._process_single_dataset(
+                        ds[i], config["variables"][i], gm_name=gm_name, ds_ref=ds[0]
+                    )
                 )
             merge_params = config.get("xr_merge_params", {})
             if "join" not in merge_params:
@@ -625,25 +627,29 @@ class MultiSourceDataStore:
                 merge_params["combine_attrs"] = "drop_conflicts"
             if "compat" not in merge_params:
                 merge_params["compat"] = "override"
-            return xr.merge(dss_reindexed, **merge_params)
+            return xr.merge(dss_processed, **merge_params)
         else:
-            return self._process_single_dataset(ds, config)
+            return self._process_single_dataset(ds, config, gm_name=gm_name)
 
     @_safe_execute()
     def _process_single_dataset(
-        self, ds: xr.Dataset, config: dict, ds_ref: xr.Dataset = None
+        self,
+        ds: xr.Dataset,
+        config: dict,
+        gm_name: str | None = None,
+        ds_ref: xr.Dataset = None,
     ) -> xr.Dataset | Exception:
         if "temporal_resample_params" in config:
-            temporal_resample_params = config["temporal_resample_params"]
-            frequency = temporal_resample_params.pop("frequency")
-            ds = resample_in_time(ds, frequency, **temporal_resample_params)
+            temp_params = config["temporal_resample_params"]
+            frequency = temp_params.pop("frequency")
+            ds = resample_in_time(ds, frequency, **temp_params)
 
         # if grid mapping is given, resample the dataset
-        if "grid_mapping" in config:
-            if hasattr(self._grid_mappings, config["grid_mapping"]):
-                target_gm = getattr(self._grid_mappings, config["grid_mapping"])
+        if gm_name:
+            if hasattr(self._grid_mappings, gm_name):
+                target_gm = getattr(self._grid_mappings, gm_name)
             else:
-                config_ref = self.config.datasets[config["grid_mapping"]]
+                config_ref = self.config.datasets[gm_name]
                 data_id = _get_data_id(config_ref)
                 ds_ref = getattr(self.stores, "storage").open_data(data_id)
                 target_gm = GridMapping.from_dataset(ds_ref)
