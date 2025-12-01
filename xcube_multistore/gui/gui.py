@@ -1,27 +1,25 @@
 import panel as pn
 import yaml
-from xcube.util.jsonschema import JsonComplexSchema, JsonStringSchema
+from types import SimpleNamespace
+
 from xcube.util.undefined import UNDEFINED
 
 from xcube_multistore.multistore import MultiSourceDataStore
 
-pn.extension('modal', 'codeeditor')
+pn.extension('modal', 'codeeditor', 'notifications')
 
-# -------------------------------------------------------------------
-# Internal state
-# -------------------------------------------------------------------
-
-store_entries = []  # appended to YAML
+store_entries = []
 grid_mappings = []
 dataset_entries = []
 
-wanted_data_stores = ["stac", "zenodo", "clms", "file"]
+SUPPORTED_DATA_STORES = ["stac", "zenodo", "clms", "file"]
 
-# -------------------------------------------------------------------
-# YAML Preview
-# -------------------------------------------------------------------
-
-preview = pn.widgets.CodeEditor(name="YAML Preview", language="yaml", height=500)
+preview = pn.widgets.CodeEditor(
+    name="YAML Preview",
+    language="yaml",
+    height=1000,
+    width=1000
+)
 
 def update_preview():
     cfg = {
@@ -33,33 +31,11 @@ def update_preview():
 
 update_preview()
 
-# -------------------------------------------------------------------
-# Build dynamic widgets from JSON schema
-# -------------------------------------------------------------------
+## Datastores
 
-def create_param_widget(name, spec):
-    t = spec.get("type", "string")
-    default = spec.get("default")
-
-    if t == "string":
-        return pn.widgets.TextInput(name=name, value=default or "")
-    if t == "number":
-        return pn.widgets.FloatInput(name=name, value=default or 0.0)
-    if t == "integer":
-        return pn.widgets.IntInput(name=name, value=default or 0)
-    if t == "boolean":
-        return pn.widgets.Checkbox(name=name, value=bool(default))
-    if "enum" in spec:
-        return pn.widgets.Select(name=name, options=spec["enum"], value=default)
-
-    return pn.widgets.TextInput(name=name, value=str(default))
-
-# -------------------------------------------------------------------
-# Modal Widgets
-# -------------------------------------------------------------------
 all_data_store_ids = MultiSourceDataStore.list_data_store_ids()
 filtered_data_store_ids = [data_id for data_id in all_data_store_ids if
-                          data_id in wanted_data_stores]
+                           data_id in SUPPORTED_DATA_STORES]
 
 store_id_select = pn.widgets.Select(
     name="Store ID",
@@ -69,19 +45,14 @@ store_id_select = pn.widgets.Select(
 
 identifier_input = pn.widgets.TextInput(name="Identifier", value="file")
 
-store_params = pn.Column()  # dynamically rebuilt
+store_params = pn.Column(sizing_mode="stretch_width")  # dynamically rebuilt
 
 def render_schema(name, schema, prefix=""):
-    """
-    Recursively convert schema → (Panel widget tree, widget_dict)
-
-    widget_dict maps "storage_options.credentials.client_id" → widget
-    """
+    """Recursively convert schema to  widget dict"""
 
     full_prefix = f"{prefix}.{name}" if prefix else name
     widgets = {}
 
-    # ---------- SIMPLE TYPES ----------
     if schema.type == "string":
         w = pn.widgets.TextInput(name=name, value=schema.default if schema.default != UNDEFINED  else "")
         widgets[full_prefix] = w
@@ -112,37 +83,11 @@ def render_schema(name, schema, prefix=""):
         widgets[full_prefix] = w
         return w, widgets
 
-    # ---------- ENUM ----------
-    if getattr(schema, "enum", None):
-        w = pn.widgets.Select(
-            name=name,
-            options=schema.enum,
-            value=schema.default or schema.enum[0]
-        )
-        widgets[full_prefix] = w
-        return w, widgets
-
-    # ---------- ARRAY ----------
-    if schema.type == "array":
-        # Recursive arrays of objects OR simple arrays
-        if getattr(schema, "items", None) and schema.items.type == "object":
-            # Array of objects → JSON editor for now
-            w = pn.widgets.JSONEditor(name=name, value=schema.default or [], mode="tree")
-            widgets[full_prefix] = w
-            return w, widgets
-
-        # fallback simple array
-        w = pn.widgets.JSONEditor(name=name, value=schema.default or [], mode="tree")
-        widgets[full_prefix] = w
-        return w, widgets
-
-    # ---------- OBJECT ----------
     if schema.type == "object":
         section = pn.Column(
-            pn.pane.Markdown(f"### {name}"),  # section header
+            pn.pane.Markdown(f"### {name}"),
             margin=(0, 0, 10, 0)
         )
-
         for prop_name, prop_schema in schema.properties.items():
             widget_or_container, inner_widgets = render_schema(
                 prop_name,
@@ -155,110 +100,163 @@ def render_schema(name, schema, prefix=""):
 
         return section, widgets
 
-    # ---------- FALLBACK ----------
     w = pn.widgets.TextAreaInput(name=name, value=str(schema.default or ""))
     widgets[full_prefix] = w
     return w, widgets
 
+
 def build_store_params(store_id):
     schema = MultiSourceDataStore.get_data_store_params_schema()
 
-    schema.properties = {
-        key: schema.properties[key] for key in wanted_data_stores if key in schema.properties
-    }
-    print("schema", schema)
-    # print(schema.properties["file"].properties)
-    # # print(schema.properties["file"].properties['storage_options'].type)
-    # s: JsonStringSchema = schema.properties["file"].properties['max_depth']
-    # for item in s.to_dict().items():
-    #     print(item)
-    # print(s.default)
-    # print(s.properties['listings_expiry_time'].type)
-    # properties = schema.get("properties", {})
-
-    # widgets = {}
-    # store_params_container.objects = []  # clear
-    #
-    # for key, spec in properties.items():
-    #     w = create_param_widget(key, spec)
-    #     widgets[key] = w
-    #     store_params_container.append(w)
-
-    # return widgets
     store_params.objects = []
 
-    # schema = MultiSourceDataStore.get_data_store_params_schema()
-    store_schema = schema.properties[store_id].properties
+    if store_id in schema.properties.keys():
+        store_schema = schema.properties[store_id].properties
+    else:
+        raise Exception(f"Store ID {store_id} not supported.")
 
-    store_param_widgets = {}  # clear
+    store_param_widgets = {}
 
     for key, prop_schema in store_schema.items():
         ui_block, widgets_dict = render_schema(key, prop_schema)
         store_params.append(ui_block)
         store_param_widgets.update(widgets_dict)
 
-    def nested_dict_from_widgets(widget_map):
-        root = {}
+    return store_param_widgets
 
-        for key, widget in widget_map.items():
-            parts = key.split(".")
-            d = root
-
-            for p in parts[:-1]:
-                d = d.setdefault(p, {})
-
-            d[parts[-1]] = widget.value
-
-        return root
-
-    params = nested_dict_from_widgets(store_param_widgets)
-    print("store_param_widgets", store_param_widgets)
-    print("params", params)
-    return params
-
-# Keep reference to current params
 current_params_widgets = build_store_params(store_id_select.value)
+
+
+def make_store_selector(label="Store", value=None):
+    """
+    Creates a store selector + dynamic store params block.
+    Returns:
+      selector       : a pn.Select of store identifiers
+      params_ui      : a Column containing rendered params
+      param_widgets  : a function that returns the current widgets dict
+    """
+
+    options = [s["identifier"] for s in store_entries]
+
+    selector = pn.widgets.Select(
+        name=label,
+        options=options,
+        value=value or (options[0] if options else None),
+    )
+
+    params_ui = pn.Column()
+    current_param_widgets = {}
+
+    def rebuild_params(event=None):
+        nonlocal current_param_widgets
+        params_ui.objects = []
+        current_param_widgets = {}
+
+        store_id = selector.value
+        match = [s for s in store_entries if s["identifier"] == store_id]
+        if not match:
+            return
+
+        store_entry = match[0]
+        full_schema = MultiSourceDataStore.get_data_store_params_schema()
+        schema = full_schema.properties[store_entry["store_id"]].properties
+
+        for key, prop_schema in schema.items():
+            ui, widgets_dict = render_schema(key, prop_schema)
+            params_ui.append(ui)
+            current_param_widgets.update(widgets_dict)
+
+    selector.param.watch(rebuild_params, "value")
+
+    rebuild_params()
+
+    return SimpleNamespace(
+        selector=selector,
+        params_ui=params_ui,
+        param_widgets=lambda: current_param_widgets,
+    )
+
 
 def on_store_id_change(event):
     global current_params_widgets
-    # Update identifier default
     identifier_input.value = event.new
-
-    # Rebuild parameters
     current_params_widgets = build_store_params(event.new)
 
 store_id_select.param.watch(on_store_id_change, "value")
 
-# -------------------------------------------------------------------
-# Modal Setup
-# -------------------------------------------------------------------
-
 add_button = pn.widgets.Button(name="Add Store", button_type="primary")
 cancel_button = pn.widgets.Button(name="Cancel", button_type="warning")
 
-# The following messes up with my UI, and the data store modal behaves
-# wieerdly a d store_params_conatiner does not update, but when i clikc save,
-# i can see the updated params in the preview, also no scrolling acheived,
-# store_params = pn.Column(
-#     store_params_container,
-#     max_height=350,
-#     scroll=True
-# )
+scrollable_params = pn.Column(
+        store_params,
+        sizing_mode="stretch_width"
+    )
 
-modal = pn.Modal(
-pn.Column(
-    pn.pane.Markdown("### Add a Data Store"),
-    identifier_input,
-    store_id_select,
-    pn.pane.Markdown("#### store_params"),
-    store_params,
-    pn.Row(add_button, cancel_button),
-),
+def make_store_modal_body():
+    return pn.Column(
+        pn.pane.Markdown("# Add a Data Store"),
+        pn.layout.Divider(),
+        identifier_input,
+        store_id_select,
+        pn.layout.Divider(),
+        pn.pane.Markdown("#### Store Params"),
+        pn.Column(store_params, sizing_mode="stretch_width"),
+        pn.layout.Divider(),
+        pn.Row(add_button, cancel_button),
+        sizing_mode="stretch_width",
+    )
+
+modal = pn.layout.modal.Modal(
+    make_store_modal_body(),
     name="Add Store Modal",
-    width=400,
+    width=520,
+    height=620,
+    show_close_button=True,
+    background_close=True,
+    sizing_mode="fixed"
 )
 
 toggle_button = modal.create_button("show", name="Add a Data Store")
+
+def on_add_store(event):
+    identifier = identifier_input.value.strip()
+
+    if any(s["identifier"] == identifier for s in store_entries):
+        pn.state.notifications.error(
+            f"A store with identifier '{identifier}' already exists."
+        )
+        modal.hide()
+        return
+
+    def collect_nested_values(widget_map):
+        result = {}
+        for key, widget in widget_map.items():
+            parts = key.split(".")
+            d = result
+            for p in parts[:-1]:
+                d = d.setdefault(p, {})
+            d[parts[-1]] = widget.value
+        return result
+
+    entry = {
+        "identifier": identifier_input.value,
+        "store_id": store_id_select.value,
+        "store_params":  collect_nested_values(current_params_widgets)
+    }
+
+    store_entries.append(entry)
+    for selector in [ds_store_selector, var_store_selector]:
+        selector.selector.options = [s["identifier"] for s in store_entries]
+    update_preview()
+    modal.hide()
+
+def on_cancel(event):
+    modal.hide()
+
+add_button.on_click(on_add_store)
+cancel_button.on_click(on_cancel)
+
+## Gridmapping
 
 gm_identifier = pn.widgets.TextInput(name="Identifier", value="gm1")
 gm_bbox = pn.widgets.TextInput(name="BBox (xmin,ymin,xmax,ymax)", value="-180,-90,180,90")
@@ -275,36 +273,13 @@ gm_modal = pn.Modal(
         gm_spatial_res,
         gm_crs,
         pn.Row(add_gm_btn, cancel_gm_btn),
-        # scroll=True,
     ),
-    open=False,
     name="Add Grid Mapping"
 )
 
 open_gm_modal_btn = gm_modal.create_button("show", name="Add Grid Mapping")
 
-# -------------------------------------------------------------------
-# Button Callbacks
-# -------------------------------------------------------------------
-
-def on_add_store(event):
-    entry = {
-        "identifier": identifier_input.value,
-        "store_id": store_id_select.value,
-        "store_params": {k: w for k, w in current_params_widgets.items()}
-    }
-
-    store_entries.append(entry)
-    ds_store.options = [s["identifier"] for s in store_entries]
-    var_store.options = [s["identifier"] for s in store_entries]
-    update_preview()
-    modal.hide()
-
-def on_cancel(event):
-    modal.hide()
-
 def on_add_gm(event):
-    # parse bbox
     try:
         bbox_vals = [float(x) for x in gm_bbox.value.split(",")]
         if len(bbox_vals) != 4:
@@ -332,47 +307,44 @@ def on_cancel_gm(event):
 add_gm_btn.on_click(on_add_gm)
 cancel_gm_btn.on_click(on_cancel_gm)
 
-add_button.on_click(on_add_store)
-cancel_button.on_click(on_cancel)
-
-
-###############################################################################
-# VARIABLE SUB-MODAL (for multi dataset)
-###############################################################################
+### datasets
 
 var_identifier = pn.widgets.TextInput(name="Variable Identifier", value="")
 var_store = pn.widgets.Select(name="Store", options=[])
 var_data_id = pn.widgets.TextInput(name="Data ID", value="")
 
 var_open_params = pn.widgets.TextAreaInput(name="open_params (YAML)", value="")
-var_custom_proc = pn.widgets.TextAreaInput(name="custom_processing (YAML)", value="")
-var_spatial = pn.widgets.TextAreaInput(name="spatial_resample_params (YAML)", value="")
-var_temporal = pn.widgets.TextAreaInput(name="temporal_resample_params (YAML)", value="")
 
 add_var_btn = pn.widgets.Button(name="Add Variable", button_type="primary")
 cancel_var_btn = pn.widgets.Button(name="Cancel", button_type="danger")
 
+var_store_selector = make_store_selector(label="Store")
+
 variable_modal = pn.Modal(
     pn.Column(
-        pn.pane.Markdown("### Add Variable Object"),
+        pn.pane.Markdown("# Add Variable Object"),
+        pn.layout.Divider(),
         var_identifier,
-        var_store,
+        var_store_selector.selector,
         var_data_id,
-        var_open_params,
-        var_custom_proc,
-        var_spatial,
-        var_temporal,
+        pn.layout.Divider(),
+        pn.pane.Markdown("#### Store Params"),
+        var_store_selector.params_ui,
         pn.Row(add_var_btn, cancel_var_btn),
+        sizing_mode="stretch_width",
     ),
     open=False,
-    name="Add Variable"
+    name="Add Variable",
+    width=520,
+    height=620,
+    show_close_button=True,
+    background_close=True,
+    sizing_mode="fixed",
 )
 
-open_variable_modal_btn = variable_modal.create_button("show", name="➕ Add Variable")
+open_variable_modal_btn = variable_modal.create_button("show", name="Add Variable")
 
-# The multi-dataset holds variables temporarily until the main dataset is added
 multi_variable_list = []
-
 
 def on_add_variable(event):
     entry = {
@@ -381,27 +353,20 @@ def on_add_variable(event):
         "data_id": var_data_id.value,
     }
 
-    # optional YAML blocks
     for key, widget in [
         ("open_params", var_open_params),
-        ("custom_processing", var_custom_proc),
-        ("spatial_resample_params", var_spatial),
-        ("temporal_resample_params", var_temporal),
     ]:
         val = widget.value
         if val is not None:
             entry[key] = val
 
     multi_variable_list.append(entry)
+    refresh_md_variable_display()
     variable_modal.hide()
 
 cancel_var_btn.on_click(lambda e: variable_modal.hide())
 add_var_btn.on_click(on_add_variable)
 
-
-###############################################################################
-# DATASET MAIN MODAL
-###############################################################################
 
 dataset_type = pn.widgets.RadioBoxGroup(
     name="Dataset Type",
@@ -410,25 +375,63 @@ dataset_type = pn.widgets.RadioBoxGroup(
     inline=True,
 )
 
-# SINGLE DATASET FIELDS
+
+def update_data_ids(event):
+    print('getattr(dataset_modal, "open", False)', getattr(dataset_modal, "open", False))
+    if not getattr(dataset_modal, "open", False):
+        return
+
+    store_id = event.new
+    matching = [s for s in store_entries if s["identifier"] == store_id]
+    if not matching:
+        ds_data_id.options = []
+        ds_data_id.value = ""
+        pn.state.notifications.error(
+            f"No store parameters found for store '{store_id}'. Please add it first."
+        )
+        dataset_modal.hide()
+        return
+
+    store = matching[0]
+    params = store["store_params"]
+
+    ds_data_id.loading = True
+    try:
+        data_ids_schema = MultiSourceDataStore.list_data_ids(
+            {store["store_id"]: params}
+        )
+
+        try:
+            options = []
+            for k in getattr(data_ids_schema, "properties", {}):
+                enum = getattr(data_ids_schema.properties[k], "enum", None)
+                if enum:
+                    options = list(enum)
+                    break
+        except Exception:
+            options = list(data_ids_schema) if data_ids_schema else []
+
+        ds_data_id.options = options[:100]
+        ds_data_id.value = options[0] if options else ""
+    except Exception as e:
+        ds_data_id.options = []
+        ds_data_id.value = ""
+        pn.state.notifications.error(f"Error fetching data IDs: {e}")
+    finally:
+        ds_data_id.loading = False
+
+
 ds_identifier = pn.widgets.TextInput(name="Identifier", value="")
-ds_store = pn.widgets.Select(name="Store", options=[])
+ds_store_selector = make_store_selector(label="Store")
 ds_grid_mapping = pn.widgets.Select(name="Grid Mapping", options=[])
-ds_data_id = pn.widgets.TextInput(name="Data ID", value="")
+ds_data_id = pn.widgets.Select(name="Data ID", value="")
 ds_format_id = pn.widgets.TextInput(name="Format ID (optional)", value="")
 
-ds_open_params = pn.widgets.TextAreaInput(name="open_params (YAML)", value="{}")
-ds_custom_proc = pn.widgets.TextAreaInput(name="custom_processing (YAML)", value="")
-ds_spatial = pn.widgets.TextAreaInput(name="spatial_resample_params (YAML)", value="")
-ds_temporal = pn.widgets.TextAreaInput(name="temporal_resample_params (YAML)", value="")
+ds_store_selector.selector.param.watch(update_data_ids, "value")
 
-# MULTI DATASET FIELDS
 md_identifier = pn.widgets.TextInput(name="Identifier", value="")
 md_grid_mapping = pn.widgets.Select(name="Grid Mapping", options=[])
 md_format_id = pn.widgets.TextInput(name="Format ID (optional)", value="")
-md_xr_merge_params = pn.widgets.TextAreaInput(name="xr_merge_params (YAML)", value="{}")
-
-# Just a display of variables added
 md_var_display = pn.pane.Markdown("No variables added yet.")
 
 
@@ -442,9 +445,6 @@ def refresh_md_variable_display():
     md_var_display.object = text
 
 
-###############################################################################
-# RENDERING CONDITIONS
-###############################################################################
 
 def dataset_type_changed(event):
     if event.new == "single":
@@ -457,25 +457,20 @@ def dataset_type_changed(event):
 dataset_type.param.watch(dataset_type_changed, "value")
 
 
-###############################################################################
-# DATASET MODAL BODY
-###############################################################################
-
 add_ds_btn = pn.widgets.Button(name="Add Dataset", button_type="primary")
 cancel_ds_btn = pn.widgets.Button(name="Cancel", button_type="danger")
 
 single_section = pn.Column(
     pn.pane.Markdown("### Single Dataset"),
     ds_identifier,
-    ds_store,
+    ds_store_selector.selector,
     ds_grid_mapping,
     ds_data_id,
     ds_format_id,
-    pn.pane.Markdown("#### Optional parameter blocks"),
-    ds_open_params,
-    ds_custom_proc,
-    ds_spatial,
-    ds_temporal,
+    pn.layout.Divider(),
+    pn.pane.Markdown("#### Store Params"),
+    ds_store_selector.params_ui,
+    sizing_mode="stretch_width",
 )
 
 multi_section = pn.Column(
@@ -483,11 +478,11 @@ multi_section = pn.Column(
     md_identifier,
     md_grid_mapping,
     md_format_id,
-    md_xr_merge_params,
     pn.pane.Markdown("### Variables"),
     md_var_display,
     open_variable_modal_btn,
     visible=False,
+    sizing_mode="stretch_width",
 )
 
 dataset_modal = pn.Modal(
@@ -497,23 +492,32 @@ dataset_modal = pn.Modal(
         single_section,
         multi_section,
         pn.Row(add_ds_btn, cancel_ds_btn),
+        sizing_mode="stretch_width",
     ),
     open=False,
-    name="Add Dataset"
+    name="Add Dataset",
+    width=520,
+    height=620,
+    show_close_button=True,
+    background_close=True,
+    sizing_mode="fixed"
 )
 
-open_dataset_modal_btn = dataset_modal.create_button("show", name="➕ Add Dataset")
+open_dataset_modal_btn = dataset_modal.create_button("show", name="Add Dataset")
 
-###############################################################################
-# BUTTON CALLBACKS — MAIN DATASET MODAL
-###############################################################################
+def on_dataset_modal_open(event):
+    if event.new:
+        update_data_ids(type("Event", (), {"new": ds_store_selector.selector.value}))
+
+dataset_modal.param.watch(on_dataset_modal_open, "open")
+
 
 def on_add_dataset(event):
     if dataset_type.value == "single":
         entry = {
             "type": "single",
             "identifier": ds_identifier.value,
-            "store": ds_store.value,
+            "store": ds_store_selector.selector.value,
             "grid_mapping": ds_grid_mapping.value,
             "data_id": ds_data_id.value,
         }
@@ -521,10 +525,7 @@ def on_add_dataset(event):
             entry["format_id"] = ds_format_id.value
 
         for key, widget in [
-            ("open_params", ds_open_params),
-            ("custom_processing", ds_custom_proc),
-            ("spatial_resample_params", ds_spatial),
-            ("temporal_resample_params", ds_temporal),
+            ("open_params", ds_store_selector.selector),
         ]:
             val = widget.value
             if val is not None:
@@ -532,7 +533,7 @@ def on_add_dataset(event):
 
         dataset_entries.append(entry)
 
-    else:  # MULTI DATASET
+    else:
         entry = {
             "type": "multi",
             "identifier": md_identifier.value,
@@ -541,16 +542,11 @@ def on_add_dataset(event):
         if md_format_id.value:
             entry["format_id"] = md_format_id.value
 
-        xr_val = md_xr_merge_params.value
-        if xr_val is not None:
-            entry["xr_merge_params"] = xr_val
-
         entry["variables"] = list(multi_variable_list)
 
         dataset_entries.append(entry)
 
-        # reset variable list for next time
-        multi_variable_list.clear()
+        # multi_variable_list.clear()
         refresh_md_variable_display()
 
     update_preview()
@@ -563,15 +559,10 @@ def on_cancel_ds(event):
 add_ds_btn.on_click(on_add_dataset)
 cancel_ds_btn.on_click(on_cancel_ds)
 
-# -------------------------------------------------------------------
-# Layout
-# -------------------------------------------------------------------
-
 layout = pn.Row(
     pn.Column(
         "## Data Stores",
         toggle_button,
-        modal,
         "## Grid Mappings",
         open_gm_modal_btn,
         gm_modal,
@@ -579,9 +570,12 @@ layout = pn.Row(
         open_dataset_modal_btn,
         dataset_modal,
         variable_modal,
-        width=400
+        modal,
+        width=400,
+        sizing_mode="fixed",
     ),
-    preview
+    preview,
+    sizing_mode="stretch_width"
 )
 
 layout.servable()
