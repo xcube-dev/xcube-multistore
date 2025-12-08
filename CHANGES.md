@@ -13,6 +13,7 @@
 * **Geolocation visualization**: Added `display_geolocations()` to visualize
   all requested geolocations of the datacubes to be generated.
 * Fixed visualization of preload handle
+* Experimental configuration setup GUI added using panel.
 
 
 ## Changes in 0.2.0
