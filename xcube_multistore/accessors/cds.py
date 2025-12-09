@@ -26,6 +26,7 @@ import xarray as xr
 from xcube.core.store import DataStoreError
 
 from xcube_multistore.accessor import Accessor
+from xcube_multistore.visualization import GeneratorState
 
 
 class CdsAccessor(Accessor):
@@ -37,7 +38,13 @@ class CdsAccessor(Accessor):
             open_params = self._convert_point_to_bbox(data_id, open_params)
             point = open_params.pop("point")
         time_range = open_params.pop("time_range")
-        ds = self._open_with_split(data_id, time_range, open_params)
+        self.notify(
+            GeneratorState(
+                self.identifier,
+                message=f"Open dataset {self.identifier!r} 0%.",
+            )
+        )
+        ds, _ = self._open_with_split(data_id, time_range, open_params, time_range)
 
         if time_series:
             # noinspection PyUnboundLocalVariable
@@ -58,15 +65,36 @@ class CdsAccessor(Accessor):
         return open_params
 
     def _open_with_split(
-        self, data_id: str, time_range: tuple[str, str], open_params
-    ) -> xr.Dataset:
+        self,
+        data_id: str,
+        time_range: tuple[str, str],
+        open_params: dict,
+        original_time_range: tuple[str, str],
+        progress: int | None = None,
+    ) -> tuple[xr.Dataset, int]:
         """
         Recursively fetch data by splitting time_range into smaller ranges
         until store.open_data() succeeds.
         """
+        if progress is None:
+            progress = 0
         try:
             open_params["time_range"] = time_range
-            return self.store.open_data(data_id, **open_params)
+            ds = self.store.open_data(data_id, **open_params)
+            progress += 1
+            time_diff = get_timedelta(open_params["time_range"]).days
+            time_diff_orig = get_timedelta(original_time_range).days
+            nb_requests = time_diff_orig // time_diff
+            self.notify(
+                GeneratorState(
+                    self.identifier,
+                    message=(
+                        f"Open dataset {self.identifier!r} "
+                        f"{progress / nb_requests * 100:.0f}%."
+                    ),
+                )
+            )
+            return ds, progress
 
         except Exception:
             # Split the request into two halves
@@ -78,7 +106,8 @@ class CdsAccessor(Accessor):
             # Base case: prevent infinite recursion if the time range gets too tiny
             if mid <= start or mid >= end:
                 raise DataStoreError(
-                    f"No further split of time range ({start}, {end}) possible in CDS large data request alpgrithm."
+                    f"Cannot further split time range {start} to {end}: "
+                    f"minimum interval reached in CDS large data request algorithm."
                 )
 
             # Recursively fetch both halves
@@ -92,7 +121,26 @@ class CdsAccessor(Accessor):
                 ),
                 datetime.datetime.strftime(end, "%Y-%m-%d"),
             )
-            left = self._open_with_split(data_id, time_range_left, open_params)
-            right = self._open_with_split(data_id, time_range_right, open_params)
+            left, progress = self._open_with_split(
+                data_id,
+                time_range_left,
+                open_params,
+                original_time_range,
+                progress=progress,
+            )
+            right, progress = self._open_with_split(
+                data_id,
+                time_range_right,
+                open_params,
+                original_time_range,
+                progress=progress,
+            )
 
-            return xr.concat((left, right), dim="time")
+            return xr.concat((left, right), dim="time"), progress
+
+
+def get_timedelta(time_range: tuple[str, str]) -> datetime.timedelta:
+    start, end = time_range
+    start = datetime.date.fromisoformat(start)
+    end = datetime.date.fromisoformat(end)
+    return end - start

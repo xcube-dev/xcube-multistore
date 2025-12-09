@@ -36,7 +36,7 @@ class StacAccessorTest(unittest.TestCase):
     def setUp(self):
         self.ds_2d = get_sample_data_2d()
         self.storage = new_data_store("memory", root="data")
-        self.accessor = StacAccessor(MagicMock(), self.storage)
+        self.accessor = StacAccessor(MagicMock(), self.storage, "test", MagicMock())
 
     def test_open_data(self):
         self.accessor.store.open_data.return_value = self.ds_2d

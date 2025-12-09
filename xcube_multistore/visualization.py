@@ -53,7 +53,6 @@ class GeneratorState:
         status: GeneratorStatus | None = None,
         message: str | None = None,
         exception: BaseException | None = None,
-        time: str | None = None,
     ):
         assert_given(identifier, name="identifier")
         self.identifier = identifier
@@ -126,7 +125,12 @@ class GeneratorDisplay(ABC):
 
         return tabulate.tabulate(
             rows,
-            headers=["Dataset identifier", "Status", "Message", "Exception"],
+            headers=[
+                "Dataset identifier",
+                "Status",
+                "Message",
+                "Exception",
+            ],
             tablefmt=table_format,
         )
 

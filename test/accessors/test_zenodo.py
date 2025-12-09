@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import unittest
+from unittest.mock import MagicMock
 
 import xarray as xr
 from xcube.core.store import new_data_store
@@ -41,7 +42,7 @@ class ZenodoAccessorTest(unittest.TestCase):
             self.ds_3d, "zenodo_cache/dataset.zarr", replace=True
         )
         storage_store = new_data_store("file", root="data")
-        self.accesor = ZenodoAccessor(memory_store, storage_store)
+        self.accesor = ZenodoAccessor(memory_store, storage_store, "test", MagicMock())
 
     def test_open_data(self):
         ds = self.accesor.open_data("dataset.zarr")

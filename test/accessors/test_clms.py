@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import unittest
+from unittest.mock import MagicMock
 
 import xarray as xr
 from xcube.core.store import new_data_store
@@ -40,7 +41,7 @@ class ClmsAccessorTest(unittest.TestCase):
             self.ds_3d, "clms_storage|clms_dataset.zarr", replace=True
         )
         storage_store = new_data_store("file", root="data")
-        self.accesor = ClmsAccessor(memory_store, storage_store)
+        self.accesor = ClmsAccessor(memory_store, storage_store, "test", MagicMock())
 
     def test_open_data_cache_store(self):
         ds = self.accesor.open_data("clms_storage|clms_dataset.zarr")

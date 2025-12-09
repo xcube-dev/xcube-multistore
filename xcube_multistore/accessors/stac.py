@@ -26,6 +26,7 @@ from collections.abc import Iterable
 import xarray as xr
 
 from xcube_multistore.accessor import Accessor
+from xcube_multistore.visualization import GeneratorState
 
 _NB_PIXELS = int(2e4 * 2e4) * 5 * 4
 
@@ -35,10 +36,26 @@ class StacAccessor(Accessor):
 
     def open_data(self, data_id: str, **open_params) -> xr.Dataset:
         time_ranges = self._split_time_range(open_params)
+        nb_requests = len(time_ranges)
+        self.notify(
+            GeneratorState(
+                self.identifier,
+                message=f"Open dataset {self.identifier!r} 0%.",
+            )
+        )
         for i, time_range in enumerate(time_ranges):
             open_params["time_range"] = time_range
             ds = self.store.open_data(data_id, **open_params)
             self.storage.write_data(ds, f"stac_temp_{i}.zarr", replace=True)
+            self.notify(
+                GeneratorState(
+                    self.identifier,
+                    message=(
+                        f"Open dataset {self.identifier!r} "
+                        f"{(i+1) / nb_requests * 100:.0f}%."
+                    ),
+                )
+            )
 
         dss = []
         for i, _ in enumerate(time_ranges):

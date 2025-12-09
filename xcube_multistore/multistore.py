@@ -593,7 +593,9 @@ class MultiSourceDataStore:
         store_id = getattr(self.stores, f"{config['store']}_store_id")
         open_params = copy.deepcopy(config.get("open_params", {}))
         storage_store = getattr(self.stores, NAME_WRITE_STORE)
-        accessor = guess_accessor(store_id, store, storage_store)
+        accessor = guess_accessor(
+            store_id, store, storage_store, config["identifier"], self._notify
+        )
         ds = accessor.open_data(config["data_id"], **open_params)
         if isinstance(ds, MultiLevelDataset):
             ds = ds.base_dataset
@@ -678,6 +680,9 @@ class MultiSourceDataStore:
             ds = chunk_dataset(ds, format_name="zarr", chunk_sizes=chunksize)
         else:
             ds = chunk_dataset(ds, format_name=format_id, chunk_sizes=chunksize)
+        for data_var in ds.data_vars:
+            if "chunks" in ds[data_var].encoding:
+                del ds[data_var].encoding["chunks"]
 
         data_id = _get_data_id(config)
         ds = clean_dataset(ds)

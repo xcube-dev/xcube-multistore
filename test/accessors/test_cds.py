@@ -35,11 +35,13 @@ class CdsAccessorTest(unittest.TestCase):
 
     def setUp(self):
         self.ds_3d = get_sample_data_3d()
-        self.accessor = CdsAccessor(MagicMock(), MagicMock())
+        self.accessor = CdsAccessor(MagicMock(), MagicMock(), "era5-land", MagicMock())
 
     def test_open_data(self):
         self.accessor.store.open_data.return_value = self.ds_3d
-        ds = self.accessor.open_data("id", time_range=("2025-01-01", "2025-01-10"))
+        ds = self.accessor.open_data(
+            "era5-land", time_range=("2025-01-01", "2025-01-10")
+        )
         xr.testing.assert_equal(self.ds_3d, ds)
         self.accessor.store.open_data.assert_called_once()
 
@@ -68,7 +70,9 @@ class CdsAccessorTest(unittest.TestCase):
             raise AssertionError("Unexpected time_range")
 
         self.accessor.store.open_data.side_effect = side_effect
-        ds = self.accessor.open_data("id", time_range=("2025-01-01", "2025-01-10"))
+        ds = self.accessor.open_data(
+            "era5-land", time_range=("2025-01-01", "2025-01-10")
+        )
         xr.testing.assert_equal(self.ds_3d, ds)
 
     def test_open_with_split_base_case_error(self):
@@ -78,4 +82,4 @@ class CdsAccessorTest(unittest.TestCase):
             _ = self.accessor.open_data(
                 "era5-land", time_range=("2025-01-01", "2025-01-10")
             )
-        self.assertIn("No further split of time range", str(cm.exception))
+        self.assertIn("Cannot further split time range", str(cm.exception))

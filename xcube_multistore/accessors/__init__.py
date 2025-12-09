@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
+from collections.abc import Callable
 
 from xcube.core.store import DataStore
 
@@ -40,6 +40,12 @@ ACCESSOR_MAPPING = {
 }
 
 
-def guess_accessor(store_id: str, store: DataStore, storage: DataStore) -> Accessor:
+def guess_accessor(
+    store_id: str,
+    store: DataStore,
+    storage: DataStore,
+    identifier: str,
+    notify: Callable,
+) -> Accessor:
     accessor_class = ACCESSOR_MAPPING.get(store_id, BaseAccessor)
-    return accessor_class(store, storage)
+    return accessor_class(store, storage, identifier, notify)

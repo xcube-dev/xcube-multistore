@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 
 import xarray as xr
 from xcube.core.mldataset import MultiLevelDataset
@@ -34,9 +35,13 @@ class Accessor(ABC):
         store: The data store instance to use for dataset access.
     """
 
-    def __init__(self, store: DataStore, storage: DataStore):
+    def __init__(
+        self, store: DataStore, storage: DataStore, identifier: str, notify: Callable
+    ):
         self.store = store
         self.storage = storage
+        self.identifier = identifier
+        self.notify = notify
 
     @abstractmethod
     def open_data(
