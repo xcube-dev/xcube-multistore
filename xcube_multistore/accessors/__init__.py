@@ -22,16 +22,24 @@
 
 
 from xcube.core.store import DataStore
+
 from xcube_multistore.accessor import Accessor
 
 from .base import BaseAccessor
 from .cds import CdsAccessor
-from .zenodo import ZenodoAccessor
 from .clms import ClmsAccessor
+from .stac import StacAccessor
+from .zenodo import ZenodoAccessor
 
-ACCESSOR_MAPPING = {"cds": CdsAccessor, "zenodo": ZenodoAccessor, "clms": ClmsAccessor}
+ACCESSOR_MAPPING = {
+    "cds": CdsAccessor,
+    "zenodo": ZenodoAccessor,
+    "clms": ClmsAccessor,
+    "stac-cdse-ardc": StacAccessor,
+    "stac-pc-ardc": StacAccessor,
+}
 
 
-def guess_accessor(store_id: str, store: DataStore) -> Accessor:
+def guess_accessor(store_id: str, store: DataStore, storage: DataStore) -> Accessor:
     accessor_class = ACCESSOR_MAPPING.get(store_id, BaseAccessor)
-    return accessor_class(store)
+    return accessor_class(store, storage)

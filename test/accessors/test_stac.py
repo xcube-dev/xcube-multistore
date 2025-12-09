@@ -21,40 +21,51 @@
 # SOFTWARE.
 
 import unittest
+from unittest.mock import MagicMock
 
 import xarray as xr
 from xcube.core.store import new_data_store
 
-from xcube_multistore.accessors.zenodo import ZenodoAccessor
+from xcube_multistore.accessors.stac import StacAccessor
 
-from ..sample_data import get_sample_data_3d
+from ..sample_data import get_sample_data_2d
 
 
-class ZenodoAccessorTest(unittest.TestCase):
+class StacAccessorTest(unittest.TestCase):
 
     def setUp(self):
-        self.ds_3d = get_sample_data_3d()
-        memory_store = new_data_store("memory", root="datasource")
-        memory_store.write_data(self.ds_3d, "dataset.zarr", replace=True)
-        memory_store.cache_store = new_data_store("memory", root="cache_datadource")
-        memory_store.cache_store.write_data(
-            self.ds_3d, "zenodo_cache/dataset.zarr", replace=True
-        )
-        storage_store = new_data_store("file", root="data")
-        self.accesor = ZenodoAccessor(memory_store, storage_store)
+        self.ds_2d = get_sample_data_2d()
+        self.storage = new_data_store("memory", root="data")
+        self.accessor = StacAccessor(MagicMock(), self.storage)
 
     def test_open_data(self):
-        ds = self.accesor.open_data("dataset.zarr")
+        self.accessor.store.open_data.return_value = self.ds_2d
+        ds = self.accessor.open_data(
+            "sentinel-2-l2a",
+            bbox=[9, 54, 11, 56],
+            time_range=("2025-01-01", "2025-01-31"),
+            spatial_res=0.0001,
+        )
         self.assertIsInstance(ds, xr.Dataset)
         self.assertCountEqual(["band_1"], ds.data_vars)
+        self.assertCountEqual(("time", "lat", "lon"), ds.dims)
         self.assertEqual(
-            [10, 3, 3], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+            [9, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
         )
 
-    def test_open_data_cache_store(self):
-        ds = self.accesor.open_data("zenodo_cache/dataset.zarr")
+    def test_open_data_point_request(self):
+        self.accessor.store.open_data.return_value = self.ds_2d
+        ds = self.accessor.open_data(
+            "sentinel-2-l2a",
+            point=(10, 55),
+            bbox_width=4000,
+            time_range=("2020-01-01", "2025-12-31"),
+            spatial_res=10,
+            asset_names=["B02"],
+        )
         self.assertIsInstance(ds, xr.Dataset)
         self.assertCountEqual(["band_1"], ds.data_vars)
+        self.assertCountEqual(("time", "lat", "lon"), ds.dims)
         self.assertEqual(
-            [10, 3, 3], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+            [6, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
         )

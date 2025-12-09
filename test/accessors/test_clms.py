@@ -20,15 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from xcube.core.store import new_data_store, PreloadedDataStore
-from xcube.util.jsonschema import JsonObjectSchema,JsonNumberSchema
+import unittest
+
 import xarray as xr
-from unittest.mock import patch
+from xcube.core.store import new_data_store
 
 from xcube_multistore.accessors.clms import ClmsAccessor
-from ..sample_data import get_sample_data_3d
 
-import unittest
+from ..sample_data import get_sample_data_3d
 
 
 class ClmsAccessorTest(unittest.TestCase):
@@ -37,11 +36,16 @@ class ClmsAccessorTest(unittest.TestCase):
         self.ds_3d = get_sample_data_3d()
         memory_store = new_data_store("memory", root="datasource")
         memory_store.cache_store = new_data_store("memory", root="cache_datadource")
-        memory_store.cache_store.write_data(self.ds_3d, "clms_storage|clms_dataset.zarr", replace=True)
-        self.accesor = ClmsAccessor(memory_store)
+        memory_store.cache_store.write_data(
+            self.ds_3d, "clms_storage|clms_dataset.zarr", replace=True
+        )
+        storage_store = new_data_store("file", root="data")
+        self.accesor = ClmsAccessor(memory_store, storage_store)
 
     def test_open_data_cache_store(self):
         ds = self.accesor.open_data("clms_storage|clms_dataset.zarr")
         self.assertIsInstance(ds, xr.Dataset)
         self.assertCountEqual(["band_1"], ds.data_vars)
-        self.assertEqual([10, 3, 3], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]])
+        self.assertEqual(
+            [10, 3, 3], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+        )

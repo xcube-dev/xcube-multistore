@@ -20,9 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .version import __version__
-
 from .multistore import MultiSourceDataStore
+from .version import __version__  # noqa: F401
 
 __all__ = [
     "MultiSourceDataStore",

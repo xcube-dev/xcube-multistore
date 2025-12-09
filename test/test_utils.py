@@ -27,11 +27,11 @@ import pyproj
 import xarray as xr
 
 from xcube_multistore.utils import (
-    get_bbox,
-    get_utm_zone,
     _get_data_id,
     _safe_execute,
     clean_dataset,
+    get_bbox,
+    get_utm_zone,
 )
 
 

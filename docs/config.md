@@ -54,6 +54,7 @@ This configures a dataset object from a single data source.
 * **[data_id](#data_id)**
 * **[open_params](#open_params)**
 * **[format_id](#format_id)**
+* **[chunksize](#chunksize)**
 * **[custom_processing](#custom_processing)**
 * **[spatial_resample_params](#spatial_resample_params)**
 * **[temporal_resample_params](#temporal_resample_params)**
@@ -69,6 +70,7 @@ opened individually, and once all datasets are loaded, they are merged using
 * **[identifier](#identifier)**: This identifier defines the name of the final data cube.
 * **[grid_mapping](#grid_mapping)**
 * **[format_id](#format_id)**
+* **[chunksize](#chunksize)**
 * **[xr_merge_params](#xr_merge_params)**
 * **variables**: List of [variable object](#variable-object) objects.
 
@@ -152,7 +154,7 @@ Identifier that assigns a grid mapping to the final dataset for reprojection.
 Unique identifier for the dataset's data source within the assigned data store.
 
 ### open_params
-Open data parameters related to the data store and data_id
+Open data parameters related to the data store and data_id.
 
 ### xr_merge_params
 Parameters of `xarry.merge` needed if harmonization of multiple datasets into one
@@ -164,6 +166,9 @@ Desired format of the saved datacube.
 
 **Default:** `zarr`  
 **Allowed values:** `netcdf`, `zarr`, [`levels`](https://xcube.readthedocs.io/en/latest/mldatasets.html#the-xcube-levels-format)
+
+### chunksize
+Optional mapping from dimension to chunk size.
 
 ### spatial_resample_params
 This section enables user to define the parameters for spatial resampling of 

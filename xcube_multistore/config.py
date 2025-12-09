@@ -26,6 +26,7 @@ from typing import Any
 
 import fsspec
 import yaml
+from xcube.core.store import list_data_store_ids
 from xcube.util.jsonschema import (
     JsonArraySchema,
     JsonBooleanSchema,
@@ -34,7 +35,6 @@ from xcube.util.jsonschema import (
     JsonObjectSchema,
     JsonStringSchema,
 )
-from xcube.core.store import list_data_store_ids
 
 from .constants import NAME_WRITE_STORE
 from .utils import _remove_compressed_extension
@@ -71,6 +71,11 @@ SCHEMA_FORMAT_ID = JsonStringSchema(
     title="Desired format of the saved datacube.",
     default="zarr",
     enum=["netcdf", "zarr", "levels"],
+)
+SCHEMA_CHUNKSIZE = JsonObjectSchema(
+    title="Mapping from dimension to chunk size.",
+    required=[],
+    additional_properties=True,
 )
 SCHEMA_CUSTOM_PROCESSING = JsonObjectSchema(
     properties=dict(
@@ -241,6 +246,7 @@ SCHEMA_MULTI_DATASET = JsonObjectSchema(
         ),
         grid_mapping=SCHEMA_GRIDMAPPING_ID,
         format_id=SCHEMA_FORMAT_ID,
+        chunksize=SCHEMA_CHUNKSIZE,
         xr_merge_params=SCHEMA_XR_MERGE_PARAMS,
     ),
     required=["identifier", "variables"],
@@ -254,6 +260,7 @@ SCHEMA_SINGLE_DATASET = JsonObjectSchema(
         data_id=SCHEMA_DATA_ID,
         open_params=SCHEMA_OPEN_PARAMS,
         format_id=SCHEMA_FORMAT_ID,
+        chunksize=SCHEMA_CHUNKSIZE,
         custom_processing=SCHEMA_CUSTOM_PROCESSING,
         spatial_resample_params=SCHEMA_SPATIAL_RESAMPLE_PARAMS,
         temporal_resample_params=SCHEMA_TEMPORAL_RESAMPLE_PARAMS,

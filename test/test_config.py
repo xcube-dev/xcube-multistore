@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
 import unittest
 from unittest.mock import patch
 
@@ -123,6 +122,5 @@ class MultiSourceConfigTest(unittest.TestCase):
             self.assertFalse(_is_jupyter_notebook())
 
         with patch("IPython.get_ipython") as mock_get_ipython:
-            mock_get_ipython.return_value = object()   # anything non-None
+            mock_get_ipython.return_value = object()  # anything non-None
             self.assertTrue(_is_jupyter_notebook())
-

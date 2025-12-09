@@ -25,8 +25,8 @@ import traceback
 
 import pyproj
 import xarray as xr
-from xcube_resampling.utils import normalize_grid_mapping
 from xcube_resampling.gridmapping import GridMapping
+from xcube_resampling.utils import normalize_grid_mapping
 
 from .constants import COMPRESSED_FORMATS, CRS_WGS84
 
@@ -141,7 +141,7 @@ def clean_dataset(ds: xr.Dataset, gm: GridMapping | None = None) -> xr.Dataset:
     if gm is None:
         try:
             gm = GridMapping.from_dataset(ds)
-        except:
+        except ValueError:
             pass
     if gm is not None:
         ds = normalize_grid_mapping(ds, gm)

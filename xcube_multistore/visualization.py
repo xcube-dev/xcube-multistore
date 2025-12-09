@@ -88,7 +88,6 @@ class GeneratorDisplay(ABC):
     @classmethod
     def create(cls, states: list[GeneratorState]) -> "GeneratorDisplay":
         try:
-            from IPython.display import display
             from IPython import get_ipython
 
             # Only use IPyGeneratorDisplay if we are actually inside a notebook
@@ -177,7 +176,6 @@ class ConfigDisplay(ABC):
     @classmethod
     def create(cls, config: MultiSourceConfig) -> "ConfigDisplay":
         try:
-            from IPython.display import display
             from IPython import get_ipython
 
             # Only use IPyConfigDisplay if we are actually inside a notebook

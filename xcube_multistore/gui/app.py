@@ -3,8 +3,8 @@
 
 import panel as pn
 import yaml
-
 from xcube.util.undefined import UNDEFINED
+
 from xcube_multistore.multistore import MultiSourceDataStore
 
 pn.extension("modal", "codeeditor", "notifications")
