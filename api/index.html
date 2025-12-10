@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.19">
     
     
       
@@ -1286,6 +1286,7 @@ reference to a YAML configuration file.</p>
 
 
 
+
               <details class="quote">
                 <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
                 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 65</span>
@@ -1891,7 +1892,38 @@ reference to a YAML configuration file.</p>
 <span class="normal">665</span>
 <span class="normal">666</span>
 <span class="normal">667</span>
-<span class="normal">668</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages access to multiple data sources and their configurations for generating</span>
 <span class="sd">    data cubes.</span>
 
@@ -1935,6 +1967,9 @@ reference to a YAML configuration file.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_display</span><span class="o">.</span><span class="n">display_title</span><span class="p">(</span><span class="s2">&quot;Cube Generation&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_display</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_generate_cubes</span><span class="p">()</span>
+
+        <span class="c1"># clean up if needed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_config_schema</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
@@ -2336,7 +2371,7 @@ reference to a YAML configuration file.</p>
         <span class="k">for</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">config_ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
             <span class="n">data_id</span> <span class="o">=</span> <span class="n">_get_data_id</span><span class="p">(</span><span class="n">config_ds</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="s2">&quot;storage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">has_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span><span class="o">.</span><span class="n">has_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span>
                     <span class="n">GeneratorState</span><span class="p">(</span>
                         <span class="n">identifier</span><span class="p">,</span>
@@ -2389,7 +2424,6 @@ reference to a YAML configuration file.</p>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span>
-                <span class="n">format_id</span> <span class="o">=</span> <span class="n">config_ds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;format_id&quot;</span><span class="p">,</span> <span class="s2">&quot;zarr&quot;</span><span class="p">)</span>
                 <span class="n">data_id</span> <span class="o">=</span> <span class="n">_get_data_id</span><span class="p">(</span><span class="n">config_ds</span><span class="p">)</span>
                 <span class="n">store</span><span class="o">.</span><span class="n">has_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">store</span><span class="o">.</span><span class="n">delete_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_notify_error</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
@@ -2417,9 +2451,12 @@ reference to a YAML configuration file.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_single_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="n">store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;store&quot;</span><span class="p">])</span>
-        <span class="n">store_id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;store&quot;</span><span class="p">]</span><span class="si">}</span><span class="s2">_store_id&quot;</span><span class="p">)</span>
+        <span class="n">store_id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;store&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_store_id&quot;</span><span class="p">)</span>
         <span class="n">open_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;open_params&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-        <span class="n">accessor</span> <span class="o">=</span> <span class="n">guess_accessor</span><span class="p">(</span><span class="n">store_id</span><span class="p">,</span> <span class="n">store</span><span class="p">)</span>
+        <span class="n">storage_store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span>
+        <span class="n">accessor</span> <span class="o">=</span> <span class="n">guess_accessor</span><span class="p">(</span>
+            <span class="n">store_id</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">storage_store</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identifier&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span>
+        <span class="p">)</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;data_id&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">open_params</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">MultiLevelDataset</span><span class="p">):</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">base_dataset</span>
@@ -2436,16 +2473,18 @@ reference to a YAML configuration file.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_dataset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">gm_name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">dss_processed</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_single_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">config</span><span class="p">)]</span>
-            <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-                <span class="n">dss_processed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_process_single_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">ds_ref</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">dss_processed</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_process_single_dataset</span><span class="p">(</span>
+                    <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gm_name</span><span class="o">=</span><span class="n">gm_name</span>
                 <span class="p">)</span>
-            <span class="n">dss_reindexed</span> <span class="o">=</span> <span class="p">[</span><span class="n">dss_processed</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">dss_processed</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-                <span class="n">dss_reindexed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">ds</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">dss_processed</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)):</span>
+                <span class="n">dss_processed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_process_single_dataset</span><span class="p">(</span>
+                        <span class="n">ds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;variables&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">gm_name</span><span class="o">=</span><span class="n">gm_name</span><span class="p">,</span> <span class="n">ds_ref</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
             <span class="n">merge_params</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;xr_merge_params&quot;</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">if</span> <span class="s2">&quot;join&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merge_params</span><span class="p">:</span>
@@ -2454,27 +2493,31 @@ reference to a YAML configuration file.</p>
                 <span class="n">merge_params</span><span class="p">[</span><span class="s2">&quot;combine_attrs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;drop_conflicts&quot;</span>
             <span class="k">if</span> <span class="s2">&quot;compat&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merge_params</span><span class="p">:</span>
                 <span class="n">merge_params</span><span class="p">[</span><span class="s2">&quot;compat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;override&quot;</span>
-            <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">dss_reindexed</span><span class="p">,</span> <span class="o">**</span><span class="n">merge_params</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">dss_processed</span><span class="p">,</span> <span class="o">**</span><span class="n">merge_params</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_single_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_single_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">gm_name</span><span class="o">=</span><span class="n">gm_name</span><span class="p">)</span>
 
     <span class="nd">@_safe_execute</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_single_dataset</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ds_ref</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">gm_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ds_ref</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">if</span> <span class="s2">&quot;temporal_resample_params&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">temporal_resample_params</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;temporal_resample_params&quot;</span><span class="p">]</span>
-            <span class="n">frequency</span> <span class="o">=</span> <span class="n">temporal_resample_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;frequency&quot;</span><span class="p">)</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">resample_in_time</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="o">**</span><span class="n">temporal_resample_params</span><span class="p">)</span>
+            <span class="n">temp_params</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;temporal_resample_params&quot;</span><span class="p">]</span>
+            <span class="n">frequency</span> <span class="o">=</span> <span class="n">temp_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;frequency&quot;</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">resample_in_time</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="o">**</span><span class="n">temp_params</span><span class="p">)</span>
 
         <span class="c1"># if grid mapping is given, resample the dataset</span>
-        <span class="k">if</span> <span class="s2">&quot;grid_mapping&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_mappings</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">]):</span>
-                <span class="n">target_gm</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_mappings</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">gm_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_mappings</span><span class="p">,</span> <span class="n">gm_name</span><span class="p">):</span>
+                <span class="n">target_gm</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_mappings</span><span class="p">,</span> <span class="n">gm_name</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">config_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;grid_mapping&quot;</span><span class="p">]]</span>
+                <span class="n">config_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="n">gm_name</span><span class="p">]</span>
                 <span class="n">data_id</span> <span class="o">=</span> <span class="n">_get_data_id</span><span class="p">(</span><span class="n">config_ref</span><span class="p">)</span>
-                <span class="n">ds_ref</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="s2">&quot;storage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
+                <span class="n">ds_ref</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
                 <span class="n">target_gm</span> <span class="o">=</span> <span class="n">GridMapping</span><span class="o">.</span><span class="n">from_dataset</span><span class="p">(</span><span class="n">ds_ref</span><span class="p">)</span>
             <span class="n">spatial_resample_params</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;spatial_resample_params&quot;</span><span class="p">,</span> <span class="p">{})</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">resample_in_space</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">target_gm</span><span class="o">=</span><span class="n">target_gm</span><span class="p">,</span> <span class="o">**</span><span class="n">spatial_resample_params</span><span class="p">)</span>
@@ -2491,16 +2534,37 @@ reference to a YAML configuration file.</p>
         <span class="n">format_id</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;format_id&quot;</span><span class="p">,</span> <span class="s2">&quot;zarr&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">format_id</span> <span class="o">==</span> <span class="s2">&quot;netcdf&quot;</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">prepare_dataset_for_netcdf</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="n">chunksize</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chunksize&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chunksize</span><span class="p">:</span>
+            <span class="n">chunksize</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">chunksizes</span>
+        <span class="k">if</span> <span class="n">format_id</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;zarr&quot;</span><span class="p">,</span> <span class="s2">&quot;levels&quot;</span><span class="p">]:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">chunk_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">format_name</span><span class="o">=</span><span class="s2">&quot;zarr&quot;</span><span class="p">,</span> <span class="n">chunk_sizes</span><span class="o">=</span><span class="n">chunksize</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">chunk_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">format_name</span><span class="o">=</span><span class="n">format_id</span><span class="p">,</span> <span class="n">chunk_sizes</span><span class="o">=</span><span class="n">chunksize</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">data_var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;chunks&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">ds</span><span class="p">[</span><span class="n">data_var</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s2">&quot;chunks&quot;</span><span class="p">]</span>
+
         <span class="n">data_id</span> <span class="o">=</span> <span class="n">_get_data_id</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">clean_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
         <span class="n">store</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">data_id</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span>
+
+        <span class="c1"># remove temp files</span>
+        <span class="n">data_ids</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">list_data_ids</span><span class="p">()</span>
+        <span class="n">data_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_id</span> <span class="k">for</span> <span class="n">data_id</span> <span class="ow">in</span> <span class="n">data_ids</span> <span class="k">if</span> <span class="n">data_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;stac_temp_&quot;</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">data_id</span> <span class="ow">in</span> <span class="n">data_ids</span><span class="p">:</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">delete_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
 
 
   <div class="doc doc-children">
+
 
 
 
@@ -2553,14 +2617,14 @@ reference to a YAML configuration file.</p>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
-<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_config_schema</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves the configuration schema for the multi-source data store.</span>
 
@@ -2623,10 +2687,7 @@ xcube plugin is installed in the environment.</p>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
@@ -2635,7 +2696,10 @@ xcube plugin is installed in the environment.</p>
 <span class="normal">234</span>
 <span class="normal">235</span>
 <span class="normal">236</span>
-<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">list_data_store_ids</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List the identifiers of all available data stores.</span>
@@ -2749,10 +2813,7 @@ or None. If None, all available data store identifiers are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
 <span class="normal">245</span>
@@ -2776,7 +2837,10 @@ or None. If None, all available data store identifiers are used.</p>
 <span class="normal">263</span>
 <span class="normal">264</span>
 <span class="normal">265</span>
-<span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_data_store_params_schema</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">data_store_ids</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2890,10 +2954,7 @@ data store parameters for initialization.</p>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
 <span class="normal">274</span>
@@ -2923,7 +2984,10 @@ data store parameters for initialization.</p>
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span>
-<span class="normal">301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">list_data_ids</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_ids_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
@@ -3079,10 +3143,7 @@ data store parameters for initialization.</p>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span>
@@ -3096,7 +3157,10 @@ data store parameters for initialization.</p>
 <span class="normal">317</span>
 <span class="normal">318</span>
 <span class="normal">319</span>
-<span class="normal">320</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_open_data_params_schema</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_store_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data_id</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
@@ -3219,10 +3283,7 @@ To see the expected search parameters, use <code>get_search_params_schema</code>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
@@ -3274,7 +3335,10 @@ To see the expected search parameters, use <code>get_search_params_schema</code>
 <span class="normal">374</span>
 <span class="normal">375</span>
 <span class="normal">376</span>
-<span class="normal">377</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">search_data_ids</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">data_store_ids_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span>
@@ -3437,10 +3501,7 @@ for a given store.</p>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">382</span>
 <span class="normal">383</span>
 <span class="normal">384</span>
 <span class="normal">385</span>
@@ -3472,7 +3533,10 @@ for a given store.</p>
 <span class="normal">411</span>
 <span class="normal">412</span>
 <span class="normal">413</span>
-<span class="normal">414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_search_params_schema</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_ids_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonObjectSchema</span><span class="p">:</span>
@@ -3630,10 +3694,7 @@ for a given store.</p>
 
             <details class="quote">
               <summary>Source code in <code>xcube_multistore/multistore.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">419</span>
 <span class="normal">420</span>
 <span class="normal">421</span>
 <span class="normal">422</span>
@@ -3647,7 +3708,10 @@ for a given store.</p>
 <span class="normal">430</span>
 <span class="normal">431</span>
 <span class="normal">432</span>
-<span class="normal">433</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">describe_data</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">data_store_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_store_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data_id</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataDescriptor</span><span class="p">:</span>
@@ -4292,7 +4356,7 @@ it to the relevant data variables.</p>
     <span class="k">if</span> <span class="n">gm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">gm</span> <span class="o">=</span> <span class="n">GridMapping</span><span class="o">.</span><span class="n">from_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="k">pass</span>
     <span class="k">if</span> <span class="n">gm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">normalize_grid_mapping</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">gm</span><span class="p">)</span>
@@ -4346,7 +4410,8 @@ it to the relevant data variables.</p>
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     

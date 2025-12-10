@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.19">
     
     
       
@@ -519,6 +519,15 @@
   <a href="#format_id" class="md-nav__link">
     <span class="md-ellipsis">
       format_id
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chunksize" class="md-nav__link">
+    <span class="md-ellipsis">
+      chunksize
     </span>
   </a>
   
@@ -1419,6 +1428,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#chunksize" class="md-nav__link">
+    <span class="md-ellipsis">
+      chunksize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#spatial_resample_params" class="md-nav__link">
     <span class="md-ellipsis">
       spatial_resample_params
@@ -1590,6 +1608,7 @@ mapping. </p>
 <li><strong><a href="#data_id">data_id</a></strong></li>
 <li><strong><a href="#open_params">open_params</a></strong></li>
 <li><strong><a href="#format_id">format_id</a></strong></li>
+<li><strong><a href="#chunksize">chunksize</a></strong></li>
 <li><strong><a href="#custom_processing">custom_processing</a></strong></li>
 <li><strong><a href="#spatial_resample_params">spatial_resample_params</a></strong></li>
 <li><strong><a href="#temporal_resample_params">temporal_resample_params</a></strong></li>
@@ -1603,6 +1622,7 @@ opened individually, and once all datasets are loaded, they are merged using
 <li><strong><a href="#identifier">identifier</a></strong>: This identifier defines the name of the final data cube.</li>
 <li><strong><a href="#grid_mapping">grid_mapping</a></strong></li>
 <li><strong><a href="#format_id">format_id</a></strong></li>
+<li><strong><a href="#chunksize">chunksize</a></strong></li>
 <li><strong><a href="#xr_merge_params">xr_merge_params</a></strong></li>
 <li><strong>variables</strong>: List of <a href="#variable-object">variable object</a> objects.</li>
 </ul>
@@ -1673,7 +1693,7 @@ generation process.</p>
 <h3 id="data_id">data_id</h3>
 <p>Unique identifier for the dataset's data source within the assigned data store.</p>
 <h3 id="open_params">open_params</h3>
-<p>Open data parameters related to the data store and data_id</p>
+<p>Open data parameters related to the data store and data_id.</p>
 <h3 id="xr_merge_params">xr_merge_params</h3>
 <p>Parameters of <code>xarry.merge</code> needed if harmonization of multiple datasets into one
 datacube is required. For further information view the <a href="https://docs.xarray.dev/en/stable/generated/xarray.merge.html">xarray.merge documentation</a>.
@@ -1682,6 +1702,8 @@ datacube is required. For further information view the <a href="https://docs.xar
 <p>Desired format of the saved datacube.  </p>
 <p><strong>Default:</strong> <code>zarr</code><br />
 <strong>Allowed values:</strong> <code>netcdf</code>, <code>zarr</code>, <a href="https://xcube.readthedocs.io/en/latest/mldatasets.html#the-xcube-levels-format"><code>levels</code></a></p>
+<h3 id="chunksize">chunksize</h3>
+<p>Optional mapping from dimension to chunk size.</p>
 <h3 id="spatial_resample_params">spatial_resample_params</h3>
 <p>This section enables user to define the parameters for spatial resampling of 
 the dataset. For a full list of supported parameters, refer to the
@@ -1799,7 +1821,8 @@ only non-preloaded datasets will be preloaded.  </p>
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     
