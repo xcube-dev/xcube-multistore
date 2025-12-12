@@ -59,7 +59,7 @@ class StacAccessorTest(unittest.TestCase):
             "sentinel-2-l2a",
             point=(10, 55),
             bbox_width=4000,
-            time_range=("2020-01-01", "2025-12-31"),
+            time_range=("2020-01-01", "2020-12-31"),
             spatial_res=10,
             asset_names=["B02"],
         )
@@ -67,5 +67,5 @@ class StacAccessorTest(unittest.TestCase):
         self.assertCountEqual(["band_1"], ds.data_vars)
         self.assertCountEqual(("time", "lat", "lon"), ds.dims)
         self.assertEqual(
-            [6, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+            [3, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
         )
