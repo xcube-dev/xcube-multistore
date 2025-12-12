@@ -81,7 +81,7 @@ class MultiSourceDataStore:
     def __init__(self, config: str | dict[str, Any]):
         config = MultiSourceConfig(config)
         self.config = config
-        self.stores = None
+        self.stores = DataStores.setup_data_stores(self.config)
         if config.grid_mappings:
             self._grid_mappings = GridMappings.setup_grid_mappings(config)
         else:
@@ -96,7 +96,6 @@ class MultiSourceDataStore:
             self._display = GeneratorDisplay.create(list(self._states.values()))
 
     def generate(self):
-        self.stores = DataStores.setup_data_stores(self.config)
         # preload data, which is not preloaded as default
         if self.config.preload_datasets is not None:
             self._preload_datasets()
@@ -125,7 +124,6 @@ class MultiSourceDataStore:
         display.show()
 
     def display_geolocations(self):
-        self.stores = DataStores.setup_data_stores(self.config)
         records = []
 
         for config_ds in self.config.datasets.values():
@@ -673,16 +671,21 @@ class MultiSourceDataStore:
         format_id = config.get("format_id", "zarr")
         if format_id == "netcdf":
             ds = prepare_dataset_for_netcdf(ds)
+
+        # unify chunksize
+        ds = ds.unify_chunks()
         chunksize = config.get("chunksize")
-        if not chunksize:
-            chunksize = ds.chunksizes
-        if format_id in ["zarr", "levels"]:
-            ds = chunk_dataset(ds, format_name="zarr", chunk_sizes=chunksize)
-        else:
-            ds = chunk_dataset(ds, format_name=format_id, chunk_sizes=chunksize)
-        for data_var in ds.data_vars:
-            if "chunks" in ds[data_var].encoding:
-                del ds[data_var].encoding["chunks"]
+        if chunksize is None:
+            chunksize = {
+                dim: sizes[0] for dim, sizes in getattr(ds, "chunksizes", {}).items()
+            }
+        if chunksize:
+            # Select format name for chunking
+            format_name = "zarr" if format_id in ["zarr", "levels"] else format_id
+            ds = chunk_dataset(ds, format_name=format_name, chunk_sizes=chunksize)
+            # Remove "chunks" from encoding to avoid serialization issues
+            for var in ds.data_vars:
+                ds[var].encoding.pop("chunks", None)
 
         data_id = _get_data_id(config)
         ds = clean_dataset(ds)

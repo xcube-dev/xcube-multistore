@@ -38,13 +38,7 @@ class CdsAccessor(Accessor):
             open_params = self._convert_point_to_bbox(data_id, open_params)
             point = open_params.pop("point")
         time_range = open_params.pop("time_range")
-        self.notify(
-            GeneratorState(
-                self.identifier,
-                message=f"Open dataset {self.identifier!r} 0%.",
-            )
-        )
-        ds, _ = self._open_with_split(data_id, time_range, open_params, time_range)
+        ds = self._open_with_split(data_id, time_range, open_params, time_range)
 
         if time_series:
             # noinspection PyUnboundLocalVariable
@@ -70,31 +64,24 @@ class CdsAccessor(Accessor):
         time_range: tuple[str, str],
         open_params: dict,
         original_time_range: tuple[str, str],
-        progress: int | None = None,
-    ) -> tuple[xr.Dataset, int]:
+    ) -> xr.Dataset:
         """
         Recursively fetch data by splitting time_range into smaller ranges
         until store.open_data() succeeds.
         """
-        if progress is None:
-            progress = 0
         try:
             open_params["time_range"] = time_range
             ds = self.store.open_data(data_id, **open_params)
-            progress += 1
-            time_diff = get_timedelta(open_params["time_range"]).days
-            time_diff_orig = get_timedelta(original_time_range).days
-            nb_requests = time_diff_orig // time_diff
             self.notify(
                 GeneratorState(
                     self.identifier,
                     message=(
                         f"Open dataset {self.identifier!r} "
-                        f"{progress / nb_requests * 100:.0f}%."
+                        f"time range: {open_params['time_range']}"
                     ),
                 )
             )
-            return ds, progress
+            return ds
 
         except Exception:
             # Split the request into two halves
@@ -121,22 +108,20 @@ class CdsAccessor(Accessor):
                 ),
                 datetime.datetime.strftime(end, "%Y-%m-%d"),
             )
-            left, progress = self._open_with_split(
+            left = self._open_with_split(
                 data_id,
                 time_range_left,
                 open_params,
                 original_time_range,
-                progress=progress,
             )
-            right, progress = self._open_with_split(
+            right = self._open_with_split(
                 data_id,
                 time_range_right,
                 open_params,
                 original_time_range,
-                progress=progress,
             )
 
-            return xr.concat((left, right), dim="time"), progress
+            return xr.concat((left, right), dim="time")
 
 
 def get_timedelta(time_range: tuple[str, str]) -> datetime.timedelta:

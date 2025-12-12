@@ -127,6 +127,7 @@ def clean_dataset(ds: xr.Dataset, gm: GridMapping | None = None) -> xr.Dataset:
 
     Args:
         ds: The input xarray dataset to be cleaned.
+        gm: grid mapping associated with ds
 
     Returns:
         A cleaned version of the dataset with boundary variables removed and grid

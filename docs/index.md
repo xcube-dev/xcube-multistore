@@ -62,13 +62,34 @@ For further examples please view the [examples folder](https://github.com/xcube-
 * support preload API for [xcube-clms](https://github.com/xcube-dev/xcube-clms) and 
   [xcube-zendoo](https://github.com/xcube-dev/xcube-zenodo)
 * allow to write to netcdf and zarr
+* some auxiliary functionalities which shall help to setup a config YAML file.
+* interpolate along the time axis
 
-> The following features will be implemented in the future:
+### Configuration Generator GUI
 
-* some auxiliary functionalities which shall help to setup a config YAML file. 
-* interpolate along the time axis 
+The **Configuration Generator GUI** provides an interactive interface for creating and
+editing the configuration YAML, making the setup process more intuitive and less
+error-prone.
 
-### License
+**Key features (in development):**
+
+- Display of all available fields for each configuration section
+- Dynamic fetching and updating of valid parameters and inputs
+- Dropdown menus that show only supported options
+- Autofill assistance for large option sets (e.g., thousands of data IDs)
+- Built-in configuration validator/checker
+- Geolocation visualization to help define bounding boxes
+
+> **Note:** This feature is under active development, and only a minimal working
+> example is currently available.
+
+To launch the GUI, run the following command from the package root:
+
+```bash
+panel serve xcube_multistore/gui/app.py --dev
+```
+
+## License
 
 The package is open source and released under the 
 [MIT license](https://opensource.org/license/mit). :heart:

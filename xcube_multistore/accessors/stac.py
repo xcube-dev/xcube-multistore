@@ -29,6 +29,8 @@ from xcube_multistore.accessor import Accessor
 from xcube_multistore.visualization import GeneratorState
 
 _NB_PIXELS = int(2e4 * 2e4) * 5 * 4
+_MAX_DAYS = 100
+_NUM_SEN2_BANDS = 13
 
 
 class StacAccessor(Accessor):
@@ -68,7 +70,7 @@ class StacAccessor(Accessor):
         if "asset_names" in open_params:
             nb_vars = len(open_params["asset_names"])
         else:
-            nb_vars = 13
+            nb_vars = _NUM_SEN2_BANDS
         start, end = open_params["time_range"]
         start = datetime.date.fromisoformat(start)
         end = datetime.date.fromisoformat(end)
@@ -93,9 +95,9 @@ class StacAccessor(Accessor):
             nb_splits = 1
 
         base = total_days // nb_splits
-        if base > 365:
-            base = 365
-            nb_splits = total_days // 365
+        if base > _MAX_DAYS:
+            base = _MAX_DAYS
+            nb_splits = total_days // _MAX_DAYS
         remainder = total_days % nb_splits
         time_ranges = []
         current = start
