@@ -1,4 +1,4 @@
-## Changes in 0.3.0 (in development)
+## Changes in 0.3.0
 
 * **Unified spatial resampling**: Switched to the new
   `xcube_resampling.resample_in_space` library, replacing
