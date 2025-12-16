@@ -21,27 +21,27 @@
 # SOFTWARE.
 
 import copy
-import importlib
 import datetime
+import importlib
 import sys
 from typing import Any, Mapping
 
 import geopandas as gpd
-from shapely.geometry import box, Point
-import numpy as np
 import xarray as xr
+from shapely.geometry import Point, box
+from xcube.core.chunk import chunk_dataset
+from xcube.core.mldataset import MultiLevelDataset
 from xcube.core.store import (
-    list_data_store_ids,
-    get_data_store_params_schema,
-    DataStoreError,
     DataDescriptor,
+    DataStoreError,
+    get_data_store_params_schema,
+    list_data_store_ids,
     new_data_store,
 )
+from xcube.util.jsonschema import JsonArraySchema, JsonObjectSchema
 from xcube_resampling import resample_in_space, resample_in_time
 from xcube_resampling.gridmapping import GridMapping
 from xcube_resampling.utils import resolution_meters_to_degrees
-from xcube.util.jsonschema import JsonObjectSchema, JsonArraySchema
-from xcube.core.mldataset import MultiLevelDataset
 
 from .accessors import guess_accessor
 from .config import MultiSourceConfig
@@ -81,7 +81,7 @@ class MultiSourceDataStore:
     def __init__(self, config: str | dict[str, Any]):
         config = MultiSourceConfig(config)
         self.config = config
-        self.stores = None
+        self.stores = DataStores.setup_data_stores(self.config)
         if config.grid_mappings:
             self._grid_mappings = GridMappings.setup_grid_mappings(config)
         else:
@@ -96,7 +96,6 @@ class MultiSourceDataStore:
             self._display = GeneratorDisplay.create(list(self._states.values()))
 
     def generate(self):
-        self.stores = DataStores.setup_data_stores(self.config)
         # preload data, which is not preloaded as default
         if self.config.preload_datasets is not None:
             self._preload_datasets()
@@ -106,6 +105,9 @@ class MultiSourceDataStore:
             self._display.display_title("Cube Generation")
             self._display.show()
         self._generate_cubes()
+
+        # clean up if needed
+        self._close()
 
     @classmethod
     def get_config_schema(cls) -> JsonObjectSchema:
@@ -122,7 +124,6 @@ class MultiSourceDataStore:
         display.show()
 
     def display_geolocations(self):
-        self.stores = DataStores.setup_data_stores(self.config)
         records = []
 
         for config_ds in self.config.datasets.values():
@@ -507,7 +508,7 @@ class MultiSourceDataStore:
         for identifier, config_ds in self.config.datasets.items():
             start = datetime.datetime.now()
             data_id = _get_data_id(config_ds)
-            if getattr(self.stores, "storage").has_data(data_id):
+            if getattr(self.stores, NAME_WRITE_STORE).has_data(data_id):
                 self._notify(
                     GeneratorState(
                         identifier,
@@ -560,7 +561,6 @@ class MultiSourceDataStore:
                 )
             else:
                 store = getattr(self.stores, NAME_WRITE_STORE)
-                format_id = config_ds.get("format_id", "zarr")
                 data_id = _get_data_id(config_ds)
                 store.has_data(data_id) and store.delete_data(data_id)
                 self._notify_error(identifier, ds)
@@ -588,9 +588,12 @@ class MultiSourceDataStore:
 
     def _open_single_dataset(self, config: dict) -> xr.Dataset | Exception:
         store = getattr(self.stores, config["store"])
-        store_id = getattr(self.stores, f"{config["store"]}_store_id")
+        store_id = getattr(self.stores, f"{config['store']}_store_id")
         open_params = copy.deepcopy(config.get("open_params", {}))
-        accessor = guess_accessor(store_id, store)
+        storage_store = getattr(self.stores, NAME_WRITE_STORE)
+        accessor = guess_accessor(
+            store_id, store, storage_store, config["identifier"], self._notify
+        )
         ds = accessor.open_data(config["data_id"], **open_params)
         if isinstance(ds, MultiLevelDataset):
             ds = ds.base_dataset
@@ -651,7 +654,7 @@ class MultiSourceDataStore:
             else:
                 config_ref = self.config.datasets[gm_name]
                 data_id = _get_data_id(config_ref)
-                ds_ref = getattr(self.stores, "storage").open_data(data_id)
+                ds_ref = getattr(self.stores, NAME_WRITE_STORE).open_data(data_id)
                 target_gm = GridMapping.from_dataset(ds_ref)
             spatial_resample_params = config.get("spatial_resample_params", {})
             ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
@@ -668,7 +671,32 @@ class MultiSourceDataStore:
         format_id = config.get("format_id", "zarr")
         if format_id == "netcdf":
             ds = prepare_dataset_for_netcdf(ds)
+
+        # unify chunksize
+        ds = ds.unify_chunks()
+        chunksize = config.get("chunksize")
+        if chunksize is None:
+            chunksize = {
+                dim: sizes[0] for dim, sizes in getattr(ds, "chunksizes", {}).items()
+            }
+        if chunksize:
+            # Select format name for chunking
+            format_name = "zarr" if format_id in ["zarr", "levels"] else format_id
+            ds = chunk_dataset(ds, format_name=format_name, chunk_sizes=chunksize)
+            # Remove "chunks" from encoding to avoid serialization issues
+            for var in ds.data_vars:
+                ds[var].encoding.pop("chunks", None)
+
         data_id = _get_data_id(config)
         ds = clean_dataset(ds)
         store.write_data(ds, data_id, replace=True)
         return ds
+
+    def _close(self):
+        store = getattr(self.stores, NAME_WRITE_STORE)
+
+        # remove temp files
+        data_ids = store.list_data_ids()
+        data_ids = [data_id for data_id in data_ids if data_id.startswith("stac_temp_")]
+        for data_id in data_ids:
+            store.delete_data(data_id)

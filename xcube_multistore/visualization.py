@@ -53,7 +53,6 @@ class GeneratorState:
         status: GeneratorStatus | None = None,
         message: str | None = None,
         exception: BaseException | None = None,
-        time: str | None = None,
     ):
         assert_given(identifier, name="identifier")
         self.identifier = identifier
@@ -88,7 +87,6 @@ class GeneratorDisplay(ABC):
     @classmethod
     def create(cls, states: list[GeneratorState]) -> "GeneratorDisplay":
         try:
-            from IPython.display import display
             from IPython import get_ipython
 
             # Only use IPyGeneratorDisplay if we are actually inside a notebook
@@ -127,7 +125,12 @@ class GeneratorDisplay(ABC):
 
         return tabulate.tabulate(
             rows,
-            headers=["Dataset identifier", "Status", "Message", "Exception"],
+            headers=[
+                "Dataset identifier",
+                "Status",
+                "Message",
+                "Exception",
+            ],
             tablefmt=table_format,
         )
 
@@ -177,7 +180,6 @@ class ConfigDisplay(ABC):
     @classmethod
     def create(cls, config: MultiSourceConfig) -> "ConfigDisplay":
         try:
-            from IPython.display import display
             from IPython import get_ipython
 
             # Only use IPyConfigDisplay if we are actually inside a notebook

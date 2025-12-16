@@ -22,18 +22,16 @@
 
 import shutil
 import unittest
-from io import StringIO
-from unittest.mock import patch
 from collections.abc import Container, Iterator
+from io import StringIO
 from typing import Any
+from unittest.mock import patch
 
-from folium.folium import Map
 import numpy as np
-import pytest
 import xarray as xr
-from xcube.core.store import new_data_store
+from folium.folium import Map
+from xcube.core.store import DataDescriptor, DataStore, DataTypeLike, new_data_store
 from xcube.util.jsonschema import JsonObjectSchema, JsonStringSchema
-from xcube.core.store import DataDescriptor, DataStore, DataTypeLike
 
 from xcube_multistore.multistore import MultiSourceDataStore
 
@@ -43,14 +41,14 @@ from .sample_data import (
     get_config_dict2,
     get_config_dict3,
     get_config_dict4,
-    get_config_dict6,
     get_config_dict5,
+    get_config_dict6,
     get_config_dict7,
     get_config_dict8,
-    get_sample_data_2d,
-    get_sample_data_3d,
     get_config_dict9,
     get_config_dict10,
+    get_sample_data_2d,
+    get_sample_data_3d,
 )
 
 
@@ -161,7 +159,6 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         msds = MultiSourceDataStore(config)
         m = msds.display_geolocations()
         self.assertIsInstance(m, Map)
-
 
     @patch("xcube_multistore.multistore.list_data_store_ids")
     def test_list_data_store_ids(self, mock_list_ids):
@@ -334,7 +331,6 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertCountEqual(data_vars, ds.data_vars.keys())
         msds.stores.storage.delete_data("senf_andorra.zarr")
         shutil.rmtree(msds.stores.zenodo_senf.cache_store.root)
-
 
     def test_generate_error(self):
         # with logging, no visualization

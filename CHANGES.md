@@ -1,4 +1,4 @@
-## Changes in 0.3.0 (in development)
+## Changes in 0.3.0
 
 * **Unified spatial resampling**: Switched to the new
   `xcube_resampling.resample_in_space` library, replacing
@@ -14,6 +14,9 @@
   all requested geolocations of the datacubes to be generated.
 * Fixed visualization of preload handle
 * Experimental configuration setup GUI added using panel.
+* Implemented a new access handler that supports large dataset requests by
+  automatically splitting and retrieving data from the `"cds"`, `"stac-cdse-ardc"`,
+  and `"stac-pc-ardc"` data stores.
 
 
 ## Changes in 0.2.0

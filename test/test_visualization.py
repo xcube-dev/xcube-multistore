@@ -1,18 +1,18 @@
 import sys
 import unittest
 from io import StringIO
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+from xcube_multistore.config import MultiSourceConfig
 from xcube_multistore.visualization import (
+    ConfigDisplay,
     GeneratorDisplay,
     GeneratorState,
     GeneratorStatus,
-    IPyGeneratorDisplay,
-    ConfigDisplay,
     IPyConfigDisplay,
+    IPyGeneratorDisplay,
     _format_params,
 )
-from xcube_multistore.config import MultiSourceConfig
 
 from .sample_data import get_config_dict0
 
