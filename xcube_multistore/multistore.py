@@ -572,15 +572,17 @@ class MultiSourceDataStore:
         else:
             dss = []
             for config_var in config["variables"]:
+                config_var["identifier_var"] = config_var["identifier"]
+                config_var["identifier"] = config["identifier"]
                 ds = self._open_single_dataset(config_var)
                 if len(ds.data_vars) > 1:
                     name_dict = {
-                        var: f"{config_var['identifier']}_{var}"
+                        var: f"{config_var['identifier_var']}_{var}"
                         for var in ds.data_vars.keys()
                     }
                 else:
                     name_dict = {
-                        var: f"{config_var['identifier']}"
+                        var: f"{config_var['identifier_var']}"
                         for var in ds.data_vars.keys()
                     }
                 dss.append(ds.rename_vars(name_dict=name_dict))
@@ -671,6 +673,7 @@ class MultiSourceDataStore:
         format_id = config.get("format_id", "zarr")
         if format_id == "netcdf":
             ds = prepare_dataset_for_netcdf(ds)
+        ds = clean_dataset(ds)
 
         # unify chunksize
         ds = ds.unify_chunks()
@@ -682,13 +685,14 @@ class MultiSourceDataStore:
         if chunksize:
             # Select format name for chunking
             format_name = "zarr" if format_id in ["zarr", "levels"] else format_id
-            ds = chunk_dataset(ds, format_name=format_name, chunk_sizes=chunksize)
+            ds = chunk_dataset(
+                ds, format_name=format_name, chunk_sizes=chunksize, data_vars_only=True
+            )
             # Remove "chunks" from encoding to avoid serialization issues
             for var in ds.data_vars:
                 ds[var].encoding.pop("chunks", None)
 
         data_id = _get_data_id(config)
-        ds = clean_dataset(ds)
         store.write_data(ds, data_id, replace=True)
         return ds
 
