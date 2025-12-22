@@ -32,7 +32,6 @@ dependencies:
   - mkdocstrings-python
   - pytest
   - pytest-cov
-  - pytest-recording
   - ruff
   # Development Dependencies - Demos
   - jupyterlab
