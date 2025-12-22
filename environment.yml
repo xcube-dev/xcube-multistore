@@ -16,7 +16,7 @@ dependencies:
   - xcube-resampling >=0.2.3
   - yaml
   # data store plugins
-  - xcube-cci >=0.11.2
+  - xcube-cci >=0.11.2, <=0.11.10
   - xcube-cds >=1.0.0
   - xcube-clms >=0.2.2
   - xcube-stac >=1.1.2
@@ -32,7 +32,6 @@ dependencies:
   - mkdocstrings-python
   - pytest
   - pytest-cov
-  - pytest-recording
   - ruff
   # Development Dependencies - Demos
   - jupyterlab

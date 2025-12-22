@@ -2,66 +2,84 @@ preload_datasets:
   - store: zenodo_senf
     data_ids:
       - "france.zip"
-  - store: clms
-    data_ids:
-      - "tree-cover-density-2015|TCD_2015_020m_eu_03035_d05_E30N20"
-      - "dominant-leaf-type-2015|DLT_2015_020m_eu_03035_d04_E30N20"
-      - "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20"
+  #- store: clms
+  #  data_ids:
+  #    - "tree-cover-density-2015|TCD_2015_020m_eu_03035_d05_E30N20"
+  #    - "dominant-leaf-type-2015|DLT_2015_020m_eu_03035_d04_E30N20"
+  #    - "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20"
 
 datasets:
   # create dataset for tree maps from CLMS
-  - identifier: clms
-    grid_mapping: gm_scs2
-    variables:
-    - identifier: tree_cover_density
-      store: clms
-      data_id: "tree-cover-density-2015|TCD_2015_020m_eu_03035_d05_E30N20.zarr"
-    - identifier: dominant_leaf_type
-      store: clms
-      data_id: "dominant-leaf-type-2015|DLT_2015_020m_eu_03035_d04_E30N20.zarr"
-    - identifier: forest_type
-      store: clms
-      data_id: "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20.zarr"
+  #- identifier: clms
+  #  grid_mapping: gm_scs2
+  #  variables:
+  #  - identifier: tree_cover_density
+  #    store: clms
+  #   data_id: "tree-cover-density-2015|TCD_2015_020m_eu_03035_d05_E30N20.zarr"
+  #  - identifier: dominant_leaf_type
+  #    store: clms
+  #    data_id: "dominant-leaf-type-2015|DLT_2015_020m_eu_03035_d04_E30N20.zarr"
+  #  - identifier: forest_type
+  #    store: clms
+  #    data_id: "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20.zarr"
   # create dataset for forest disturbance from Senf et al.
   - identifier: senf
     grid_mapping: gm_scs2
     variables:
     - identifier: annual_disturbances
       store: zenodo_senf
-      data_id: "france/annual_disturbances_1985_2023_france.zarr"
+      data_id: "france/annual_disturbances_1985_2023_france.tif"
+      open_params:
+          band_as_variable: False
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
     - identifier: disturbance_agent
       store: zenodo_senf
-      data_id: "france/disturbance_agent_1985_2023_france.zarr"
+      data_id: "france/disturbance_agent_1985_2023_france.tif"
+      open_params:
+          band_as_variable: False
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
     - identifier: greatest_disturbance
       store: zenodo_senf
-      data_id: "france/greatest_disturbance_france.zarr"
+      data_id: "france/greatest_disturbance_france.tif"
+      open_params:
+          band_as_variable: False
     - identifier: forest_mask
       store: zenodo_senf
-      data_id: "france/forest_mask_france.zarr"
+      data_id: "france/forest_mask_france.tif"
+      open_params:
+          band_as_variable: False
     - identifier: disturbance_agent_aggregated
       store: zenodo_senf
-      data_id: "france/disturbance_agent_aggregated_france.zarr"
+      data_id: "france/disturbance_agent_aggregated_france.tif"
+      open_params:
+          band_as_variable: False
     - identifier: latest_disturbance
       store: zenodo_senf
-      data_id: "france/latest_disturbance_france.zarr"
+      data_id: "france/latest_disturbance_france.tif"
+      open_params:
+          band_as_variable: False
     - identifier: number_disturbances
       store: zenodo_senf
-      data_id: "france/number_disturbances_france.zarr"
+      data_id: "france/number_disturbances_france.tif"
+      open_params:
+          band_as_variable: False
     - identifier: disturbance_probability
       store: zenodo_senf
-      data_id: "france/disturbance_probability_1985_2023_france.zarr"
+      data_id: "france/disturbance_probability_1985_2023_france.tif"
+      open_params:
+          band_as_variable: False
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
     - identifier: disturbance_severity
       store: zenodo_senf
-      data_id: "france/disturbance_severity_1985_2023_france.zarr"
+      data_id: "france/disturbance_severity_1985_2023_france.tif"
+      open_params:
+          band_as_variable: False
       custom_processing:
         module_path: "scs2_modify_dataset"
         function_name: "modify_time_axis"
@@ -80,22 +98,28 @@ datasets:
     - identifier: agb
       store: zenodo_liu
       data_id: "planet_agb_30m_v0.1.tif"
+      open_params:
+          band_as_variable: False
     - identifier: canopy_cover
       store: zenodo_liu
       data_id: "planet_canopy_cover_30m_v0.1.tif"
+      open_params:
+          band_as_variable: False
     - identifier: canopy_height
       store: zenodo_liu
       data_id: "planet_canopy_height_30m_v0.1.tif"
+      open_params:
+          band_as_variable: False
 
 data_stores:
   - identifier: storage
     store_id: file
     store_params:
       root: data
-  - identifier: clms
-    store_id: clms
-    store_params:
-      credentials: "clms-credentials.json"
+  #- identifier: clms
+  #  store_id: clms
+  #  store_params:
+  #    credentials: "clms-credentials.json"
   - identifier: zenodo_liu
     store_id: zenodo
     store_params:
@@ -117,8 +141,4 @@ grid_mappings:
     bbox: [-1.25, 43.5, 0.5, 44.8]
     spatial_res: 0.00025
     crs: EPSG:4326
-    tile_size: 1000
-
-general:
-  dask_scheduler: "single-threaded"
-
+    tile_size: 4000

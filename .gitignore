@@ -164,3 +164,4 @@ cython_debug/
 # data output
 *.zarr
 *.nc
+*.tif

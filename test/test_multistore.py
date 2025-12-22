@@ -291,6 +291,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertCountEqual(data_vars, ds.data_vars.keys())
 
         # run again, preload and cube generation is skipped
+        config_dict = get_config_dict5()
         with self.assertLogs("xcube.multistore", level="INFO") as cm:
             msds = MultiSourceDataStore(config_dict)
             msds.generate()
@@ -307,6 +308,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         msds.stores.storage.delete_data("senf_andorra.zarr")
 
         # preload is excluded, since already preloaded
+        config_dict = get_config_dict5()
         with self.assertLogs("xcube.multistore", level="INFO") as cm:
             msds = MultiSourceDataStore(config_dict)
             msds.generate()
@@ -321,6 +323,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         msds.stores.storage.delete_data("senf_andorra.zarr")
 
         # preload with vizualisation
+        config_dict = get_config_dict5()
         config_dict["general"]["visualize"] = True
         config_dict["general"]["force_preload"] = True
         msds = MultiSourceDataStore(config_dict)
