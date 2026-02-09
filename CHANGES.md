@@ -1,3 +1,8 @@
+## Changes in 0.3.1 (under development)
+
+* Use xcube_resampling.gridmapping.GridMapping.regular_from_bbox to create regular grid-
+  mapping instacne from configuration.
+
 ## Changes in 0.3.0
 
 * **Unified spatial resampling**: Switched to the new
