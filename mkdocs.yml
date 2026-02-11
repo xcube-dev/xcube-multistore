@@ -8,6 +8,7 @@ nav:
   - Overview: index.md
   - Getting Started: start.md
   - Configuration Guide: config.md
+  - Data Availability: data.md
   - Examples:
       - Setup Configuration: examples/setup_config.ipynb
       - Example 1:
@@ -26,7 +27,7 @@ nav:
         - Notebook page: examples/example4/scs4_xcube_multistore.ipynb
         - Configuration File: examples/example4/scs4_config.yml
         - Auxiliary Python functions: examples/example4/scs4_modify_dataset.py
-  - API Reference: api.md
+  - Python API: api.md
   - About: about.md
 
 theme:

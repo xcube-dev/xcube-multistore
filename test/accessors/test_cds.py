@@ -24,6 +24,8 @@ import unittest
 from unittest.mock import MagicMock
 
 import xarray as xr
+from requests.exceptions import HTTPError
+from requests.models import Response
 from xcube.core.store import DataStoreError
 
 from xcube_multistore.accessors.cds import CdsAccessor
@@ -58,11 +60,12 @@ class CdsAccessorTest(unittest.TestCase):
         self.assertEqual([10], [ds.sizes["time"]])
 
     def test_open_data_splits(self):
+
         # Fail first call, succeed sequentially on split halves
         def side_effect(*args, **kwargs):
             time_range = kwargs.get("time_range")
             if time_range == ("2025-01-01", "2025-01-10"):
-                raise Exception("Too large request")
+                raise make_403_error("Cost limits exceeded")
             if time_range == ("2025-01-01", "2025-01-05"):
                 return self.ds_3d.isel(time=slice(0, 5))
             if time_range == ("2025-01-06", "2025-01-10"):
@@ -76,10 +79,20 @@ class CdsAccessorTest(unittest.TestCase):
         xr.testing.assert_equal(self.ds_3d, ds)
 
     def test_open_with_split_base_case_error(self):
-        self.accessor.store.open_data.side_effect = Exception("fail always")
+        # Always raise 403 error
+        self.accessor.store.open_data.side_effect = make_403_error()
 
         with self.assertRaises(DataStoreError) as cm:
             _ = self.accessor.open_data(
-                "era5-land", time_range=("2025-01-01", "2025-01-10")
+                "era5-land",
+                time_range=("2025-01-01", "2025-01-10"),
             )
+
         self.assertIn("Cannot further split time range", str(cm.exception))
+
+
+def make_403_error(message="Cost limits exceeded"):
+    response = Response()
+    response.status_code = 403
+    response._content = message.encode()  # optional
+    return HTTPError(message, response=response)
