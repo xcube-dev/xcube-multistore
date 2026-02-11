@@ -191,8 +191,8 @@ class MultiSourceDataStore:
             )
 
         # Case: point with radius
-        elif "point" in op:
-            point = Point(op["point"])
+        elif "point" in op or "location" in op:
+            point = Point(op.get("point", op.get("location")))
 
             # If radius is given, create a circle
             if "radius" in op:

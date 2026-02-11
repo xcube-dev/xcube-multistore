@@ -1,6 +1,6 @@
 datasets:
 - identifier: AU-Dry_sen2
-  store: stac-cdse
+  store: stac-pc
   data_id: sentinel-2-l2a
   open_params:
     time_range: &id001
@@ -25,18 +25,17 @@ datasets:
     - B11
     - B12
     - SCL
-- identifier: AU-Dry_era5land
+- identifier: AU-Dry_era5
   store: cds
-  data_id: reanalysis-era5-land
+  data_id: reanalysis-era5-single-levels-timeseries
   open_params:
     variable_names:
     - 2m_temperature
-    - total_precipitation
+    - 2m_dewpoint_temperature
     time_range: *id001
-    point:
+    location:
     - 132.3706
     - -15.2588
-    spatial_res: 0.1
 - identifier: AU-Dry_ccibiomass
   store: esa_cci
   grid_mapping: AU-Dry_sen2
@@ -44,7 +43,7 @@ datasets:
   open_params:
     time_range: *id001
 - identifier: AU-How_sen2
-  store: stac-cdse
+  store: stac-pc
   data_id: sentinel-2-l2a
   open_params:
     time_range: *id001
@@ -67,18 +66,17 @@ datasets:
     - B11
     - B12
     - SCL
-- identifier: AU-How_era5land
+- identifier: AU-How_era5
   store: cds
-  data_id: reanalysis-era5-land
+  data_id: reanalysis-era5-single-levels-timeseries
   open_params:
     variable_names:
     - 2m_temperature
-    - total_precipitation
+    - 2m_dewpoint_temperature
     time_range: *id001
-    point:
+    location:
     - 131.1523
     - -12.4943
-    spatial_res: 0.1
 - identifier: AU-How_ccibiomass
   store: esa_cci
   grid_mapping: AU-How_sen2
@@ -92,14 +90,11 @@ data_stores:
     root: data
 - identifier: esa_cci
   store_id: cciodp
-- identifier: stac-cdse
-  store_id: stac-cdse-ardc
-  store_params:
-    key: <CDSE_S3_key>
-    secret: <CDSE_S3_secret>
+- identifier: stac-pc
+  store_id: stac-pc-ardc
 - identifier: cds
   store_id: cds
   store_params:
     endpoint_url: https://cds.climate.copernicus.eu/api
-    cds_api_key: CDS_API_key
+    cds_api_key: 8ba066d4-5195-4c1d-af91-6fb13bfc22df
     normalize_names: true

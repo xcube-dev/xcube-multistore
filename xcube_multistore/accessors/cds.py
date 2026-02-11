@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import datetime
+from requests.exceptions import HTTPError
 
 import xarray as xr
 from xcube.core.store import DataStoreError
@@ -38,7 +39,7 @@ class CdsAccessor(Accessor):
             open_params = self._convert_point_to_bbox(data_id, open_params)
             point = open_params.pop("point")
         time_range = open_params.pop("time_range")
-        ds = self._open_with_split(data_id, time_range, open_params, time_range)
+        ds = self._open_with_split(data_id, time_range, open_params)
 
         if time_series:
             # noinspection PyUnboundLocalVariable
@@ -63,8 +64,7 @@ class CdsAccessor(Accessor):
         data_id: str,
         time_range: tuple[str, str],
         open_params: dict,
-        original_time_range: tuple[str, str],
-    ) -> xr.Dataset:
+    ) -> xr.Dataset | None:
         """
         Recursively fetch data by splitting time_range into smaller ranges
         until store.open_data() succeeds.
@@ -83,45 +83,51 @@ class CdsAccessor(Accessor):
             )
             return ds
 
-        except Exception:
-            # Split the request into two halves
-            start, end = open_params["time_range"]
-            start = datetime.date.fromisoformat(start)
-            end = datetime.date.fromisoformat(end)
-            mid = start + (end - start) / 2
+        except HTTPError as e:
+            # Only split if this is the CDS "request too large" error
+            if (
+                e.response.status_code == 403
+                and "cost limits exceeded" in str(e).lower()
+            ):
+                # Split the request into two halves
+                start, end = open_params["time_range"]
+                start = datetime.date.fromisoformat(start)
+                end = datetime.date.fromisoformat(end)
+                mid = start + (end - start) / 2
 
-            # Base case: prevent infinite recursion if the time range gets too tiny
-            if mid <= start or mid >= end:
-                raise DataStoreError(
-                    f"Cannot further split time range {start} to {end}: "
-                    f"minimum interval reached in CDS large data request algorithm."
+                # Base case: prevent infinite recursion if the time range gets too tiny
+                if mid <= start or mid >= end:
+                    raise DataStoreError(
+                        f"Cannot further split time range {start} to {end}: "
+                        "minimum interval reached."
+                    )
+
+                # Recursively fetch both halves
+                time_range_left = (
+                    datetime.datetime.strftime(start, "%Y-%m-%d"),
+                    datetime.datetime.strftime(mid, "%Y-%m-%d"),
+                )
+                time_range_right = (
+                    datetime.datetime.strftime(
+                        mid + datetime.timedelta(days=1), "%Y-%m-%d"
+                    ),
+                    datetime.datetime.strftime(end, "%Y-%m-%d"),
+                )
+                left = self._open_with_split(
+                    data_id,
+                    time_range_left,
+                    open_params,
+                )
+                right = self._open_with_split(
+                    data_id,
+                    time_range_right,
+                    open_params,
                 )
 
-            # Recursively fetch both halves
-            time_range_left = (
-                datetime.datetime.strftime(start, "%Y-%m-%d"),
-                datetime.datetime.strftime(mid, "%Y-%m-%d"),
-            )
-            time_range_right = (
-                datetime.datetime.strftime(
-                    mid + datetime.timedelta(days=1), "%Y-%m-%d"
-                ),
-                datetime.datetime.strftime(end, "%Y-%m-%d"),
-            )
-            left = self._open_with_split(
-                data_id,
-                time_range_left,
-                open_params,
-                original_time_range,
-            )
-            right = self._open_with_split(
-                data_id,
-                time_range_right,
-                open_params,
-                original_time_range,
-            )
+                return xr.concat((left, right), dim="time")
 
-            return xr.concat((left, right), dim="time")
+            # Not the size-limit error but a HTTPError → propagate it
+            raise
 
 
 def get_timedelta(time_range: tuple[str, str]) -> datetime.timedelta:
