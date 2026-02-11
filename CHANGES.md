@@ -1,7 +1,10 @@
-## Changes in 0.3.1 (under development)
+## Changes in 0.3.1
 
-* Use `xcube_resampling.gridmapping.GridMapping.regular_from_bbox` to create regular grid-
-  mapping instance from configuration.
+* Use `xcube_resampling.gridmapping.GridMapping.regular_from_bbox` to create regular
+  grid-mapping instance from configuration.
+* Added support for ERA5 time series extraction via the [xcube-cds](github.com/xcube-dev/xcube-cds)
+  data store plugin.
+* Improved documentation by adding a new Data Availability page.
 
 ## Changes in 0.3.0
 
