@@ -126,7 +126,7 @@ class CdsAccessor(Accessor):
 
                 return xr.concat((left, right), dim="time")
 
-            # Not the size-limit error but a HTTPError → propagate it
+            # Not a size-limit error but a HTTPError → propagate it
             raise
 
 
