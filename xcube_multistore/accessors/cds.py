@@ -21,9 +21,9 @@
 # SOFTWARE.
 
 import datetime
-from requests.exceptions import HTTPError
 
 import xarray as xr
+from requests.exceptions import HTTPError
 from xcube.core.store import DataStoreError
 
 from xcube_multistore.accessor import Accessor

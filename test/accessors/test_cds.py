@@ -20,12 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from requests.exceptions import HTTPError
-from requests.models import Response
 import unittest
 from unittest.mock import MagicMock
 
 import xarray as xr
+from requests.exceptions import HTTPError
+from requests.models import Response
 from xcube.core.store import DataStoreError
 
 from xcube_multistore.accessors.cds import CdsAccessor
