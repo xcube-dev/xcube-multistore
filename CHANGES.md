@@ -5,6 +5,7 @@
 * Added support for ERA5 time series extraction via the [xcube-cds](github.com/xcube-dev/xcube-cds)
   data store plugin.
 * Improved documentation by adding a new Data Availability page.
+* Fixed bug to unify chunking of concatenated datasets before writing.
 
 ## Changes in 0.3.0
 

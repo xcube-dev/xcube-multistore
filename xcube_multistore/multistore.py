@@ -675,22 +675,16 @@ class MultiSourceDataStore:
             ds = prepare_dataset_for_netcdf(ds)
         ds = clean_dataset(ds)
 
-        # unify chunksize
-        ds = ds.unify_chunks()
         chunksize = config.get("chunksize")
-        if chunksize is None:
-            chunksize = {
-                dim: sizes[0] for dim, sizes in getattr(ds, "chunksizes", {}).items()
-            }
+        if not chunksize:
+            if hasattr(ds, "chunks") and ds.chunks is not None:
+                chunksize = {dim: chunks[0] for dim, chunks in ds.chunks.items()}
         if chunksize:
-            # Select format name for chunking
-            format_name = "zarr" if format_id in ["zarr", "levels"] else format_id
-            ds = chunk_dataset(
-                ds, format_name=format_name, chunk_sizes=chunksize, data_vars_only=True
-            )
-            # Remove "chunks" from encoding to avoid serialization issues
-            for var in ds.data_vars:
-                ds[var].encoding.pop("chunks", None)
+            ds = ds.chunk(chunks=chunksize)
+        # Remove "chunks" from encoding to avoid serialization issues
+        for var in ds.data_vars:
+            ds[var].encoding.pop("chunks", None)
+            ds[var].encoding.pop("chunksizes", None)
 
         data_id = _get_data_id(config)
         store.write_data(ds, data_id, replace=True)

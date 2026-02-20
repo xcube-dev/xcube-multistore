@@ -12,15 +12,19 @@ dependencies:
   - pyproj
   - tabulate
   - xarray
-  - xcube >=1.9.0
-  - xcube-resampling >=0.2.4
+  - xcube >=1.13.1
+  - xcube-resampling >=0.3.0
   - yaml
   # data store plugins
   - xcube-cci >=0.12.1
   - xcube-cds >=1.2.0
   - xcube-clms >=0.2.2
   - xcube-stac >=1.1.2
-  - xcube-zenodo >=1.1.0
+  - xcube-zenodo >=1.1.1
+  - # Pip section
+  - pip
+  - pip:
+      - xcube-icosdp >=0.1.1
   # Development Dependencies - Tools
   - black
   - isort

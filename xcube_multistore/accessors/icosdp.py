@@ -19,35 +19,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from collections.abc import Callable
 
-from xcube.core.store import DataStore
+import xarray as xr
 
 from xcube_multistore.accessor import Accessor
 
-from .base import BaseAccessor
-from .cds import CdsAccessor
-from .clms import ClmsAccessor
-from .icosdp import IcosDpAccessor
-from .stac import StacAccessor
-from .zenodo import ZenodoAccessor
 
-ACCESSOR_MAPPING = {
-    "cds": CdsAccessor,
-    "clms": ClmsAccessor,
-    "icosdp": IcosDpAccessor,
-    "stac-cdse-ardc": StacAccessor,
-    "stac-pc-ardc": StacAccessor,
-    "zenodo": ZenodoAccessor,
-}
+class IcosDpAccessor(Accessor):
+    """Provides methods for accessing dataset from xcube-zenodo data store"""
 
-
-def guess_accessor(
-    store_id: str,
-    store: DataStore,
-    storage: DataStore,
-    identifier: str,
-    notify: Callable,
-) -> Accessor:
-    accessor_class = ACCESSOR_MAPPING.get(store_id, BaseAccessor)
-    return accessor_class(store, storage, identifier, notify)
+    def open_data(self, data_id: str, **open_params) -> xr.Dataset:
+        if data_id.endswith(".zarr"):
+            ds = self.store.cache_store.open_data(data_id, **open_params)
+        else:
+            ds = self.store.open_data(data_id, **open_params)
+        return ds

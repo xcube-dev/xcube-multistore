@@ -133,7 +133,7 @@ def clean_dataset(ds: xr.Dataset, gm: GridMapping | None = None) -> xr.Dataset:
         A cleaned version of the dataset with boundary variables removed and grid
         mapping normalized.
     """
-    check_vars = ["x_bnds", "y_bnds", "lat_bnds", "lon_bnds", "time_bnds"]
+    check_vars = ["x_bnds", "y_bnds", "lat_bnds", "lon_bnds", "time_bnds", "hour_bnds"]
     sel_vars = []
     for var in check_vars:
         if var in ds:
