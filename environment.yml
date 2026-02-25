@@ -21,10 +21,6 @@ dependencies:
   - xcube-clms >=0.2.2
   - xcube-stac >=1.1.2
   - xcube-zenodo >=1.1.1
-  - # Pip section
-  - pip
-  - pip:
-      - xcube-icosdp >=0.1.1
   # Development Dependencies - Tools
   - black
   - isort
