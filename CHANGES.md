@@ -5,8 +5,7 @@
 - Added support for ERA5 time series extraction via the xcube-cds data store plugin.
 - Improved documentation by adding a new Data Availability page.
 - Fixed an issue by unifying chunking of concatenated datasets prior to writing.
-- Reduced dependencies by removing bundled data store plugins; data store plugins 
-  must now be installed separately, providing greater flexibility for environment setup.
+
 
 ## Changes in 0.3.0
 

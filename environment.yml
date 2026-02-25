@@ -15,6 +15,12 @@ dependencies:
   - xcube >=1.13.1
   - xcube-resampling >=0.3.0
   - yaml
+  # data store plugins
+  - xcube-cci >=0.12.1
+  - xcube-cds >=1.2.0
+  - xcube-clms >=0.2.2
+  - xcube-stac >=1.1.2
+  - xcube-zenodo >=1.1.1
   # Development Dependencies - Tools
   - black
   - isort
