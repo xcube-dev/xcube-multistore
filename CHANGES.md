@@ -1,11 +1,12 @@
 ## Changes in 0.3.1
 
-* Use `xcube_resampling.gridmapping.GridMapping.regular_from_bbox` to create regular
-  grid-mapping instance from configuration.
-* Added support for ERA5 time series extraction via the [xcube-cds](github.com/xcube-dev/xcube-cds)
-  data store plugin.
-* Improved documentation by adding a new Data Availability page.
-* Fixed bug to unify chunking of concatenated datasets before writing.
+- Use `xcube_resampling.gridmapping.GridMapping.regular_from_bbox` to create a 
+  regular grid mapping instance from configuration.
+- Added support for ERA5 time series extraction via the xcube-cds data store plugin.
+- Improved documentation by adding a new Data Availability page.
+- Fixed an issue by unifying chunking of concatenated datasets prior to writing.
+- Reduced dependencies by removing bundled data store plugins; data store plugins 
+  must now be installed separately, providing greater flexibility for environment setup.
 
 ## Changes in 0.3.0
 
