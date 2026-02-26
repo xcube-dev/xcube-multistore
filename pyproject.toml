@@ -32,7 +32,7 @@ dependencies = [
     "tabulate",
     "xarray",
     "xcube>=1.13.1",
-    "xcube-resampling>=0.3.0",
+    "xcube-resampling>=0.3.1",
     "yaml",
 ]
 classifiers = [

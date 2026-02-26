@@ -29,7 +29,6 @@ from typing import Any, Mapping
 import geopandas as gpd
 import xarray as xr
 from shapely.geometry import Point, box
-from xcube.core.chunk import chunk_dataset
 from xcube.core.mldataset import MultiLevelDataset
 from xcube.core.store import (
     DataDescriptor,
@@ -659,10 +658,14 @@ class MultiSourceDataStore:
                 ds_ref = getattr(self.stores, NAME_WRITE_STORE).open_data(data_id)
                 target_gm = GridMapping.from_dataset(ds_ref)
             spatial_resample_params = config.get("spatial_resample_params", {})
+            if "prevent_nan_propagations" not in spatial_resample_params:
+                spatial_resample_params["prevent_nan_propagations"] = True
             ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
         elif ds_ref is not None:
             target_gm = GridMapping.from_dataset(ds_ref)
             spatial_resample_params = config.get("spatial_resample_params", {})
+            if "prevent_nan_propagations" not in spatial_resample_params:
+                spatial_resample_params["prevent_nan_propagations"] = True
             ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
 
         return ds
