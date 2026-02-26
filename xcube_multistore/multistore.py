@@ -659,10 +659,14 @@ class MultiSourceDataStore:
                 ds_ref = getattr(self.stores, NAME_WRITE_STORE).open_data(data_id)
                 target_gm = GridMapping.from_dataset(ds_ref)
             spatial_resample_params = config.get("spatial_resample_params", {})
+            if not "prevent_nan_propagations" in spatial_resample_params:
+                spatial_resample_params["prevent_nan_propagations"] = True
             ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
         elif ds_ref is not None:
             target_gm = GridMapping.from_dataset(ds_ref)
             spatial_resample_params = config.get("spatial_resample_params", {})
+            if not "prevent_nan_propagations" in spatial_resample_params:
+                spatial_resample_params["prevent_nan_propagations"] = True
             ds = resample_in_space(ds, target_gm=target_gm, **spatial_resample_params)
 
         return ds

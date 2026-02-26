@@ -29,15 +29,30 @@ from xcube_multistore.accessor import Accessor
 from xcube_multistore.visualization import GeneratorState
 
 _NB_PIXELS = int(2e4 * 2e4) * 5 * 4
-_MAX_DAYS = 100
-_NUM_SEN2_BANDS = 13
+_MAX_DAYS = {
+    "sentinel-2-l1c": 100,
+    "sentinel-2-l2a": 100,
+    "sentinel-3-syn-2-syn-ntc": 7,
+    "sentinel-3-sl-2-lst-ntc": 7,
+    "sentinel-3-synergy-syn-l2-netcdf": 7,
+    "sentinel-3-slstr-lst-l2-netcdf": 7,
+}
+
+_NUM_BANDS = {
+    "sentinel-2-l1c": 13,
+    "sentinel-2-l2a": 13,
+    "sentinel-3-syn-2-syn-ntc": 25,
+    "sentinel-3-sl-2-lst-ntc": 2,
+    "sentinel-3-synergy-syn-l2-netcdf": 25,
+    "sentinel-3-slstr-lst-l2-netcdf": 2,
+}
 
 
 class StacAccessor(Accessor):
     """Provides methods for accessing dataset from xcube-cds data store"""
 
     def open_data(self, data_id: str, **open_params) -> xr.Dataset:
-        time_ranges = self._split_time_range(open_params)
+        time_ranges = self._split_time_range(data_id, open_params)
         nb_requests = len(time_ranges)
         self.notify(
             GeneratorState(
@@ -66,11 +81,11 @@ class StacAccessor(Accessor):
         return ds
 
     @staticmethod
-    def _split_time_range(open_params: dict):
+    def _split_time_range(data_id: str, open_params: dict):
         if "asset_names" in open_params:
             nb_vars = len(open_params["asset_names"])
         else:
-            nb_vars = _NUM_SEN2_BANDS
+            nb_vars = _NUM_BANDS[data_id]
         start, end = open_params["time_range"]
         start = datetime.date.fromisoformat(start)
         end = datetime.date.fromisoformat(end)
@@ -95,9 +110,10 @@ class StacAccessor(Accessor):
             nb_splits = 1
 
         base = total_days // nb_splits
-        if base > _MAX_DAYS:
-            base = _MAX_DAYS
-            nb_splits = total_days // _MAX_DAYS
+        max_days = _MAX_DAYS[data_id]
+        if base > max_days:
+            base = _MAX_DAYS[data_id]
+            nb_splits = total_days // max_days
         remainder = total_days % nb_splits
         time_ranges = []
         current = start
