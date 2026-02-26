@@ -381,7 +381,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertIsInstance(msds, MultiSourceDataStore)
         config_ds = msds.config.datasets
         self.assertEqual(
-            {"agg_methods": "max"},
+            {"agg_methods": "max", "prevent_nan_propagations": True},
             config_ds["dataset1"]["spatial_resample_params"],
         )
         ds = msds.stores.storage.open_data("dataset1.zarr")
@@ -399,7 +399,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertIsInstance(msds, MultiSourceDataStore)
         config_ds = msds.config.datasets
         self.assertEqual(
-            {"interp_methods": "nearest"},
+            {"interp_methods": "nearest", "prevent_nan_propagations": True},
             config_ds["dataset_final"]["variables"][0]["spatial_resample_params"],
         )
         ds = msds.stores.storage.open_data("dataset_final.zarr")
