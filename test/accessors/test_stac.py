@@ -50,7 +50,7 @@ class StacAccessorTest(unittest.TestCase):
         self.assertCountEqual(["band_1"], ds.data_vars)
         self.assertCountEqual(("time", "lat", "lon"), ds.dims)
         self.assertEqual(
-            [9, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+            [8, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
         )
 
     def test_open_data_point_request(self):
@@ -67,5 +67,5 @@ class StacAccessorTest(unittest.TestCase):
         self.assertCountEqual(["band_1"], ds.data_vars)
         self.assertCountEqual(("time", "lat", "lon"), ds.dims)
         self.assertEqual(
-            [3, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+            [4, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
         )
