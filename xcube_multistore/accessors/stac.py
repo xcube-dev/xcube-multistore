@@ -28,14 +28,14 @@ import xarray as xr
 from xcube_multistore.accessor import Accessor
 from xcube_multistore.visualization import GeneratorState
 
-_NB_PIXELS = int(2e4 * 2e4) * 5 * 4
+_NB_PIXELS = int(2e4 * 2e4) * 50
 _MAX_DAYS = {
     "sentinel-2-l1c": 100,
     "sentinel-2-l2a": 100,
-    "sentinel-3-syn-2-syn-ntc": 7,
-    "sentinel-3-sl-2-lst-ntc": 7,
-    "sentinel-3-synergy-syn-l2-netcdf": 7,
-    "sentinel-3-slstr-lst-l2-netcdf": 7,
+    "sentinel-3-syn-2-syn-ntc": 2,
+    "sentinel-3-sl-2-lst-ntc": 2,
+    "sentinel-3-synergy-syn-l2-netcdf": 2,
+    "sentinel-3-slstr-lst-l2-netcdf": 2,
 }
 
 _NUM_BANDS = {
@@ -82,15 +82,13 @@ class StacAccessor(Accessor):
 
     @staticmethod
     def _split_time_range(data_id: str, open_params: dict):
-        if "asset_names" in open_params:
-            nb_vars = len(open_params["asset_names"])
-        else:
-            nb_vars = _NUM_BANDS[data_id]
+        # get number days
         start, end = open_params["time_range"]
         start = datetime.date.fromisoformat(start)
         end = datetime.date.fromisoformat(end)
-        total_days = (end - start).days
-        nb_ts = total_days // 2
+        nb_days = (end - start).days
+
+        # get number spatial pixel
         spatial_res = open_params["spatial_res"]
         if not isinstance(spatial_res, Iterable):
             spatial_res = (spatial_res, spatial_res)
@@ -104,25 +102,38 @@ class StacAccessor(Accessor):
             nb_pixels_spatial = int(bbox_width / spatial_res[0]) * int(
                 bbox_width / spatial_res[1]
             )
-        nb_pixels = nb_pixels_spatial * nb_ts * nb_vars
+
+        # get number variables
+        if "asset_names" in open_params:
+            nb_vars = len(open_params["asset_names"])
+        else:
+            nb_vars = _NUM_BANDS[data_id]
+
+        nb_pixels = nb_pixels_spatial * nb_days * nb_vars
         nb_splits = nb_pixels // _NB_PIXELS
         if nb_splits == 0:
             nb_splits = 1
 
-        base = total_days // nb_splits
+        step = nb_days // nb_splits
         max_days = _MAX_DAYS[data_id]
-        if base > max_days:
-            base = _MAX_DAYS[data_id]
-            nb_splits = total_days // max_days
-        remainder = total_days % nb_splits
-        time_ranges = []
-        current = start
-        for i in range(nb_splits):
-            length = base + (1 if i < remainder else 0)
-            sub_start = current
-            sub_end = current + datetime.timedelta(days=length)
-            time_ranges.append(
-                (sub_start.strftime("%Y-%m-%d"), sub_end.strftime("%Y-%m-%d"))
-            )
-            current = sub_end + datetime.timedelta(days=1)
+        if step > max_days:
+            step = max_days
+            nb_splits = nb_days // step
+
+        if nb_splits == 1:
+            time_ranges = [(start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"))]
+        else:
+            time_ranges = []
+            current = start
+            step -= 1
+            for i in range(nb_splits + 1):
+                sub_start = current
+                if i == nb_splits:
+                    sub_end = end
+                else:
+                    sub_end = current + datetime.timedelta(days=step)
+                time_ranges.append(
+                    (sub_start.strftime("%Y-%m-%d"), sub_end.strftime("%Y-%m-%d"))
+                )
+                current = sub_end + datetime.timedelta(days=1)
         return time_ranges
