@@ -1,3 +1,9 @@
+## Changes in 0.3.2
+
+- Improved logging output when `visualize` is disabled in the configuration.
+- Updated dependency versions for the xcube data store plugins.
+
+
 ## Changes in 0.3.1
 
 - Use `xcube_resampling.gridmapping.GridMapping.regular_from_bbox` to create a 

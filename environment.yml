@@ -13,14 +13,14 @@ dependencies:
   - tabulate
   - xarray
   - xcube >=1.13.1
-  - xcube-resampling >=0.3.1
+  - xcube-resampling >=0.3.2
   - yaml
   # data store plugins
-  - xcube-cci >=0.12.1
+  - xcube-cci >=0.13
   - xcube-cds >=1.2.0
-  - xcube-clms >=0.2.2
-  - xcube-stac >=1.2.0
-  - xcube-zenodo >=1.1.1
+  - xcube-clms >=1.3.0
+  - xcube-stac >=1.2.2
+  - xcube-zenodo >=1.2.0
   # Development Dependencies - Tools
   - black
   - isort
