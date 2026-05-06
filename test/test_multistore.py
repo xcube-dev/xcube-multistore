@@ -229,7 +229,10 @@ class MultiSourceDataStoreTest(unittest.TestCase):
             msds.generate()
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(4, len(cm.output))
-        msg = "INFO:xcube.multistore:Dataset 'dataset1' finished:"
+        msg = (
+            "INFO:xcube.multistore:Data ID: dataset1; Status: COMPLETED; "
+            "Message: Dataset 'dataset1' finished"
+        )
         self.assertIn(msg, str(cm.output[-1]))
         ds = msds.stores.storage.open_data("dataset1.nc")
         self.assertIsInstance(ds, xr.Dataset)
@@ -299,7 +302,10 @@ class MultiSourceDataStoreTest(unittest.TestCase):
         self.assertEqual(3, len(cm.output))
         msg = "INFO:xcube.multistore:Data ID 'andorra.zip' already preloaded."
         self.assertEqual(msg, str(cm.output[1]))
-        msg = "INFO:xcube.multistore:Dataset 'senf_andorra' already generated."
+        msg = (
+            "INFO:xcube.multistore:Data ID: senf_andorra; Status: COMPLETED; "
+            "Message: Dataset 'senf_andorra' already generated."
+        )
         self.assertEqual(msg, str(cm.output[2]))
         ds = msds.stores.storage.open_data("senf_andorra.zarr")
         self.assertIsInstance(ds, xr.Dataset)
@@ -357,7 +363,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
             msds.generate()
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(3, len(cm.output))
-        self.assertIn("ERROR:xcube.multistore:An error occurred:", str(cm.output[-1]))
+        self.assertIn("ERROR:xcube.multistore:Data ID: dataset1", str(cm.output[-1]))
         self.assertIn("KeyError: 'grid1'", str(cm.output[-1]))
 
     def test_generate_error_write_dataset(self):
@@ -368,7 +374,7 @@ class MultiSourceDataStoreTest(unittest.TestCase):
             msds.generate()
         self.assertIsInstance(msds, MultiSourceDataStore)
         self.assertEqual(4, len(cm.output))
-        self.assertIn("ERROR:xcube.multistore:An error occurred: ", str(cm.output[-1]))
+        self.assertIn("ERROR:xcube.multistore:Data ID: dataset1", str(cm.output[-1]))
         self.assertIn(
             "AttributeError: 'ZenodoDataStore' object has no attribute 'write_data'",
             str(cm.output[-1]),

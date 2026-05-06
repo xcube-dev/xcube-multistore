@@ -439,9 +439,19 @@ class MultiSourceDataStore:
             self._display.update()
         else:
             if event.status == GeneratorStatus.failed:
-                LOG.error("An error occurred: %s", event.exception)
+                LOG.error(
+                    "Data ID: %s; Status: %s; Exception: %s",
+                    event.identifier,
+                    event.status,
+                    event.exception,
+                )
             else:
-                LOG.info(event.message)
+                LOG.info(
+                    "Data ID: %s; Status: %s; Message: %s",
+                    event.identifier,
+                    event.status,
+                    event.message,
+                )
 
     def _notify_error(self, identifier: str, exception: Any):
         self._notify(
