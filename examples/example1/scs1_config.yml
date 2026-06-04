@@ -96,5 +96,7 @@ data_stores:
   store_id: cds
   store_params:
     endpoint_url: https://cds.climate.copernicus.eu/api
-    cds_api_key: CDS_API_key
+    cds_api_key: 8ba066d4-5195-4c1d-af91-6fb13bfc22df
     normalize_names: true
+general:
+  visualize: false

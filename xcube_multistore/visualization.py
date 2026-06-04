@@ -177,23 +177,27 @@ class IPyGeneratorDisplay(GeneratorDisplay):
 
 class ConfigDisplay(ABC):
 
+    def __init__(self, config: MultiSourceConfig, include=None, exclude=None):
+        self.config = config
+        self.include = set(include) if include else None
+        self.exclude = set(exclude) if exclude else None
+
     @classmethod
-    def create(cls, config: MultiSourceConfig) -> "ConfigDisplay":
+    def create(
+        cls, config: MultiSourceConfig, include=None, exclude=None
+    ) -> "ConfigDisplay":
         try:
             from IPython import get_ipython
 
             # Only use IPyConfigDisplay if we are actually inside a notebook
             shell = get_ipython().__class__.__name__
             if shell == "ZMQInteractiveShell":
-                return IPyConfigDisplay(config)
+                return IPyConfigDisplay(config, include=include, exclude=exclude)
         except (ImportError, NameError, AttributeError):
             pass
 
         # Default fallback: text-based display
-        return ConfigDisplay(config)
-
-    def __init__(self, config: MultiSourceConfig):
-        self.config = config
+        return ConfigDisplay(config, include=include, exclude=exclude)
 
     def _repr_html_(self) -> str:
         return self.to_html()
@@ -283,8 +287,8 @@ class ConfigDisplay(ABC):
 
 
 class IPyConfigDisplay(ConfigDisplay):
-    def __init__(self, config: MultiSourceConfig):
-        super().__init__(config)
+    def __init__(self, config: MultiSourceConfig, include=None, exclude=None):
+        super().__init__(config, include=include, exclude=exclude)
         from IPython import display
 
         self._ipy_display = display

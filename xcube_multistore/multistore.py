@@ -117,8 +117,8 @@ class MultiSourceDataStore:
         """
         return MultiSourceConfig.get_schema()
 
-    def display_config(self):
-        display = ConfigDisplay.create(self.config)
+    def display_config(self, include=None, exclude=None):
+        display = ConfigDisplay.create(self.config, include=include, exclude=exclude)
         display.display_title("Configuration")
         display.show()
 
