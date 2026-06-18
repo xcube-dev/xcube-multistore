@@ -11,22 +11,32 @@ These plugins can be seamlessly integrated into the Multi-Source Data Store.
 The following data store plugins provide direct access to major Earth observation
 and research data providers.
 
-| Data Source                                                                 | Store ID                | Plugin Repository                                          |
-|-----------------------------------------------------------------------------|------------------------|------------------------------------------------------------|
-| **[Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/)** | `"cds"`                | [GitHub](https://github.com/xcube-dev/xcube-cds)            |
-| **[Copernicus Marine Service (CMEMS)](https://marine.copernicus.eu/)**       | `"cmems"`              | [GitHub](https://github.com/xcube-dev/xcube-cmems)          |
-| **[Copernicus Land Monitoring Service (CLMS)](https://land.copernicus.eu/en/dataset-catalog)** | `"clms"` | [GitHub](https://github.com/xcube-dev/xcube-clms)           |
-| **[EOPF Sentinel Zarr Samples](https://zarr.eopf.copernicus.eu/)**           | `"eopf-zarr"`          | [GitHub](https://github.com/EOPF-Sample-Service/xcube-eopf) |
-| **[ESA CCI](https://climate.esa.int/en/data/#/dashboard)**                   | `"cciodp"`<br>`"ccizarr"` | [GitHub](https://github.com/xcube-dev/xcube-cci)        |
-| **[ESA SMOS](https://earth.esa.int/eogateway/missions/smos)**                | `"smos"`               | [GitHub](https://github.com/xcube-dev/xcube-smos)           |
-| **[ICOS Data Portal](https://www.icos-cp.eu/data-services)**                 | `"icosdp"`             | [GitHub](https://github.com/xcube-dev/xcube-icosdp)         |
-| **[Global Ecosystem Dynamics Investigation (GEDI)](https://gedi.umd.edu/)**  | `"gedi"`               | [GitHub](https://github.com/xcube-dev/xcube-gedi)           |
-| **[Sentinel Hub](https://www.sentinel-hub.com/)**                            | `"sentinelhub"`        | [GitHub](https://github.com/xcube-dev/xcube-sh)             |
-| **[SpatioTemporal Asset Catalog (STAC)](https://stacspec.org/en/about/datasets/)** | `"stac"`        | [GitHub](https://github.com/xcube-dev/xcube-stac)           |
-| **[Zenodo](https://zenodo.org/)**                                            | `"zenodo"`             | [GitHub](https://github.com/xcube-dev/xcube-zenodo)         |
-
-Each plugin repository contains usage examples and documentation specific to the
-respective data provider.
+# EO Data Sources and Variables via xcube Plugins
+| **Plugin** | **Store ID** | **Data Source** | **Key Variables / Products** | **Domain** |
+|---|---|---|---|---|
+| **[xcube-sh](https://github.com/xcube-dev/xcube-sh)** | `sentinelhub` | Sentinel Hub | Sentinel-1 GRD | Land, Forestry |
+| | `sentinelhub` | Sentinel Hub | Sentinel-2 L1C/L2A | Land, Agriculture |
+| | `sentinelhub` | Sentinel Hub | Sentinel-3 OLCI/SLSTR | Ocean, Land |
+| | `sentinelhub` | Sentinel Hub | Sentinel-5P L2 | Atmosphere |
+| **[xcube-smos](https://github.com/xcube-dev/xcube-smos)** | `smos` | ESA SMOS L2 | Soil moisture, ocean salinity | Land, Ocean |
+| **[xcube-cci](https://github.com/esa-cci/xcube-cci)** | `cciodp`, `ccizarr` | ESA Climate Change Initiative | Land cover, biomass, soil moisture, fires, GHGs, clouds, sea level, glaciers, and more | Multi-domain |
+| **[xcube-cds](https://github.com/xcube-dev/xcube-cds)** | `cds` | ERA5 / ERA5-Land | Temperature, precipitation, wind, radiation, soil moisture, snow | Climate, Hydrology |
+| | `cds` | Copernicus Soil Moisture / Sea Ice | Soil moisture, sea ice thickness | Land, Cryosphere |
+| | `cds` | Drought indices | SPI, SPEI | Land |
+| | `cds` | Land cover classification | LCCS by UN FAO | Land |
+| | `cds` | Land surface temperature | Land surface temperature day and night | Land |
+| | `cds` | Surface albedo | Broadband and spectral surface albedo | Land |
+| **[xcube-cmems](https://github.com/xcube-dev/xcube-cmems)** | `cmems` | Copernicus Marine Service | Sea surface temperature, salinity, ocean currents, biogeochemistry, sea level, chlorophyll | Ocean |
+| **[xcube-stac](https://github.com/xcube-dev/xcube-stac)** | `stac` | SpatioTemporal Asset Catalog (STAC) | Dependent on catalog | Multi-domain |
+| | `stac` | CDSE | Sentinel-2 L1C/L2A, Sentinel-3 SYNERGY Surface Reflectance | Land, Ocean |
+| | `stac` | Planetary Computer | Sentinel-2 L1C/L2A, Sentinel-3 SYNERGY, Harmonized Sentinel-2 and Landsat Surface Reflectance | Land, Ocean |
+| **[xcube-clms](https://github.com/xcube-dev/xcube-clms)** | `clms` | Copernicus Land Monitoring Service (CLMS) | Land cover, imperviousness, vegetation phenology, forest characteristics | Land, Urban |
+| **[xcube-zenodo](https://github.com/xcube-dev/xcube-zenodo)** | `zenodo` | Zenodo Data Portal | Scientific datasets, model outputs, benchmark products | Open Research |
+| **[xcube-icosdp](https://github.com/xcube-dev/xcube-icosdp)** | `icosdp` | ICOS Carbon Portal | GHG fluxes, atmospheric concentrations, meteorological variables | Atmosphere, Land |
+| **[xcube-gedidb](https://github.com/xcube-dev/xcube-gedidb)** | `gedi` | GEDI L2A, L2B, L4A, L4C products | Aboveground biomass density, canopy cover, DEM | Land, Forest |
+| **[xcube-eopf](https://github.com/xcube-dev/xcube-eopf)** | `eopf-zarr` | EOPF Sentinel Zarr Samples | Sentinel-1 GRD, Sentinel-1 SLC, Sentinel-1 OCN | Land, Forestry, Ocean |
+| | `eopf-zarr` | EOPF Sentinel Zarr Samples | Sentinel-2 L1C/L2A | Land, Agriculture |
+| | `eopf-zarr` | EOPF Sentinel Zarr Samples | Sentinel-3 OLCI, SLSTR-RBT, SLSTR-LST | Ocean, Land |
 
 ### Bring Your Own Data
 

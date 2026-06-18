@@ -1,0 +1,84 @@
+preload_datasets:
+  - store: icosdp
+    data_ids:
+      - "FLUXCOM-X-BASE_GPP"
+      - "FLUXCOM-X-BASE_ET"
+    preload_params:
+      agg_mode: "005_monthly"
+      time_range:
+        - '2000-01-01'
+        - '2021-12-31'
+
+datasets:
+  # Xu et al. Aboveground Biomass
+  - identifier: biomass_xu
+    store: zenodo
+    grid_mapping: globe
+    data_id: "test10a_cd_ab_pred_corr_2000_2019_v2.tif"
+    open_params:
+        band_as_variable: False
+    custom_processing:
+      module_path: "utils"
+      function_name: "biomass_xu_rename"
+    format_id: netcdf
+  # ESA CCI biomass
+  - identifier: biomass_esa_cci
+    store: esa_cci
+    grid_mapping: globe
+    data_id: "esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.6-0.10000m"
+    format_id: netcdf
+  # FLUXCOM-X GPP
+  - identifier: fluxcom_x_gpp
+    store: icosdp
+    grid_mapping: globe
+    data_id: "FLUXCOM-X-BASE_GPP_monthly_2000_2021.zarr"
+    format_id: netcdf
+  # FLUXCOM-X GPP
+  - identifier: fluxcom_x_et
+    store: icosdp
+    grid_mapping: globe
+    data_id: "FLUXCOM-X-BASE_ET_monthly_2000_2021.zarr"
+    format_id: netcdf
+  # GlobMAPLAIV3
+  - identifier: laiv3
+    store: local_laiv3
+    grid_mapping: globe
+    data_id: "GlobMapLAIV3.zarr"
+    temporal_resample_params:
+        frequency: "1MS"
+        agg_methods: "mean"
+    format_id: netcdf
+
+
+data_stores:
+  # Storage data store
+  - identifier: storage
+    store_id: file
+    store_params:
+      root: ../data
+  # ESA CCI data store
+  - identifier: esa_cci
+    store_id: cciodp
+  # Zenodo data store for Xu et al.
+  - identifier: zenodo
+    store_id: zenodo
+    store_params:
+      root: "4161694"
+  # ICOS Data Portal data store
+  - identifier: icosdp
+    store_id: icosdp
+    store_params:
+        email: "<icos-email>"
+        password: "<icos-password>"
+  # Zenodo Cache data store for GlobMAPLAIV3
+  - identifier: local_laiv3
+    store_id: file
+    store_params:
+        root: "zenodo_cache/12698637"
+
+grid_mappings:
+  - identifier: globe
+    bbox: [-180, -90, 180, 90]
+    spatial_res: 0.1
+    crs: EPSG:4326
+    tile_size: [1800, 1800]
