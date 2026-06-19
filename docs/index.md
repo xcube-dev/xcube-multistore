@@ -43,6 +43,9 @@ from xcube_multistore.multistore import MultiSourceDataStore
 msds = MultiSourceDataStore("config.yml")
 ```
 
+> Note: If the generation of one data cube fails, the system continues with the next 
+> dataset. This ensures that all configured datasets are processed and that a single 
+> failing dataset does not interrupt the entire workflow.
 
 ## Features
 
