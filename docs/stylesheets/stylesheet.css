@@ -33,3 +33,16 @@
     font-weight: normal;
     grid-column: 1;
 }
+
+/* Allow normal line wrapping, but don't split words */
+.md-typeset table td:nth-child(2),
+.md-typeset table th:nth-child(2) {
+    white-space: nowrap;
+}
+
+
+@media screen and (min-width: 76.25em) {
+    .md-grid {
+        max-width: 65rem;
+    }
+}

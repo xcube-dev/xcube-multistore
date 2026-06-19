@@ -1,0 +1,14 @@
+name: eo-lincs-scs1
+channels:
+  - conda-forge
+dependencies:
+  - python >=3.10
+  - jupyter
+  - utm
+  - xcube-multistore >=0.3.2
+  - xcube-stac >=1.3.1
+  - xcube-cds >=1.4.0
+  - xcube-cci >=0.14
+  - pip
+  - pip:
+      - xcube-gedidb

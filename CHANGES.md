@@ -1,3 +1,11 @@
+## Changes in 0.3.3
+
+- Improved documentation:
+  - Added a new "How-to" guide.
+  - Expanded and improved the Data Availability page.
+  - Update all examples in `examples` and `docs/examples`
+- Reduced dependencies by removing the direct dependency on xcube data store plugins.
+
 ## Changes in 0.3.2
 
 - Improved logging output when `visualize` is disabled in the configuration.

@@ -15,11 +15,35 @@ from xcube_multistore.multistore import MultiSourceDataStore
 MultiSourceDataStore.get_config_schema()
 ```
 
-In the notebook [setup_config.ipynb](https://xcube-dev.github.io/xcube-multistore/examples/setup_config/), you can find
+In the notebook [setup_config.ipynb](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/setup_config.ipynb), you can find
 an example demonstrating how to use auxiliary functions to set up a configuration.  
+  
+Example configurations can be explored in the [examples](https://github.com/xcube-dev/xcube-multistore/blob/main/examples) folder.
 
-An example configuration is available in [examples/config.yml](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml).  
-Additional example configurations can be explored in the [examples](https://github.com/xcube-dev/xcube-multistore/blob/main/examples) folder.
+## Configuration Generator GUI
+
+> **Note:** This feature is under active development, and only a minimal working
+> example is currently available.
+
+The **Configuration Generator GUI** shall provide an interactive interface for creating and
+editing the configuration YAML, making the setup process more intuitive and less
+error-prone.
+
+**Key features (in development):**
+
+- Display of all available fields for each configuration section
+- Dynamic fetching and updating of valid parameters and inputs
+- Dropdown menus that show only supported options
+- Autofill assistance for large option sets (e.g., thousands of data IDs)
+- Built-in configuration validator/checker
+- Geolocation visualization to help define bounding boxes
+
+To launch the GUI, run the following command from the package root:
+
+```bash
+panel serve xcube_multistore/gui/app.py --dev
+```
+
 
 ## Entire configuration schema
 

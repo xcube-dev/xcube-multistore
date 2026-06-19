@@ -1,0 +1,168 @@
+datasets:
+- identifier: AU-How/sen2
+  store: stac-pc
+  data_id: sentinel-2-l2a
+  open_params:
+    time_range: &id001
+    - '2020-04-15'
+    - '2020-04-30'
+    point:
+    - 131.1523
+    - -12.4943
+    bbox_width: 4000
+    spatial_res: 10
+    asset_names:
+    - B01
+    - B02
+    - B03
+    - B04
+    - B05
+    - B06
+    - B07
+    - B08
+    - B8A
+    - B09
+    - B11
+    - B12
+    - SCL
+- identifier: AU-How/sen3_syn
+  store: stac-pc
+  data_id: sentinel-3-synergy-syn-l2-netcdf
+  open_params:
+    asset_names:
+    - syn-oa04-reflectance
+    - syn-oa08-reflectance
+    - syn-oa10-reflectance
+    - syn-oa11-reflectance
+    - syn-oa12-reflectance
+    - syn-oa17-reflectance
+    time_range: *id001
+    bbox:
+    - 731412.0
+    - 8615335.0
+    - 736412.0
+    - 8620335.0
+    spatial_res: 200
+    crs: EPSG:32752
+    add_error_bands: false
+  grid_mapping: AU-How/sen2
+- identifier: AU-How/era5
+  store: cds
+  data_id: reanalysis-era5-single-levels-timeseries
+  open_params:
+    variable_names:
+    - 10m_u_component_of_wind
+    - 10m_v_component_of_wind
+    - 2m_dewpoint_temperature
+    - 2m_temperature
+    - skin_temperature
+    - surface_pressure
+    - surface_solar_radiation_downwards
+    - surface_thermal_radiation_downwards
+    time_range:
+    - '1990-01-01'
+    - '2025-12-31'
+    location:
+    - 131.1523
+    - -12.4943
+- identifier: AU-How/esa_cci_biomass
+  store: esa_cci
+  grid_mapping: AU-How/sen2
+  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m
+  open_params:
+    time_range: *id001
+- identifier: AU-How/CCI_BIOMASS
+  store: store_foresteo
+  data_id: biomass-carbon/CCI_BIOMASS/CCI_BIOMASS_v6.0/CCI_BIOMASS_v6.0.json
+  grid_mapping: AU-How/sen2
+  custom_processing:
+    module_path: utils
+    function_name: modify_cci_biomass
+- identifier: AU-How/SAATCHI_BIOMASS
+  store: store_foresteo
+  data_id: biomass-carbon/SAATCHI_BIOMASS/SAATCHI_BIOMASS_v2.0/SAATCHI_BIOMASS_v2.0.json
+  grid_mapping: AU-How/sen2
+- identifier: AU-How/ROBINSON_CR
+  store: store_foresteo
+  data_id: biomass-carbon/ROBINSON_CR/ROBINSON_CR_v1.0/ROBINSON_CR_v1.0.json
+  grid_mapping: AU-How/sen2
+- identifier: AU-How/HANSEN_GFC
+  store: store_foresteo
+  data_id: disturbance-change/HANSEN_GFC/HANSEN_GFC_v1.12/HANSEN_GFC_v1.12.json
+  grid_mapping: AU-How/sen2
+- identifier: AU-How/GAMI
+  store: store_foresteo
+  data_id: structure-demography/GAMI/GAMI_v3.1/GAMI_v3.1.json
+  grid_mapping: AU-How/sen2
+  custom_processing:
+    module_path: utils
+    function_name: modify_gami
+- identifier: AU-How/POTAPOV_HEIGHT
+  store: store_foresteo
+  data_id: structure-demography/POTAPOV_HEIGHT/POTAPOV_HEIGHT_v1.0/POTAPOV_HEIGHT_v1.0.json
+  grid_mapping: AU-How/sen2
+- identifier: AU-How/gedi
+  store: store_gedi
+  data_id: all
+  open_params:
+    bbox:
+    - 131.13375765995252
+    - -12.512527494209674
+    - 131.17084382391076
+    - -12.476087024702665
+    time_range:
+    - '2019-04-01'
+    - '2025-12-31'
+    variables:
+    - agbd
+    - agbd_pi_lower
+    - agbd_pi_upper
+    - agbd_se
+    - agbd_t
+    - agbd_t_se
+    - algorithmrun_flag
+    - beam_type
+    - degrade_flag
+    - fhd_normal
+    - l2a_quality_flag
+    - l2b_quality_flag
+    - landsat_treecover
+    - leaf_off_flag
+    - num_detectedmodes
+    - omega
+    - quality_flag
+    - rh
+    - sensitivity
+    - solar_elevation
+    - surface_flag
+    - wsci
+    - wsci_pi_lower
+    - wsci_pi_upper
+    - wsci_quality_flag
+    - wsci_xy
+    - wsci_xy_pi_lower
+    - wsci_xy_pi_upper
+    - wsci_z
+    - wsci_z_pi_lower
+    - wsci_z_pi_upper
+data_stores:
+- identifier: storage
+  store_id: file
+  store_params:
+    root: ../data
+- identifier: esa_cci
+  store_id: cciodp
+- identifier: stac-pc
+  store_id: stac-pc-ardc
+- identifier: cds
+  store_id: cds
+  store_params:
+    endpoint_url: https://cds.climate.copernicus.eu/api
+    cds_api_key: cds-api-key
+    normalize_names: true
+- identifier: store_foresteo
+  store_id: stac
+  store_params:
+    url: https://s3.gfz-potsdam.de/dog.atlaseo-glm.eo-gridded-data/collections/public/catalog.json
+- identifier: store_gedi
+  store_id: gedidb

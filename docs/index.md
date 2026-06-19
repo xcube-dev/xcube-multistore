@@ -15,7 +15,7 @@ data model. This approach simplifies the data fusion process while ensuring
 
 The package utilizes [xcube’s data access](https://xcube.readthedocs.io/en/latest/dataaccess.html#data-access), 
 implemented via data store plugins, along with additional functionalities from 
-[xcube](https://xcube.readthedocs.io/), to manipulate and harmonize datasets according
+[xcube-resampling](https://xcube-dev.github.io/xcube-resampling/), to manipulate and harmonize datasets according
 to user-defined specifications.
 
 The workflow includes the following steps:
@@ -29,11 +29,9 @@ to a consistent grid or a catalog of separate datasets.
 
 ## Overview
 
-The Multi-Source Data Store is configured via a YAML file. You can find an example 
-configuration in [examples/config.yml](https://github.com/xcube-dev/xcube-multistore/blob/main/examples/config.yml).
-
-For more detailed guidance on creating a configuration file, please refer to the 
-[Configuration Guide](https://xcube-dev.github.io/xcube-multistore/config/).
+The Multi-Source Data Store is configured through a YAML file. Examples are available 
+in the view the [examples folder](https://github.com/xcube-dev/xcube-multistore/blob/main/examples). For more detailed guidance on creating a 
+configuration file, please refer to the [Configuration Guide](https://xcube-dev.github.io/xcube-multistore/config/).
 
 Once the configuration file is ready, the Multi-Source Data Store can be started 
 with a single line of code, as shown below:
@@ -45,52 +43,25 @@ from xcube_multistore.multistore import MultiSourceDataStore
 msds = MultiSourceDataStore("config.yml")
 ```
 
-For further examples please view the [examples folder](https://github.com/xcube-dev/xcube-multistore/blob/main/examples).
+> Note: If the generation of one data cube fails, the system continues with the next 
+> dataset. This ensures that all configured datasets are processed and that a single 
+> failing dataset does not interrupt the entire workflow.
 
-## Features 
-
-> **IMPORTANT:**  
-> The `xcube-multistore` package is currently in the early stages of development.  
-> The following features are available so far:
+## Features
 
 * subset of dataset (defined by grid mapping)
 * resample and reproject dataset (defined by grid mapping)
+* resample along the time axis
 * grid mapping may be defined by the user or by a dataset 
 * allow for time series at a single spatial point; interpolate the neighbouring points
 * allow data fusion, where data variables in one `xr.Dataset` refers to different data sources
 * support spatial cutout of an area around a defined spatial point.
-* support preload API for [xcube-clms](https://github.com/xcube-dev/xcube-clms) and 
-  [xcube-zendoo](https://github.com/xcube-dev/xcube-zenodo)
+* support preload API for [xcube-clms](https://github.com/xcube-dev/xcube-clms) and [xcube-zendoo](https://github.com/xcube-dev/xcube-zenodo)
 * allow to write to netcdf and zarr
-* some auxiliary functionalities which shall help to setup a config YAML file.
-* interpolate along the time axis
+* some auxiliary functionalities which shall help to set up a config YAML file.
 
-### Configuration Generator GUI
-
-The **Configuration Generator GUI** provides an interactive interface for creating and
-editing the configuration YAML, making the setup process more intuitive and less
-error-prone.
-
-**Key features (in development):**
-
-- Display of all available fields for each configuration section
-- Dynamic fetching and updating of valid parameters and inputs
-- Dropdown menus that show only supported options
-- Autofill assistance for large option sets (e.g., thousands of data IDs)
-- Built-in configuration validator/checker
-- Geolocation visualization to help define bounding boxes
-
-> **Note:** This feature is under active development, and only a minimal working
-> example is currently available.
-
-To launch the GUI, run the following command from the package root:
-
-```bash
-panel serve xcube_multistore/gui/app.py --dev
-```
 
 ## License
 
-The package is open source and released under the 
-[MIT license](https://opensource.org/license/mit). :heart:
+The package is open source and released under the [MIT license](https://opensource.org/license/mit). :heart:
 

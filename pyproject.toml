@@ -31,7 +31,7 @@ dependencies = [
     "pyproj",
     "tabulate",
     "xarray",
-    "xcube>=1.13.1",
+    "xcube-core>=1.13.1",
     "xcube-resampling>=0.3.2",
     "yaml",
 ]

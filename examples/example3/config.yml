@@ -1,11 +1,11 @@
 datasets:
-- identifier: AU-Dry_sen2
-  store: stac-pc
+- identifier: AU-Dry/sen2
+  store: stac-store
   data_id: sentinel-2-l2a
   open_params:
     time_range: &id001
     - '2020-01-01'
-    - '2020-03-30'
+    - '2020-06-30'
     point:
     - 132.3706
     - -15.2588
@@ -25,25 +25,29 @@ datasets:
     - B11
     - B12
     - SCL
-- identifier: AU-Dry_era5
+- identifier: AU-Dry/era5_land
   store: cds
-  data_id: reanalysis-era5-single-levels-timeseries
+  data_id: reanalysis-era5-land
   open_params:
     variable_names:
     - 2m_temperature
+    - total_precipitation
+    - surface_solar_radiation_downwards
+    - surface_net_solar_radiation
     - 2m_dewpoint_temperature
     time_range: *id001
-    location:
+    point:
     - 132.3706
     - -15.2588
-- identifier: AU-Dry_ccibiomass
-  store: esa_cci
-  grid_mapping: AU-Dry_sen2
-  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m
+    spatial_res: 0.1
+- identifier: AU-Dry/esa_cci_biomass
+  store: esa-cci-store
+  grid_mapping: AU-Dry/sen2
+  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.6-0.100m
   open_params:
     time_range: *id001
-- identifier: AU-How_sen2
-  store: stac-pc
+- identifier: AU-How/sen2
+  store: stac-store
   data_id: sentinel-2-l2a
   open_params:
     time_range: *id001
@@ -66,35 +70,39 @@ datasets:
     - B11
     - B12
     - SCL
-- identifier: AU-How_era5
+- identifier: AU-How/era5_land
   store: cds
-  data_id: reanalysis-era5-single-levels-timeseries
+  data_id: reanalysis-era5-land
   open_params:
     variable_names:
     - 2m_temperature
+    - total_precipitation
+    - surface_solar_radiation_downwards
+    - surface_net_solar_radiation
     - 2m_dewpoint_temperature
     time_range: *id001
-    location:
+    point:
     - 131.1523
     - -12.4943
-- identifier: AU-How_ccibiomass
-  store: esa_cci
-  grid_mapping: AU-How_sen2
-  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.5-0.100m
+    spatial_res: 0.1
+- identifier: AU-How/esa_cci_biomass
+  store: esa-cci-store
+  grid_mapping: AU-How/sen2
+  data_id: esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.6-0.100m
   open_params:
     time_range: *id001
 data_stores:
 - identifier: storage
   store_id: file
   store_params:
-    root: data
-- identifier: esa_cci
+    root: ../data
+- identifier: esa-cci-store
   store_id: cciodp
-- identifier: stac-pc
+- identifier: stac-store
   store_id: stac-pc-ardc
 - identifier: cds
   store_id: cds
   store_params:
     endpoint_url: https://cds.climate.copernicus.eu/api
-    cds_api_key: CDS_API_key
+    cds_api_key: 917c02bf-1a72-468c-a3b3-482affbdfb87
     normalize_names: true
