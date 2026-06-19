@@ -355,7 +355,7 @@ SCHEMA_VISUALIZE = JsonBooleanSchema(
 SCHEMA_FORCE_PRELOAD = JsonBooleanSchema(
     description="If True, all data IDS given in section `preload_datasets` will be "
     "preloaded. If False, only non-preloaded datasets will be preloaded.",
-    default=True,
+    default=False,
 )
 SCHEMA_GDAL_HTTP_PARAMS = JsonObjectSchema(
     properties=dict(

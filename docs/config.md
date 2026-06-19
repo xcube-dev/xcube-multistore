@@ -279,7 +279,7 @@ Switch between visualization in table, if True, and logging, if False.
 If True, all data IDS given in section `preload_datasets` will be preloaded. If False, 
 only non-preloaded datasets will be preloaded.  
 
-**Default:** `True`
+**Default:** `False`
 
 ### gdal_http_params
 GDAL http environment variables which are used when opening a tif file with 

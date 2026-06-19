@@ -1,10 +1,3 @@
-<div style="text-align: right;">
-  <figure style="display: inline-flex; align-items: center;">
-    <img src="../docs/eo_lincs_logo.png" alt="Logo" style="height: 100px;">
-    <figcaption style="font-weight: bold; font-size: 10px; margin-left: 10px;">EO-LINCS</figcaption>
-  </figure>
-</div>
-
 ## Data Extraction
 
 This directory contains the workflow used to generate the data cubes for the SCS. The resulting data cubes are stored in the top-level `data/` directory and serve as the input for the subsequent scientific analysis.
