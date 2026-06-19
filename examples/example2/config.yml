@@ -1,0 +1,66 @@
+#preload_datasets:
+#  - store: clms
+#    data_ids:
+#      - "forest-type-2012|FTY_2012_020m_eu_03035_d02_E30N20"
+
+datasets:
+#  # CLMS Forest Type 2015
+#  - identifier: forest_type_2015
+#    store: clms
+#    grid_mapping: landes
+#    data_id: "forest-type-2012|FTY_2012_020m_eu_03035_d02_E30N20.zarr"
+  # GAMI
+  - identifier: gami
+    store: eoforest_stac
+    grid_mapping: landes
+    data_id: "structure-demography/GAMI/GAMI_v3.1/GAMI_v3.1.json"
+    custom_processing:
+      module_path: "utils"
+      function_name: "modify_gami"
+  # Forestpaths
+  - identifier: forestpaths_genus
+    store: eoforest_stac
+    grid_mapping: landes
+    data_id: "structure-demography/FORESTPATHS_GENUS/FORESTPATHS_GENUS_v0.0.1/FORESTPATHS_GENUS_v0.0.1.json"
+  # Canopy height and biomass map by Liu et al.
+  - identifier: liu
+    store: eoforest_stac
+    grid_mapping: landes
+    data_id: "biomass-carbon/LIU_BIOMASS/LIU_BIOMASS_v0.1/LIU_BIOMASS_v0.1.json"
+  # ESA CCI biomass
+  - identifier: esa_cci_biomass
+    store: esa_cci
+    grid_mapping: landes
+    data_id: "esacci.BIOMASS.yr.L4.AGB.multi-sensor.multi-platform.MERGED.6-0.100m"
+  # European Forest Disturbance Atlas
+  - identifier: efda
+    store: eoforest_stac
+    grid_mapping: landes
+    data_id: "disturbance-change/EFDA/EFDA_v2.1.1/EFDA_v2.1.1.json"
+    custom_processing:
+      module_path: "utils"
+      function_name: "modify_efda"
+
+data_stores:
+  - identifier: storage
+    store_id: file
+    store_params:
+      root: ../data
+#  - identifier: clms
+#    store_id: clms
+#    store_params:
+#      credentials: "clms-credentials.json"
+  - identifier: eoforest_stac
+    store_id: stac
+    store_params:
+      url : "https://s3.gfz-potsdam.de/dog.atlaseo-glm.eo-gridded-data/collections/public/catalog.json"
+  - identifier: esa_cci
+    store_id: cciodp
+
+grid_mappings:
+  - identifier: landes
+    bbox: [3401404, 2346797, 3556068, 2539337]
+    spatial_res: 30
+    crs: EPSG:3035
+    tile_size: 2048
+
