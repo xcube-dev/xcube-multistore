@@ -2,7 +2,7 @@ site_name: xcube Multi-Source Data Store
 repo_url: https://github.com/xcube-dev/xcube-multistore
 repo_name: xcube-dev/xcube-multistore
 
-copyright: Copyright &copy; 2025 Brockmann Consult
+copyright: Copyright &copy; 2026 Brockmann Consult
 
 nav:
   - Overview: index.md
