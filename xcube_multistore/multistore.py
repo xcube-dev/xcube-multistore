@@ -708,6 +708,6 @@ class MultiSourceDataStore:
 
         # remove temp files
         data_ids = store.list_data_ids()
-        data_ids = [data_id for data_id in data_ids if data_id.startswith("stac_temp_")]
+        data_ids = [data_id for data_id in data_ids if data_id.startswith("temp/")]
         for data_id in data_ids:
             store.delete_data(data_id)

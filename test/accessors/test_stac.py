@@ -44,13 +44,13 @@ class StacAccessorTest(unittest.TestCase):
             "sentinel-2-l2a",
             bbox=[9, 54, 11, 56],
             time_range=("2025-01-01", "2025-01-31"),
-            spatial_res=0.0001,
+            spatial_res=0.0002,
         )
         self.assertIsInstance(ds, xr.Dataset)
         self.assertCountEqual(["band_1"], ds.data_vars)
         self.assertCountEqual(("time", "lat", "lon"), ds.dims)
         self.assertEqual(
-            [8, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+            [11, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
         )
 
     def test_open_data_point_request(self):
@@ -67,5 +67,72 @@ class StacAccessorTest(unittest.TestCase):
         self.assertCountEqual(["band_1"], ds.data_vars)
         self.assertCountEqual(("time", "lat", "lon"), ds.dims)
         self.assertEqual(
-            [4, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+            [8, 9, 9], [ds.sizes["time"], ds.sizes["lat"], ds.sizes["lon"]]
+        )
+
+    def test_split_time_range_s2_within_max_days(self):
+        time_ranges = StacAccessor._split_time_range(
+            "sentinel-2-l2a",
+            {
+                "time_range": ("2025-01-01", "2025-02-19"),  # 50 days
+                "bbox": [9, 54, 11, 56],
+                "spatial_res": 0.1,
+            },
+        )
+        self.assertEqual([("2025-01-01", "2025-02-19")], time_ranges)
+
+    def test_split_time_range_s2_exceeds_max_days(self):
+        time_ranges = StacAccessor._split_time_range(
+            "sentinel-2-l2a",
+            {
+                "time_range": ("2025-01-01", "2025-03-01"),  # 60 days
+                "bbox": [9, 54, 11, 56],
+                "spatial_res": 0.1,
+            },
+        )
+        self.assertEqual(
+            [
+                ("2025-01-01", "2025-02-19"),
+                ("2025-02-20", "2025-03-01"),
+            ],
+            time_ranges,
+        )
+
+    def test_split_time_range_s3_uses_two_day_limit(self):
+        time_ranges = StacAccessor._split_time_range(
+            "sentinel-3-sl-2-lst-ntc",
+            {
+                "time_range": ("2025-01-01", "2025-01-05"),
+                "bbox": [9, 54, 11, 56],
+                "spatial_res": 0.1,
+            },
+        )
+
+        self.assertEqual(
+            [
+                ("2025-01-01", "2025-01-02"),
+                ("2025-01-03", "2025-01-04"),
+                ("2025-01-05", "2025-01-05"),
+            ],
+            time_ranges,
+        )
+
+    def test_split_time_range_limited_by_pixel_count(self):
+        time_ranges = StacAccessor._split_time_range(
+            "sentinel-2-l2a",
+            {
+                "time_range": ("2025-01-01", "2025-01-10"),
+                "bbox": [0, 0, 100000, 100000],
+                "spatial_res": 10,
+            },
+        )
+
+        self.assertEqual(
+            [
+                ("2025-01-01", "2025-01-03"),
+                ("2025-01-04", "2025-01-06"),
+                ("2025-01-07", "2025-01-09"),
+                ("2025-01-10", "2025-01-10"),
+            ],
+            time_ranges,
         )

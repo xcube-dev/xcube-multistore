@@ -20,18 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import datetime
 from collections.abc import Iterable
+import datetime
+import time
+import uuid
 
+from pystac_client.exceptions import APIError
+from requests.exceptions import ConnectionError, Timeout
+from urllib3.exceptions import ProtocolError
 import xarray as xr
+from xcube.core.store import DataStoreError
 
 from xcube_multistore.accessor import Accessor
 from xcube_multistore.visualization import GeneratorState
 
-_NB_PIXELS = int(2e4 * 2e4) * 50
+_NB_PIXELS = int(2e4 * 2e4) * 10
 _MAX_DAYS = {
-    "sentinel-2-l1c": 100,
-    "sentinel-2-l2a": 100,
+    "sentinel-2-l1c": 50,
+    "sentinel-2-l2a": 50,
     "sentinel-3-syn-2-syn-ntc": 2,
     "sentinel-3-sl-2-lst-ntc": 2,
     "sentinel-3-synergy-syn-l2-netcdf": 2,
@@ -47,6 +53,15 @@ _NUM_BANDS = {
     "sentinel-3-slstr-lst-l2-netcdf": 2,
 }
 
+_RETRYABLE_ERRORS = (
+    APIError,
+    ConnectionError,
+    Timeout,
+    ProtocolError,
+    ConnectionResetError,
+)
+_NO_ITEMS_FOUND_PREFIX = "No items found in collection"
+
 
 class StacAccessor(Accessor):
     """Provides methods for accessing dataset from xcube-cds data store"""
@@ -54,16 +69,22 @@ class StacAccessor(Accessor):
     def open_data(self, data_id: str, **open_params) -> xr.Dataset:
         time_ranges = self._split_time_range(data_id, open_params)
         nb_requests = len(time_ranges)
+        temp_id = uuid.uuid4().hex
+        temp_paths = [f"temp/{temp_id}/{i}.zarr" for i in range(nb_requests)]
+
         self.notify(
             GeneratorState(
                 self.identifier,
                 message=f"Open dataset {self.identifier!r} 0%.",
             )
         )
+        valid_paths = []
         for i, time_range in enumerate(time_ranges):
-            open_params["time_range"] = time_range
-            ds = self.store.open_data(data_id, **open_params)
-            self.storage.write_data(ds, f"stac_temp_{i}.zarr", replace=True)
+            params = dict(open_params)
+            params["time_range"] = time_range
+            path = self._open_and_store_with_retry(data_id, params, temp_paths[i])
+            if path is not None:
+                valid_paths.append(path)
             self.notify(
                 GeneratorState(
                     self.identifier,
@@ -74,66 +95,96 @@ class StacAccessor(Accessor):
                 )
             )
 
-        dss = []
-        for i, _ in enumerate(time_ranges):
-            dss.append(self.storage.open_data(f"stac_temp_{i}.zarr"))
+        dss = [self.storage.open_data(path) for path in valid_paths]
         ds = xr.concat(dss, dim="time", combine_attrs="drop_conflicts")
         return ds
 
-    @staticmethod
-    def _split_time_range(data_id: str, open_params: dict):
-        # get number days
-        start, end = open_params["time_range"]
-        start = datetime.date.fromisoformat(start)
-        end = datetime.date.fromisoformat(end)
-        nb_days = (end - start).days
+    def _open_and_store_with_retry(
+        self,
+        data_id: str,
+        params: dict,
+        temp_path: str,
+        *,
+        max_retries: int = 5,
+    ) -> str | None:
+        for attempt in range(max_retries):
+            try:
+                ds = self.store.open_data(data_id, **params)
 
-        # get number spatial pixel
+                if ds is None:
+                    self.notify(
+                        GeneratorState(
+                            self.identifier,
+                            message=(
+                                f"No items found for time slice "
+                                f"{params.get('time_range')}. "
+                                "Skipping request."
+                            ),
+                        )
+                    )
+                    return None
+
+                self.storage.write_data(ds, temp_path, replace=True)
+                return temp_path
+
+            except _RETRYABLE_ERRORS as e:
+                if attempt == max_retries - 1:
+                    raise
+
+                self.notify(
+                    GeneratorState(
+                        self.identifier,
+                        message=(
+                            f"Temporary data access error ({type(e).__name__}). "
+                            f"Retrying ({attempt + 1}/{max_retries})..."
+                        ),
+                    )
+                )
+
+                time.sleep(2**attempt)
+
+    @staticmethod
+    def _split_time_range(data_id: str, open_params: dict) -> list[tuple[str, str]]:
+        start_str, end_str = open_params["time_range"]
+        start = datetime.date.fromisoformat(start_str)
+        end = datetime.date.fromisoformat(end_str)
+
         spatial_res = open_params["spatial_res"]
         if not isinstance(spatial_res, Iterable):
             spatial_res = (spatial_res, spatial_res)
+
         if "bbox" in open_params:
-            bbox = open_params["bbox"]
-            nb_pixels_spatial = int((bbox[2] - bbox[0]) / spatial_res[0]) * int(
-                (bbox[3] - bbox[1]) / spatial_res[1]
-            )
+            min_x, min_y, max_x, max_y = open_params["bbox"]
+            width = max_x - min_x
+            height = max_y - min_y
         else:
-            bbox_width = open_params["bbox_width"]
-            nb_pixels_spatial = int(bbox_width / spatial_res[0]) * int(
-                bbox_width / spatial_res[1]
-            )
+            width = height = open_params["bbox_width"]
 
-        # get number variables
-        if "asset_names" in open_params:
-            nb_vars = len(open_params["asset_names"])
-        else:
-            nb_vars = _NUM_BANDS[data_id]
+        nb_pixels_spatial = int(width / spatial_res[0]) * int(height / spatial_res[1])
 
-        nb_pixels = nb_pixels_spatial * nb_days * nb_vars
-        nb_splits = nb_pixels // _NB_PIXELS
-        if nb_splits == 0:
-            nb_splits = 1
+        nb_vars = len(open_params.get("asset_names", [])) or _NUM_BANDS[data_id]
 
-        step = nb_days // nb_splits
-        max_days = _MAX_DAYS[data_id]
-        if step > max_days:
-            step = max_days
-            nb_splits = nb_days // step
+        pixels_per_day = nb_pixels_spatial * nb_vars
+        max_days_by_pixels = max(1, _NB_PIXELS // pixels_per_day)
+        max_days = min(_MAX_DAYS[data_id], max_days_by_pixels)
 
-        if nb_splits == 1:
-            time_ranges = [(start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"))]
-        else:
-            time_ranges = []
-            current = start
-            step -= 1
-            for i in range(nb_splits + 1):
-                sub_start = current
-                if i == nb_splits:
-                    sub_end = end
-                else:
-                    sub_end = current + datetime.timedelta(days=step)
-                time_ranges.append(
-                    (sub_start.strftime("%Y-%m-%d"), sub_end.strftime("%Y-%m-%d"))
+        time_ranges = []
+        current = start
+
+        while current <= end:
+            chunk_end = min(current + datetime.timedelta(days=max_days - 1), end)
+            time_ranges.append(
+                (
+                    current.strftime("%Y-%m-%d"),
+                    chunk_end.strftime("%Y-%m-%d"),
                 )
-                current = sub_end + datetime.timedelta(days=1)
+            )
+            current = chunk_end + datetime.timedelta(days=1)
+
         return time_ranges
+
+
+def _is_no_items_found_error(error: Exception) -> bool:
+    return isinstance(error, DataStoreError) and str(error).startswith(
+        _NO_ITEMS_FOUND_PREFIX
+    )
