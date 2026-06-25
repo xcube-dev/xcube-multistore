@@ -1,3 +1,12 @@
+## Changes in 0.3.4 (under development)
+
+- Improved support for parallel multi-source datastore operations. Sentinel-2 and
+  Sentinel-3 requests now use a randomly generated UUID for temporary file storage,
+  preventing conflicts between concurrent requests. 
+- Added a retry mechanism for the data stores `stac-cdse-ardc` and `stac-pc-ardc`
+  to handle temporary STAC API and data access errors.
+
+
 ## Changes in 0.3.3
 
 - Improved documentation:
@@ -5,6 +14,7 @@
   - Expanded and improved the Data Availability page.
   - Update all examples in `examples` and `docs/examples`
 - Reduced dependencies by removing the direct dependency on xcube data store plugins.
+
 
 ## Changes in 0.3.2
 
