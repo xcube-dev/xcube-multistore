@@ -10,6 +10,7 @@ dependencies:
   - numpy
   - panel
   - pyproj
+  - pystac_client
   - tabulate
   - xarray
   - xcube >=1.13.1

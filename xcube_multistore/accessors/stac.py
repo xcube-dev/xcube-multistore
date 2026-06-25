@@ -182,9 +182,3 @@ class StacAccessor(Accessor):
             current = chunk_end + datetime.timedelta(days=1)
 
         return time_ranges
-
-
-def _is_no_items_found_error(error: Exception) -> bool:
-    return isinstance(error, DataStoreError) and str(error).startswith(
-        _NO_ITEMS_FOUND_PREFIX
-    )

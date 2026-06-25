@@ -706,7 +706,12 @@ class MultiSourceDataStore:
     def _close(self):
         store = getattr(self.stores, NAME_WRITE_STORE)
 
-        temp_path = f"{store.root}/temp"
-        fs = store.fs
-        if fs.exists(temp_path):
-            fs.rm(temp_path, recursive=True)
+        try:
+            fs = store.fs
+            temp_path = f"{store.root}/temp"
+
+            if fs.exists(temp_path):
+                fs.rm(temp_path, recursive=True)
+
+        except (AttributeError, OSError):
+            pass
