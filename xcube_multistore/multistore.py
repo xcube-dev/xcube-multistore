@@ -706,8 +706,7 @@ class MultiSourceDataStore:
     def _close(self):
         store = getattr(self.stores, NAME_WRITE_STORE)
 
-        # remove temp files
-        data_ids = store.list_data_ids()
-        data_ids = [data_id for data_id in data_ids if data_id.startswith("temp/")]
-        for data_id in data_ids:
-            store.delete_data(data_id)
+        temp_path = f"{store.root}/temp"
+        fs = store.fs
+        if fs.exists(temp_path):
+            fs.rm(temp_path, recursive=True)
