@@ -2272,7 +2272,11 @@ reference to a YAML configuration file.</p>
 <span class="normal">710</span>
 <span class="normal">711</span>
 <span class="normal">712</span>
-<span class="normal">713</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages access to multiple data sources and their configurations for generating</span>
 <span class="sd">    data cubes.</span>
 
@@ -2917,11 +2921,15 @@ reference to a YAML configuration file.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span>
 
-        <span class="c1"># remove temp files</span>
-        <span class="n">data_ids</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">list_data_ids</span><span class="p">()</span>
-        <span class="n">data_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_id</span> <span class="k">for</span> <span class="n">data_id</span> <span class="ow">in</span> <span class="n">data_ids</span> <span class="k">if</span> <span class="n">data_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;stac_temp_&quot;</span><span class="p">)]</span>
-        <span class="k">for</span> <span class="n">data_id</span> <span class="ow">in</span> <span class="n">data_ids</span><span class="p">:</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">delete_data</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fs</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">fs</span>
+            <span class="n">temp_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">store</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/temp&quot;</span>
+
+            <span class="k">if</span> <span class="n">fs</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_path</span><span class="p">):</span>
+                <span class="n">fs</span><span class="o">.</span><span class="n">rm</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+            <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
