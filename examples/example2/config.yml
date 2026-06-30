@@ -1,14 +1,14 @@
-#preload_datasets:
-#  - store: clms
-#    data_ids:
-#      - "forest-type-2012|FTY_2012_020m_eu_03035_d02_E30N20"
+preload_datasets:
+  - store: clms
+    data_ids:
+      - "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20"
 
 datasets:
-#  # CLMS Forest Type 2015
-#  - identifier: forest_type_2015
-#    store: clms
-#    grid_mapping: landes
-#    data_id: "forest-type-2012|FTY_2012_020m_eu_03035_d02_E30N20.zarr"
+  # CLMS Forest Type 2015
+  - identifier: forest_type_2015
+    store: clms
+    grid_mapping: landes
+    data_id: "forest-type-2015|FTY_2015_020m_eu_03035_d04_E30N20.zarr"
   # GAMI
   - identifier: gami
     store: eoforest_stac
@@ -46,10 +46,10 @@ data_stores:
     store_id: file
     store_params:
       root: ../data
-#  - identifier: clms
-#    store_id: clms
-#    store_params:
-#      credentials: "clms-credentials.json"
+  - identifier: clms
+    store_id: clms
+    store_params:
+      credentials: "clms-credentials.json"
   - identifier: eoforest_stac
     store_id: stac
     store_params:
