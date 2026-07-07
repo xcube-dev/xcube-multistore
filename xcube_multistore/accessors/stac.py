@@ -20,16 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from collections.abc import Iterable
 import datetime
 import time
-import uuid
+from collections.abc import Iterable
 
+import xarray as xr
 from pystac_client.exceptions import APIError
 from requests.exceptions import ConnectionError, Timeout
 from urllib3.exceptions import ProtocolError
-import xarray as xr
-from xcube.core.store import DataStoreError
 
 from xcube_multistore.accessor import Accessor
 from xcube_multistore.visualization import GeneratorState
@@ -69,8 +67,7 @@ class StacAccessor(Accessor):
     def open_data(self, data_id: str, **open_params) -> xr.Dataset:
         time_ranges = self._split_time_range(data_id, open_params)
         nb_requests = len(time_ranges)
-        temp_id = uuid.uuid4().hex
-        temp_paths = [f"temp/{temp_id}/{i}.zarr" for i in range(nb_requests)]
+        temp_paths = [f"{self.identifier}/{i}.zarr" for i in range(nb_requests)]
 
         self.notify(
             GeneratorState(
@@ -95,7 +92,7 @@ class StacAccessor(Accessor):
                 )
             )
 
-        dss = [self.storage.open_data(path) for path in valid_paths]
+        dss = [self.storage_temp.open_data(path) for path in valid_paths]
         ds = xr.concat(dss, dim="time", combine_attrs="drop_conflicts")
         return ds
 
@@ -124,7 +121,7 @@ class StacAccessor(Accessor):
                     )
                     return None
 
-                self.storage.write_data(ds, temp_path, replace=True)
+                self.storage_temp.write_data(ds, temp_path, replace=True)
                 return temp_path
 
             except _RETRYABLE_ERRORS as e:

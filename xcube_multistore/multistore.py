@@ -44,7 +44,7 @@ from xcube_resampling.utils import resolution_meters_to_degrees
 
 from .accessors import guess_accessor
 from .config import MultiSourceConfig
-from .constants import LOG, NAME_WRITE_STORE
+from .constants import LOG, NAME_WRITE_STORE, NAME_WRITE_STORE_TEMP
 from .gridmappings import GridMappings
 from .stores import DataStores
 from .utils import (
@@ -462,7 +462,10 @@ class MultiSourceDataStore:
             )
         )
         if "Keyboard Interrupt caught! Exiting gracefully." == exception:
+            self._close()
             sys.exit(1)
+        else:
+            self._close(data_id=identifier)
 
     def _preload_datasets(self):
         for config_preload in self.config.preload_datasets:
@@ -601,9 +604,9 @@ class MultiSourceDataStore:
         store = getattr(self.stores, config["store"])
         store_id = getattr(self.stores, f"{config['store']}_store_id")
         open_params = copy.deepcopy(config.get("open_params", {}))
-        storage_store = getattr(self.stores, NAME_WRITE_STORE)
+        storage_store_temp = getattr(self.stores, NAME_WRITE_STORE_TEMP)
         accessor = guess_accessor(
-            store_id, store, storage_store, config["identifier"], self._notify
+            store_id, store, storage_store_temp, config["identifier"], self._notify
         )
         ds = accessor.open_data(config["data_id"], **open_params)
         if isinstance(ds, MultiLevelDataset):
@@ -703,15 +706,15 @@ class MultiSourceDataStore:
         store.write_data(ds, data_id, replace=True)
         return ds
 
-    def _close(self):
-        store = getattr(self.stores, NAME_WRITE_STORE)
+    def _close(self, data_id: str | None = None):
+        store = getattr(self.stores, NAME_WRITE_STORE_TEMP)
 
         try:
             fs = store.fs
-            temp_path = f"{store.root}/temp"
-
-            if fs.exists(temp_path):
-                fs.rm(temp_path, recursive=True)
-
+            root = store.root
+            if data_id is not None:
+                root = f"{root}/{data_id}"
+            if fs.exists(root):
+                fs.rm(root, recursive=True)
         except (AttributeError, OSError):
             pass

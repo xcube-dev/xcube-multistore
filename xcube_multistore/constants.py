@@ -24,5 +24,6 @@ import logging
 
 LOG = logging.getLogger("xcube.multistore")
 NAME_WRITE_STORE = "storage"
+NAME_WRITE_STORE_TEMP = "storage_temp"
 COMPRESSED_FORMATS = ["zip", "tar", "tar.gz", "rar"]
 CRS_WGS84 = "epsg:4326"

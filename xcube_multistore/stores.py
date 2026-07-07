@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import copy
 import json
+import uuid
 
 from xcube.core.store import new_data_store
 
@@ -36,11 +38,20 @@ class DataStores:
             if config_store["store_id"] == "clms":
                 with open(store_params["credentials"]) as f:
                     store_params["credentials"] = json.load(f)
-            if config_store["identifier"] == "storage" and (
-                config_store["store_id"] in ["file", "s3"]
-            ):
-                if not "max_depth" in store_params:
-                    store_params["max_depth"] = 10
+            if config_store["identifier"] == "storage":
+                # setup temp store
+                temp_store_params = copy.deepcopy(store_params)
+                temp_store_params["root"] += f"/temp_{uuid.uuid4().hex}"
+                setattr(
+                    cls,
+                    f"{identifier}_temp",
+                    new_data_store(config_store["store_id"], **temp_store_params),
+                )
+                setattr(cls, f"{identifier}_temp_store_id", config_store["store_id"])
+                if config_store["store_id"] in ["file", "s3"]:
+                    if "max_depth" not in store_params:
+                        store_params["max_depth"] = 10
+
             setattr(
                 cls,
                 identifier,
