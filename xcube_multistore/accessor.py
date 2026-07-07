@@ -36,10 +36,14 @@ class Accessor(ABC):
     """
 
     def __init__(
-        self, store: DataStore, storage: DataStore, identifier: str, notify: Callable
+        self,
+        store: DataStore,
+        storage_temp: DataStore,
+        identifier: str,
+        notify: Callable,
     ):
         self.store = store
-        self.storage = storage
+        self.storage_temp = storage_temp
         self.identifier = identifier
         self.notify = notify
 
