@@ -20,14 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from collections.abc import Iterable
 import datetime
 import time
+from collections.abc import Iterable
 
+import xarray as xr
 from pystac_client.exceptions import APIError
 from requests.exceptions import ConnectionError, Timeout
 from urllib3.exceptions import ProtocolError
-import xarray as xr
 
 from xcube_multistore.accessor import Accessor
 from xcube_multistore.visualization import GeneratorState
