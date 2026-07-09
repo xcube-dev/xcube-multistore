@@ -21,11 +21,13 @@
 # SOFTWARE.
 
 import datetime
+import random
 import time
 from collections.abc import Iterable
 
 import xarray as xr
 from pystac_client.exceptions import APIError
+from rasterio.errors import RasterioIOError
 from requests.exceptions import ConnectionError, Timeout
 from urllib3.exceptions import ProtocolError
 
@@ -56,6 +58,7 @@ _RETRYABLE_ERRORS = (
     ConnectionError,
     Timeout,
     ProtocolError,
+    RasterioIOError,
     ConnectionResetError,
 )
 _NO_ITEMS_FOUND_PREFIX = "No items found in collection"
@@ -138,7 +141,8 @@ class StacAccessor(Accessor):
                     )
                 )
 
-                time.sleep(2**attempt)
+                delay = (5 * 2**attempt) + random.uniform(0, 2)
+                time.sleep(delay)
 
     @staticmethod
     def _split_time_range(data_id: str, open_params: dict) -> list[tuple[str, str]]:
