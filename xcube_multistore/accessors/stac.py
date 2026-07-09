@@ -36,8 +36,8 @@ from xcube_multistore.visualization import GeneratorState
 
 _NB_PIXELS = int(2e4 * 2e4) * 10
 _MAX_DAYS = {
-    "sentinel-2-l1c": 30,
-    "sentinel-2-l2a": 30,
+    "sentinel-2-l1c": 50,
+    "sentinel-2-l2a": 50,
     "sentinel-3-syn-2-syn-ntc": 2,
     "sentinel-3-sl-2-lst-ntc": 2,
     "sentinel-3-synergy-syn-l2-netcdf": 2,
