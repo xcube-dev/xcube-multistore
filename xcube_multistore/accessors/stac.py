@@ -89,8 +89,8 @@ class StacAccessor(Accessor):
                 GeneratorState(
                     self.identifier,
                     message=(
-                        f"Open dataset {self.identifier!r} "
-                        f"{(i+1) / nb_requests * 100:.0f}%."
+                        f"Open dataset {self.identifier!r} for time range "
+                        f"{time_range}: {(i+1) / nb_requests * 100:.0f}%."
                     ),
                 )
             )

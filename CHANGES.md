@@ -1,4 +1,4 @@
-## Changes in 0.3.4 (under development)
+## Changes in 0.3.4
 
 - Improved support for parallel multi-source datastore operations. Sentinel-2 and
   Sentinel-3 requests now use a randomly generated UUID for temporary file storage,
