@@ -2922,10 +2922,9 @@ client.dashboard_link</div>
 <h2 id="cube-generation">Cube Generation<a class="anchor-link" href="#cube-generation">¶</a></h2><p>Cube generation is triggered with a single command and proceeds in two stages:</p>
 <h3 id="1-preloading">1. Preloading<a class="anchor-link" href="#1-preloading">¶</a></h3><p>The workflow first preloads all required datasets from their respective stores:</p>
 <ul>
-<li><strong>zenodo</strong>: Preloads the European Forest Disturbance Atlas.</li>
 <li><strong>clms</strong>: Preloads the Forest Type map for 2015.</li>
 </ul>
-<p>Preloading ensures that all input files, including archives or TIFFs, are available locally for processing.</p>
+<p>Preloading ensures that all input files are available locally for processing.</p>
 <h3 id="2-sequential-processing">2. Sequential Processing<a class="anchor-link" href="#2-sequential-processing">¶</a></h3><p>Once preloading is complete, each dataset is processed sequentially. The workflow applies the following steps as needed:</p>
 <ul>
 <li>Spatial resampling to a common target grid</li>
@@ -2940,6 +2939,8 @@ client.dashboard_link</div>
 <li><p><strong>forestpaths_genus</strong>, <strong>liu</strong> and <strong>efda</strong>: Accessed lazily via the EOForest STAC store using xcube’s STAC datastore, with resampling performed on the fly.</p>
 </li>
 <li><p><strong>biomass_esa_cci</strong>: Accessed lazily via the xcube ESA CCI datastore, with on-the-fly resampling.</p>
+</li>
+<li><p><strong>efda</strong> Accessed lazily via the EOForest STAC store using xcube’s STAC datastore, with resampling performed on the fly.</p>
 </li>
 </ul>
 <blockquote>

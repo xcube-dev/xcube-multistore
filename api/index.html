@@ -2276,7 +2276,10 @@ reference to a YAML configuration file.</p>
 <span class="normal">714</span>
 <span class="normal">715</span>
 <span class="normal">716</span>
-<span class="normal">717</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceDataStore</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages access to multiple data sources and their configurations for generating</span>
 <span class="sd">    data cubes.</span>
 
@@ -2677,7 +2680,10 @@ reference to a YAML configuration file.</p>
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;Keyboard Interrupt caught! Exiting gracefully.&quot;</span> <span class="o">==</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_preload_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">config_preload</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">preload_datasets</span><span class="p">:</span>
@@ -2816,9 +2822,9 @@ reference to a YAML configuration file.</p>
         <span class="n">store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;store&quot;</span><span class="p">])</span>
         <span class="n">store_id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;store&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_store_id&quot;</span><span class="p">)</span>
         <span class="n">open_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;open_params&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-        <span class="n">storage_store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span>
+        <span class="n">storage_store_temp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE_TEMP</span><span class="p">)</span>
         <span class="n">accessor</span> <span class="o">=</span> <span class="n">guess_accessor</span><span class="p">(</span>
-            <span class="n">store_id</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">storage_store</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identifier&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span>
+            <span class="n">store_id</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">storage_store_temp</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identifier&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span>
         <span class="p">)</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;data_id&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">open_params</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">MultiLevelDataset</span><span class="p">):</span>
@@ -2918,16 +2924,16 @@ reference to a YAML configuration file.</p>
         <span class="n">store</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">data_id</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stores</span><span class="p">,</span> <span class="n">NAME_WRITE_STORE_TEMP</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">fs</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">fs</span>
-            <span class="n">temp_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">store</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/temp&quot;</span>
-
-            <span class="k">if</span> <span class="n">fs</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_path</span><span class="p">):</span>
-                <span class="n">fs</span><span class="o">.</span><span class="n">rm</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
+            <span class="n">root</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">root</span>
+            <span class="k">if</span> <span class="n">data_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">root</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">data_id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="n">fs</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+                <span class="n">fs</span><span class="o">.</span><span class="n">rm</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
             <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
