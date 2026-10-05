@@ -138,7 +138,7 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-/site
+site/
 
 # mypy
 .mypy_cache/
@@ -165,3 +165,18 @@ cython_debug/
 *.zarr
 *.nc
 *.tif
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.idea/
+
+# Downloaded assets
+docs/assets/downloaded/
