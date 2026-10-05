@@ -1,10 +1,3 @@
-<div style="text-align: right;">
-  <figure style="display: inline-flex; align-items: center;">
-    <img src="assets/eo-lincs.png" alt="Logo" style="height: 100px;">
-    <figcaption style="font-weight: bold; font-size: 10px; margin-left: 10px;">EO-LINCS</figcaption>
-  </figure>
-</div>
-
 # xcube Multi-Source Data Store
 
 
@@ -65,3 +58,8 @@ msds = MultiSourceDataStore("config.yml")
 
 The package is open source and released under the [MIT license](https://opensource.org/license/mit). :heart:
 
+
+## Contribution
+
+We would like to thank the [EO-LINCS](https://www.eo-lincs.org/) project for 
+supporting the development of this package.
