@@ -11,7 +11,6 @@ These plugins can be seamlessly integrated into the Multi-Source Data Store.
 The following data store plugins provide direct access to major Earth observation
 and research data providers.
 
-# EO Data Sources and Variables via xcube Plugins
 | **Plugin** | **Store ID**                  | **Data Source** | **Key Variables / Products**                                                                                     | **Domain** |
 |---|-------------------------------|---|------------------------------------------------------------------------------------------------------------------|---|
 | **[xcube-sh](https://github.com/xcube-dev/xcube-sh)** | `sentinelhub`                 | Sentinel Hub | Sentinel-1 GRD                                                                                                   | Land, Forestry |
