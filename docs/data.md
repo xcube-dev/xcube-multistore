@@ -33,7 +33,7 @@ and research data providers.
 | **[xcube-zenodo](https://github.com/xcube-dev/xcube-zenodo)** | `zenodo`                      | Zenodo Data Portal | Scientific datasets, model outputs, benchmark products                                                           | Open Research |
 | **[xcube-icosdp](https://github.com/xcube-dev/xcube-icosdp)** | `icosdp`                      | ICOS Carbon Portal | GHG fluxes, atmospheric concentrations, meteorological variables                                                 | Atmosphere, Land |
 | **[xcube-gedidb](https://github.com/xcube-dev/xcube-gedidb)** | `gedi`                        | GEDI L2A, L2B, L4A, L4C products | Aboveground biomass density, canopy cover, DEM                                                                   | Land, Forest |
-| **[xcube-eopf](https://github.com/xcube-dev/xcube-eopf)** | `eopf-zarr`                   | EOPF Sentinel Zarr Samples | Sentinel-1 GRD, Sentinel-1 SLC, Sentinel-1 OCN                                                                   | Land, Forestry, Ocean |
+| **[xcube-eopf](https://eopf-sample-service.github.io/xcube-eopf/)** | `eopf-zarr`                   | EOPF Sentinel Zarr Samples | Sentinel-1 GRD, Sentinel-1 SLC, Sentinel-1 OCN                                                                   | Land, Forestry, Ocean |
 | | `eopf-zarr`                   | EOPF Sentinel Zarr Samples | Sentinel-2 L1C/L2A                                                                                               | Land, Agriculture |
 | | `eopf-zarr`                   | EOPF Sentinel Zarr Samples | Sentinel-3 OLCI, SLSTR-RBT, SLSTR-LST                                                                            | Ocean, Land |
 
